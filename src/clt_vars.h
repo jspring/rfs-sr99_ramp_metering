@@ -15,7 +15,7 @@
 db_id_t db_vars_list[] =  {
         {DB_URMS_VAR, sizeof(db_urms_t)},
         {DB_URMS_STATUS_VAR, sizeof(db_urms_status_t)},
-	{DB_URMS_DATAFILE_VAR, sizeof(urms_datafile_t)},
+//	{DB_URMS_DATAFILE_VAR, sizeof(urms_datafile_t)},
         {DB_2070_TIMING_GET_VAR, sizeof(db_timing_get_2070_t)},
         {DB_2070_TIMING_SET_VAR, sizeof(db_timing_set_2070_t)},
         {DB_SHORT_STATUS_VAR, sizeof(get_short_status_resp_t)},
