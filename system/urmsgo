@@ -1,46 +1,55 @@
 #!/bin/bash
 
-echo "Executing stopurms"
-/home/art_coord_ramp_metering/system/stopurms
-sleep 1
-
-echo "Starting db_slv"
-/home/path/db/lnx/db_slv &
-sleep 1
-
-echo "Starting clt_vars"
-/home/art_coord_ramp_metering/src/lnx/clt_vars &
-sleep 1
-
-if [[ ($1 == "no_control") || ($2 == "no_control") ]]
+if [[ q$2 == 'q' ]]
 then
-	echo "Starting urms with no control"
-	/home/atsc/urms/lnx/urms -r 10.0.1.126 -i 100 -n &
+	echo
+		echo "Usage: $0 <Controller IP> <Database variable number (must be a multiple of 4)> (control/no_control) (home/no_home)"
+	echo "       where <> denotes necessary arguments and () denotes optional arguments"
+	echo
+	exit 1
+fi
+
+#echo "Executing stopurms"
+#/home/sr99_ramp_metering/system/stopurms
+#sleep 1
+#
+#echo "Starting db_slv"
+#/home/path/db/lnx/db_slv &
+#sleep 1
+#
+#echo "Starting clt_vars"
+#/home/sr99_ramp_metering/src/lnx/clt_vars &
+#sleep 1
+
+
+CONTROLLER_IP=$1
+DB_URMS_STATUS=$2
+PORT=$3
+TIMESTAMP=`date +%m%Y%d_%H%M%S`
+
+if [[ $3 == "control" ]]
+then
+	echo "Starting urms with control"
+	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -d $DB_URMS_STATUS -p $PORT >>/big/data/ac_rm_1/urms.err &
 else
-	echo "Starting urms"
-	/home/atsc/urms/lnx/urms -r 10.0.1.126 -i 100 >>/big/data/ac_rm_1/urms.err &
+	echo "Starting urms with no control"
+	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -n -d $DB_URMS_STATUS -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
 fi
-sleep 1
+sleep 5
 
-if [[ $1 != "sj" ]]
-then
-	echo "Starting send_urms"
-	/home/art_coord_ramp_metering/system/send_urms_data_go.sh $1 >>/big/data/ac_rm_1/send_urms_data.err &
-	sleep 1
-fi
-
-if [[ $1 == "sj" ]]
-then
-	echo "Starting ac_rm_algo"
-	cd /home/art_coord_ramp_metering/src
-	./lnx/ac_rm_algo >>/big/data/ac_rm_1/ac_rm_algo.err &
-	sleep 1
-fi
+#if [[ $1 == "sj" ]]
+#then
+#	echo "Starting ac_rm_algo"
+#	cd /home/sr99_ramp_metering/src
+#	./lnx/ac_rm_algo >>/big/data/ac_rm_1/ac_rm_algo.err &
+#	sleep 1
+#fi
 
 #echo "Starting wrfiles_ac_rm"
-if [[ $1 == "home" ]]
-then
-	/home/art_coord_ramp_metering/src/lnx/wrfiles_ac_rm -d /big/data/ac_rm_1 -o
-else
-	/home/art_coord_ramp_metering/src/lnx/wrfiles_ac_rm -d /big/data/ac_rm_1 -m 15 >/big/data/ac_rm_1/wrfiles_ac_rm.err &
-fi
+#if [[ $4 == "home" ]]
+#then
+#	/home/sr99_ramp_metering/src/lnx/wrfiles_ac_rm -d /big/data/ac_rm_1 -o -s $DB_URMS_STATUS -c $CONTROLLER_IP
+#else
+	echo "Starting wrfiles_ac_rm"
+	/home/sr99_ramp_metering/src/lnx/wrfiles_ac_rm -d /big/data/ac_rm_1 -i 10000 -m 30 -s $DB_URMS_STATUS -c $CONTROLLER_IP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+#fi
