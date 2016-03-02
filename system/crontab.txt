@@ -20,6 +20,6 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-*/5 * * * * /home/art_coord_ramp_metering/system/gd
-* 2 * * * /home/art_coord_ramp_metering/system/make_daily_zipfile.sh
+*/5 * * * * /home/sr99_ramp_metering/system/gd
+* 2 * * * /home/sr99_ramp_metering/system/make_daily_zipfile.sh
 

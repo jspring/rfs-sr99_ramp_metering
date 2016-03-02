@@ -11,9 +11,9 @@
 #
 # By default this script does nothing.
 
-/home/art_coord_ramp_metering/system/artgo &
-/home/art_coord_ramp_metering/system/ssh2pems-2.sh  &
+/home/sr99_ramp_metering/system/artgo &
+/home/sr99_ramp_metering/system/ssh2pems-2.sh  &
 sleep 60
-/home/art_coord_ramp_metering/system/gd &
+/home/sr99_ramp_metering/system/gd &
 
 exit 0

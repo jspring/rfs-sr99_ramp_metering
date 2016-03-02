@@ -32,7 +32,7 @@ fi
 
 if [[ $CTR -ne 0 ]]
 then
-	/home/art_coord_ramp_metering/system/urmsgo
+	/home/sr99_ramp_metering/system/urmsgo
 fi
 
 exit 0

@@ -11,7 +11,7 @@
 #
 # By default this script does nothing.
 
-/home/art_coord_ramp_metering/system/ssh2pems.sh &
-/home/art_coord_ramp_metering/system/www2pems.sh &
-/home/art_coord_ramp_metering/system/artgo &
+/home/sr99_ramp_metering/system/ssh2pems.sh &
+/home/sr99_ramp_metering/system/www2pems.sh &
+/home/sr99_ramp_metering/system/artgo &
 exit 0

@@ -16,7 +16,7 @@ then
 	CTR=2
 fi
 
-ps -elf |grep -v grep | grep '/home/art_coord_ramp_metering/system/receive_urms_data_go.sh'
+ps -elf |grep -v grep | grep '/home/sr99_ramp_metering/system/receive_urms_data_go.sh'
 
 if [[ $? -ne 0 ]]
 then
@@ -40,7 +40,7 @@ fi
 if [[ $CTR -ne 0 ]]
 then
 	echo CTR $CTR
-	/home/art_coord_ramp_metering/system/urmsgo
+	/home/sr99_ramp_metering/system/urmsgo
 	exit 1
 fi
 
