@@ -83,6 +83,11 @@ int main(int argc, char *argv[])
 	char id_string[80];
 	char monthday[80];
 	char serialnum[80];
+	char *controller_str;
+	int db_urms_status_var = 0;
+	int db_urms_datafile_var = 0;
+	int db_urms_ramp_var = 0;
+	int retval;
 
 	int file_time = 15;     /// Number of minutes to record to a file 
 	int interval = 50;	/// Number of milliseconds between saves 
@@ -100,12 +105,18 @@ int main(int argc, char *argv[])
 	memset(id_string, 0, sizeof(id_string));
 	memset(monthday, 0, sizeof(monthday));
 	memset(serialnum, 0, sizeof(serialnum));
-	memset(tripdir, 0, sizeof(tripdir));
-	memset(tripstr, 0, sizeof(tripstr));
-	memset(ac_rm_pre, 0, sizeof(ac_rm_pre));
+	memset(tripdir, 0, 80);
+	memset(tripstr, 0, 80);
+	memset(ac_rm_pre, 0, 80);
 
+/*
+
+db_vars_ac_rm[2].id = DB_URMS_STATUS_VAR
+db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
+
+*/
 	/* Read and interpret any user switches. */
-	while ((option = getopt(argc, argv, "d:m:io")) != EOF) {
+	while ((option = getopt(argc, argv, "d:m:i:os:c:")) != EOF) {
 		switch(option) {
 		case 'd':
 			strcpy(tripdir, optarg);
@@ -121,15 +132,32 @@ int main(int argc, char *argv[])
 	        case 'o':
 			use_stdout = 1; 
 			break;
+	        case 's':
+			//Get DB_URMS_STATUS_VAR number. DB_URMS_DATAFILE_VAR is DEFINED in urms.c as DB_URMS_STATUS_VAR + 1!
+			//DB_URMS_VAR is DEFINED in urms.c as DB_URMS_STATUS_VAR + 2!
+			//DB_URMS_RAMP_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 3!
+			db_urms_status_var = atoi(optarg); 
+			db_urms_datafile_var = db_urms_status_var + 1; 
+			db_urms_ramp_var = db_urms_status_var + 3; 
+			break;
+	        case 'c':
+			//Get a string that identifies the controller
+			controller_str = strdup(optarg); 
+			break;
 	        default:
 			printf("Usage: %s\n", argv[0]); 
 			printf("    -d <trip directory> \n");
 			printf("    -m <file time in minutes (def. 15 min)> \n");
 			printf("    -i <loop time in ms (def. 50 ms)> \n");
+			printf("    -s <Database variable for DB_URMS_STATUS_VAR> \n");
+			printf("    -c <Controller id (e.g. \"10.28.234.123\" or \"SR99_and_Main\")> \n");
 			printf("    -o (use stdout instead of named file as data output)\n");
 			exit(EXIT_FAILURE);
 	        }
 	}
+	db_vars_ac_rm[0].db_id_num = db_urms_status_var;
+	db_vars_ac_rm[1].db_id_num = db_urms_datafile_var;
+	db_vars_ac_rm[2].db_id_num = db_urms_ramp_var;
 
 	if(use_stdout == 0) {
 		strcpy(tripstr, tripdir+17);
@@ -148,6 +176,13 @@ int main(int argc, char *argv[])
 		printf("Database initialization error in %s.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
+
+	if(clt_create( pclt, db_urms_ramp_var, db_urms_ramp_var, sizeof(db_ramp_data_t)) == FALSE ) {
+		// Not an error if db var already created
+		if(pclt->error != EEXIST)
+		printf("create error, var %d size %d errno %d\n", db_urms_ramp_var, sizeof(db_ramp_data_t), pclt->error);
+	}
+
         
 	/* Setup a timer for every 'interval' msec. */
 	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
@@ -161,7 +196,9 @@ int main(int argc, char *argv[])
 	if(use_stdout == 0) {
 		strcpy(ac_rm_pre, tripdir);
 		strcat(ac_rm_pre, "/");
-		strcat(ac_rm_pre, "a");
+		strcat(ac_rm_pre, "a_");
+		strcat(ac_rm_pre, controller_str);
+		strcat(ac_rm_pre, "_");
                 if (first_file == NULL) {
                         open_data_log_infix(&f_ac_rm, ac_rm_pre, ".dat",
                          &start_time, &old_fileday, &serial_num, monthday, serialnum, tripstr);
@@ -194,10 +231,12 @@ int main(int argc, char *argv[])
                  * are being written
                  */
                 for (i = 0; i < num_ac_rm_vars; i++){
-                        db_clt_read(pclt,
+                        retval = db_clt_read(pclt,
                                 db_vars_ac_rm[i].db_id_num,
                                 db_vars_ac_rm[i].size,
                                 db_vars_ac_rm[i].var_pointer);
+			if(retval == 0)
+				exit(EXIT_FAILURE);
 		}
 
 		/** Check if time to close and reopen data logs */
