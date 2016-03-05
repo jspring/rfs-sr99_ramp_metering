@@ -17,13 +17,13 @@ PATH_OBJS += $(OBJDIR)/init.o
 PATH_OBJS += $(OBJDIR)/temp_global.o
 PATH_OBJS += $(OBJDIR)/variables2.o
 PATH_OBJS += $(OBJDIR)/variables.o
-PATH_OBJS += $(OBJDIR)/ac_rm_table.o
+PATH_OBJS += $(OBJDIR)/rm_table.o
 PATH_OBJS += $(OBJDIR)/meter_lib.o
 
 PATH_LDFLAGS += -L$(ATSC_LIB_DIR)
 PATH_LIBS += -lset_min_max_green_lib
 
-EXEC = $(OBJDIR)/ac_rm_algo $(OBJDIR)/wrfiles_ac_rm $(OBJDIR)/clt_vars
+EXEC = $(OBJDIR)/rm_algo $(OBJDIR)/wrfiles_rm $(OBJDIR)/clt_vars
 
 all: 	$(OBJDIR) $(PATH_OBJS) $(EXEC)
 
