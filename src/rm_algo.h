@@ -3,6 +3,7 @@
 	database
 */
 
+#include <db_include.h>
 #include "variables2.h"
 
 #define DB_ALGO_INPUT_TYPE	2001
