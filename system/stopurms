@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Stopping wrfiles_ac_rm"
-killall wrfiles_ac_rm
+echo "Stopping wrfiles_rm"
+killall wrfiles_rm
 sleep 1
 
 echo "Stopping send_urms_data"
@@ -10,7 +10,7 @@ pid=`ps -elf | grep -v grep | grep '/bin/bash /home/sr99_ramp_metering/system/se
 kill $pid
 sleep 1
 
-echo "Stopping ac_rm_algo"
+echo "Stopping rm_algo"
 killall ac_rm_algo
 sleep 1
 
