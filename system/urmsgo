@@ -45,11 +45,6 @@ sleep 5
 #	sleep 1
 #fi
 
-#echo "Starting wrfiles_ac_rm"
-#if [[ $4 == "home" ]]
-#then
-#	/home/sr99_ramp_metering/src/lnx/wrfiles_ac_rm -d /big/data/ac_rm_1 -o -s $DB_URMS_STATUS -c $CONTROLLER_IP
-#else
-	echo "Starting wrfiles_ac_rm"
-	/home/sr99_ramp_metering/src/lnx/wrfiles_ac_rm -d /big/data/ac_rm_1 -i 10000 -m 30 -s $DB_URMS_STATUS -c $CONTROLLER_IP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+echo "Starting wrfiles_rm port $DB_URMS_STATUS IP address $CONTROLLER_IP"
+/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 10000 -m 30 -s $DB_URMS_STATUS -c $CONTROLLER_IP 1>>/big/data/ac_rm_1/"wrfiles_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
 #fi
