@@ -52,12 +52,12 @@ int get_new_data(char str[],struct signal_variables *psignal_data,struct ramp_va
 	return 0;
 }
 
-bool check_mainline_occ_health_lead(struct ramp_variables* pramp_data,int lane_id)
+boolean check_mainline_occ_health_lead(struct ramp_variables* pramp_data,int lane_id)
 {
         int i = NUMBER_RAMP_DATA-1;
         int j;
         int count;
-        bool flag;
+        boolean flag;
 
         if(pramp_data->mainline_lead_status[i][lane_id]!=MAINLINE_DETECTOR_WORKING)
                 return false;
@@ -81,12 +81,12 @@ bool check_mainline_occ_health_lead(struct ramp_variables* pramp_data,int lane_i
                 return true;
 }
 
-bool check_mainline_occ_health_trail(struct ramp_variables* pramp_data,int lane_id)
+boolean check_mainline_occ_health_trail(struct ramp_variables* pramp_data,int lane_id)
 {
         int i = NUMBER_RAMP_DATA-1;
         int j;
         int count;
-        bool flag;
+        boolean flag;
         float tabs;
 
         if(pramp_data->mainline_trail_status[i][lane_id]!=MAINLINE_DETECTOR_DISABLE)
@@ -112,12 +112,12 @@ bool check_mainline_occ_health_trail(struct ramp_variables* pramp_data,int lane_
                 return true;
 }
 
-bool check_mainline_vol_health_lead(struct ramp_variables* pramp_data,int lane_id)
+boolean check_mainline_vol_health_lead(struct ramp_variables* pramp_data,int lane_id)
 {
         int i = NUMBER_RAMP_DATA-1;
         int j;
         int count;
-        bool flag;
+        boolean flag;
 
         if(pramp_data->mainline_lead_status[i][lane_id]!=MAINLINE_DETECTOR_WORKING)
                 return false;
@@ -141,12 +141,12 @@ bool check_mainline_vol_health_lead(struct ramp_variables* pramp_data,int lane_i
                 return true;
 }
 
-bool check_mainline_vol_health_trail(struct ramp_variables* pramp_data,int lane_id)
+boolean check_mainline_vol_health_trail(struct ramp_variables* pramp_data,int lane_id)
 {
         int i = NUMBER_RAMP_DATA-1;
         int j;
         int count;
-        bool flag;
+        boolean flag;
 
         if(pramp_data->mainline_trail_status[i][lane_id]!=MAINLINE_DETECTOR_DISABLE)
                 return false;

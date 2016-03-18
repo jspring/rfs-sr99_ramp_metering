@@ -27,13 +27,13 @@ extern	int rate_0,rate_1,rate_2;
 
 int get_new_data(char str[],struct signal_variables *psignal_data,struct ramp_variables *pramp_data);
 
-bool check_mainline_occ_health_lead(struct ramp_variables* pramp_data,int lane_id);
+boolean check_mainline_occ_health_lead(struct ramp_variables* pramp_data,int lane_id);
 
-bool check_mainline_occ_health_trail(struct ramp_variables* pramp_data,int lane_id);
+boolean check_mainline_occ_health_trail(struct ramp_variables* pramp_data,int lane_id);
 
-bool check_mainline_vol_health_lead(struct ramp_variables* pramp_data,int lane_id);
+boolean check_mainline_vol_health_lead(struct ramp_variables* pramp_data,int lane_id);
 
-bool check_mainline_vol_health_trail(struct ramp_variables* pramp_data,int lane_id);
+boolean check_mainline_vol_health_trail(struct ramp_variables* pramp_data,int lane_id);
 
 float get_mainline_average_occupancy(struct ramp_variables* pramp_data);
 
