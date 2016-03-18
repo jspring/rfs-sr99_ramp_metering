@@ -19,11 +19,17 @@ PATH_OBJS += $(OBJDIR)/variables2.o
 PATH_OBJS += $(OBJDIR)/variables.o
 PATH_OBJS += $(OBJDIR)/rm_table.o
 PATH_OBJS += $(OBJDIR)/meter_lib.o
+PATH_OBJS += $(OBJDIR)/resource.o
+PATH_OBJS += $(OBJDIR)/nrutil2.o
+PATH_OBJS += $(OBJDIR)/simp1.o
+PATH_OBJS += $(OBJDIR)/simp2.o
+PATH_OBJS += $(OBJDIR)/simp3.o
+PATH_OBJS += $(OBJDIR)/simplx.o
+#cc  opt_crm.c nrutil2.c simp1.c simp2.c simp3.c simplx.c -o crm_test
 
 PATH_LDFLAGS += -L$(ATSC_LIB_DIR)
-PATH_LIBS += -lset_min_max_green_lib
 
-EXEC = $(OBJDIR)/rm_algo $(OBJDIR)/wrfiles_rm $(OBJDIR)/clt_vars
+EXEC = $(OBJDIR)/rm_algo $(OBJDIR)/wrfiles_rm $(OBJDIR)/clt_vars $(OBJDIR)/agg_data $(OBJDIR)/opt_crm
 
 all: 	$(OBJDIR) $(PATH_OBJS) $(EXEC)
 
