@@ -7,8 +7,7 @@
 #define _DECL
 #endif
 
-
-typedef unsigned int bool;
+typedef unsigned int boolean;
 #define true 1
 #define false 0
 
@@ -146,7 +145,7 @@ _DECL struct signal_variables
 	int last_sent_max_green;
 	int realtime_data[MAXROW][MAXCOL];
 	int data_row;
-	bool regular_release,overwrite_release;
+	boolean regular_release,overwrite_release;
 	int regular_remain_cycle;
 	int overwrite_remain_cycle;
 	int cycle_passed;
