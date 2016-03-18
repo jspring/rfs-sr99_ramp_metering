@@ -64,7 +64,7 @@ data_log_column_spec_t file_spec[] =
         {"%hhu ",   &db_urms_status.mainline_stat[0].trail_stat, BASE_CHAR, REPLAY_USE},//###5
         {"%hhu ",   &db_urms_status.mainline_stat[0].trail_vol, BASE_CHAR, REPLAY_USE},	//###6
         {"%.3f ",   &urms_datafile.mainline_trail_occ[0], BASE_FLOAT, REPLAY_USE},	//###7
-        {"%hhu ",   &db_urms_status.mainline_stat[0].speed, BASE_FLOAT, REPLAY_USE},	//###8
+        {"%hhu ",   &db_urms_status.mainline_stat[0].speed, BASE_CHAR, REPLAY_USE},	//###8
 
         {"%hhu ",   &db_urms_status.mainline_stat[1].lead_stat, BASE_CHAR, REPLAY_USE},	//###9
         {"%hhu ",   &db_urms_status.mainline_stat[1].lead_vol, BASE_CHAR, REPLAY_USE},	//###10
@@ -72,39 +72,39 @@ data_log_column_spec_t file_spec[] =
         {"%hhu ",   &db_urms_status.mainline_stat[1].trail_stat, BASE_CHAR, REPLAY_USE},//###12
         {"%hhu ",   &db_urms_status.mainline_stat[1].trail_vol, BASE_CHAR, REPLAY_USE},	//###13
         {"%.3f ",   &urms_datafile.mainline_trail_occ[1], BASE_FLOAT, REPLAY_USE},	//###14
-        {"%hhu ",   &db_urms_status.mainline_stat[1].speed, BASE_FLOAT, REPLAY_USE},	//###15
+        {"%hhu ",   &db_urms_status.mainline_stat[1].speed, BASE_CHAR, REPLAY_USE},	//###15
 
         {"%hhu ",   &db_urms_status.mainline_stat[2].lead_stat, BASE_CHAR, REPLAY_USE},	//###16
         {"%hhu ",   &db_urms_status.mainline_stat[2].lead_vol, BASE_CHAR, REPLAY_USE},	//###17
-        {"%hhu ",   &db_urms_status.mainline_stat[2].trail_stat, BASE_CHAR, REPLAY_USE},//###18
-        {"%.3f ",   &urms_datafile.mainline_lead_occ[2], BASE_FLOAT, REPLAY_USE},	//###19
+        {"%.3f ",   &urms_datafile.mainline_lead_occ[2], BASE_FLOAT, REPLAY_USE},	//###18
+        {"%hhu ",   &db_urms_status.mainline_stat[2].trail_stat, BASE_CHAR, REPLAY_USE},//###19
         {"%hhu ",   &db_urms_status.mainline_stat[2].trail_vol, BASE_CHAR, REPLAY_USE},	//###20
         {"%.3f ",   &urms_datafile.mainline_trail_occ[2], BASE_FLOAT, REPLAY_USE},	//###21
-        {"%hhu ",   &db_urms_status.mainline_stat[2].speed, BASE_FLOAT, REPLAY_USE},	//###22
+        {"%hhu ",   &db_urms_status.mainline_stat[2].speed, BASE_CHAR, REPLAY_USE},	//###22
 
         {"%hhu ",   &db_urms_status.mainline_stat[3].lead_stat, BASE_CHAR, REPLAY_USE},	//###23
         {"%hhu ",   &db_urms_status.mainline_stat[3].lead_vol, BASE_CHAR, REPLAY_USE},	//###24
-        {"%hhu ",   &db_urms_status.mainline_stat[3].trail_stat, BASE_CHAR, REPLAY_USE},//###25
-        {"%.3f ",   &urms_datafile.mainline_lead_occ[3], BASE_FLOAT, REPLAY_USE},	//###26
+        {"%.3f ",   &urms_datafile.mainline_lead_occ[3], BASE_FLOAT, REPLAY_USE},	//###25
+        {"%hhu ",   &db_urms_status.mainline_stat[3].trail_stat, BASE_CHAR, REPLAY_USE},//###26
         {"%hhu ",   &db_urms_status.mainline_stat[3].trail_vol, BASE_CHAR, REPLAY_USE},	//###27
         {"%.3f ",   &urms_datafile.mainline_trail_occ[3], BASE_FLOAT, REPLAY_USE},	//###28
-        {"%hhu ",   &db_urms_status.mainline_stat[3].speed, BASE_FLOAT, REPLAY_USE},	//###29
+        {"%hhu ",   &db_urms_status.mainline_stat[3].speed, BASE_CHAR, REPLAY_USE},	//###29
 
         {"%hhu ",   &db_urms_status.mainline_stat[4].lead_stat, BASE_CHAR, REPLAY_USE},	//###30
         {"%hhu ",   &db_urms_status.mainline_stat[4].lead_vol, BASE_CHAR, REPLAY_USE},	//###31
-        {"%hhu ",   &db_urms_status.mainline_stat[4].trail_stat, BASE_CHAR, REPLAY_USE},//###32
-        {"%.3f ",   &urms_datafile.mainline_lead_occ[4], BASE_FLOAT, REPLAY_USE},	//###33
+        {"%.3f ",   &urms_datafile.mainline_lead_occ[4], BASE_FLOAT, REPLAY_USE},	//###32
+        {"%hhu ",   &db_urms_status.mainline_stat[4].trail_stat, BASE_CHAR, REPLAY_USE},//###33
         {"%hhu ",   &db_urms_status.mainline_stat[4].trail_vol, BASE_CHAR, REPLAY_USE},	//###34
         {"%.3f ",   &urms_datafile.mainline_trail_occ[4], BASE_FLOAT, REPLAY_USE},	//###35
-        {"%hhu ",   &db_urms_status.mainline_stat[4].speed, BASE_FLOAT, REPLAY_USE},	//###36
+        {"%hhu ",   &db_urms_status.mainline_stat[4].speed, BASE_CHAR, REPLAY_USE},	//###36
 
         {"%hhu ",   &db_urms_status.mainline_stat[5].lead_stat, BASE_CHAR, REPLAY_USE},	//###37
         {"%hhu ",   &db_urms_status.mainline_stat[5].lead_vol, BASE_CHAR, REPLAY_USE},	//###38
-        {"%hhu ",   &db_urms_status.mainline_stat[5].trail_stat, BASE_CHAR, REPLAY_USE},//###39
-        {"%.3f ",   &urms_datafile.mainline_lead_occ[5], BASE_FLOAT, REPLAY_USE},	//###40
+        {"%.3f ",   &urms_datafile.mainline_lead_occ[5], BASE_FLOAT, REPLAY_USE},	//###39
+        {"%hhu ",   &db_urms_status.mainline_stat[5].trail_stat, BASE_CHAR, REPLAY_USE},//###40
         {"%hhu ",   &db_urms_status.mainline_stat[5].trail_vol, BASE_CHAR, REPLAY_USE},	//###41
         {"%.3f ",   &urms_datafile.mainline_trail_occ[5], BASE_FLOAT, REPLAY_USE},	//###42
-        {"%hhu ",   &db_urms_status.mainline_stat[5].speed, BASE_FLOAT, REPLAY_USE},	//###43
+        {"%hhu ",   &db_urms_status.mainline_stat[5].speed, BASE_CHAR, REPLAY_USE},	//###43
 
         {"%hhu ",   &db_urms_status.metered_lane_stat[0].demand_vol, BASE_CHAR, REPLAY_USE},	//###44
         {"%hhu ",   &db_urms_status.metered_lane_stat[0].passage_vol, BASE_CHAR, REPLAY_USE},	//###45
@@ -145,20 +145,19 @@ data_log_column_spec_t file_spec[] =
 
 
         {"%hhu ",   &db_urms_status.rm2rmc_ctr, BASE_CHAR, REPLAY_USE},		//###76
-        {"%hhu ",   &db_urms_status.rmc2ac_ctr, BASE_CHAR, REPLAY_USE},		//###77
-	{"%hhu ",   &db_urms_status.is_metering, BASE_CHAR, REPLAY_USE},	//###78
-	{"%hhu ",   &db_urms_status.computation_finished, BASE_CHAR, REPLAY_USE}, //###79
-	{"%hx ",    &db_urms_status.checksum, BASE_CHAR, REPLAY_USE}, 		//###80
-        {"%hu ",    &urms_datafile.metering_rate[2], BASE_SHORT, REPLAY_USE},	//###81
-	{"%.1f ",   &db_ramp_data.new_meter_rate, BASE_FLOAT, REPLAY_USE}, 	//###82
-	{"%.1f ",   &db_ramp_data.data_time, BASE_FLOAT, REPLAY_USE}, 		//###83
-	{"%.1f ",   &db_ramp_data.prev_update_data, BASE_FLOAT, REPLAY_USE}, 	//###84
-	{"%.3f ",   &db_ramp_data.prev_occ_out, BASE_FLOAT, REPLAY_USE}, 	//###85
-	{"%hhu ",   &db_ramp_data.passage_vol[2], BASE_CHAR, REPLAY_USE}, 	//###86
-	{"%hhu ",   &db_urms_status.plan_base_lvl[0], BASE_CHAR, REPLAY_USE},	//###87
-	{"%hhu ",   &db_urms_status.plan_base_lvl[1], BASE_CHAR, REPLAY_USE},	//###88
-	{"%hhu ",   &db_urms_status.plan_base_lvl[2], BASE_CHAR, REPLAY_USE},	//###89
-	{"%hhu ",   &db_urms_status.hour, BASE_CHAR, REPLAY_USE},		//###90
+	{"%hhu ",   &db_urms_status.is_metering, BASE_CHAR, REPLAY_USE},	//###77
+	{"%hhu ",   &db_urms_status.computation_finished, BASE_CHAR, REPLAY_USE}, //###78
+	{"%hx ",    &db_urms_status.checksum, BASE_CHAR, REPLAY_USE}, 		//###89
+        {"%hu ",    &urms_datafile.metering_rate[2], BASE_SHORT, REPLAY_USE},	//###80
+	{"%.1f ",   &db_ramp_data.new_meter_rate, BASE_FLOAT, REPLAY_USE}, 	//###81
+	{"%.1f ",   &db_ramp_data.data_time, BASE_FLOAT, REPLAY_USE}, 		//###82
+	{"%.1f ",   &db_ramp_data.prev_update_data, BASE_FLOAT, REPLAY_USE}, 	//###83
+	{"%.3f ",   &db_ramp_data.prev_occ_out, BASE_FLOAT, REPLAY_USE}, 	//###84
+	{"%hhu ",   &db_ramp_data.passage_vol[2], BASE_CHAR, REPLAY_USE}, 	//###85
+	{"%hhu ",   &db_urms_status.plan_base_lvl[0], BASE_CHAR, REPLAY_USE},	//###86
+	{"%hhu ",   &db_urms_status.plan_base_lvl[1], BASE_CHAR, REPLAY_USE},	//###87
+	{"%hhu ",   &db_urms_status.plan_base_lvl[2], BASE_CHAR, REPLAY_USE},	//###88
+	{"%hhu ",   &db_urms_status.hour, BASE_CHAR, REPLAY_USE},		//###89
 };
 
 #define NUM_FILE_COLUMNS sizeof(file_spec)/sizeof(data_log_column_spec_t)
