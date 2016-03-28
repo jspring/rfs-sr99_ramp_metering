@@ -1,38 +1,12 @@
+#pragma once
 #include <db_include.h>
 #include <path_gps_lib.h>
 #include "data_log.h"
-#include "atsc.h"
-#include "atsc_clt_vars.h"
-#include <ab3418_lib.h>
-#include <ab3418comm.h>
 #include <urms.h>
 #include "wrfiles_rm.h"
 #include "variables2.h"
 #include "meter_lib.h"
 #include "rm_algo.h"
-
-char *interval_str[] = {
-"Walk", 
-"Don't walk       ", 
-"Min green        ",
-"Unused           ",
-"Added initial    ", 
-"Passage - resting",
-"Max gap          ", 
-"Min gap          ", 
-"Red rest         ",
-"Preemption       ",
-"Stop time        ",
-"Red revert       ",
-"Max termination  ",
-"Gap termination  ",
-"Force off        ",
-"Red clearance    "
-};
- 
-get_long_status8_resp_mess_typ status;
-get_short_status_resp_t short_status;
-phase_status_t	phase_status;
 
 //Ramp meter inputs
 db_urms_status_t db_urms_status;
@@ -158,6 +132,8 @@ data_log_column_spec_t file_spec[] =
 	{"%hhu ",   &db_urms_status.plan_base_lvl[1], BASE_CHAR, REPLAY_USE},	//###87
 	{"%hhu ",   &db_urms_status.plan_base_lvl[2], BASE_CHAR, REPLAY_USE},	//###88
 	{"%hhu ",   &db_urms_status.hour, BASE_CHAR, REPLAY_USE},		//###89
+	{"%hhu ",   &db_urms_status.minute, BASE_CHAR, REPLAY_USE},		//###90
+	{"%hhu ",   &db_urms_status.second, BASE_CHAR, REPLAY_USE},		//###91
 };
 
 #define NUM_FILE_COLUMNS sizeof(file_spec)/sizeof(data_log_column_spec_t)
