@@ -11,9 +11,8 @@
 
 #include "nrutil2.h"
 #include "resource.h"
-#include "resource.h"
 #include "rm_algo.h"
-
+#include "clt_vars.h"
 
 char str[len_str];
 
@@ -40,6 +39,25 @@ int syst_init()
 }
 */
 
+static int sig_list[] =
+{
+        SIGINT,
+        SIGQUIT,
+        SIGTERM,
+        SIGALRM,
+        ERROR,
+};
+
+static jmp_buf exit_env;
+
+static void sig_hand(int code)
+{
+        if (code == SIGALRM)
+                return;
+        else
+                longjmp(exit_env, code);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -47,105 +65,105 @@ int main(int argc, char *argv[])
 	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
-	
+	db_urms_status_t controller_data[28];
+	db_urms_t urms_ctl[28];
+	int option;
+	int exitsig;
+	db_clt_typ *pclt;
+	char hostname[MAXHOSTNAMELEN+1];
+	int interval = 50;      /// Number of milliseconds between saves
+	posix_timer_typ *ptimer;       /* Timing proxy */
+	char *domain = DEFAULT_SERVICE; // usually no need to change this
+	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
+	int verbose = 0;
+	agg_data_t mainline_out[28];
+	agg_data_t onramp_out[11];
+	agg_data_t offramp_out[11];
+
+
+	memset(controller_data, 0, 28 * (sizeof(db_urms_status_t)));
+
+	get_local_name(hostname, MAXHOSTNAMELEN);
+	if ((pclt = db_list_init(argv[0], hostname, domain, xport,
+		//db_vars_list, num_db_vars, NULL, 0)) == NULL) {
+		NULL, 0, NULL, 0)) == NULL) {
+		printf("Database initialization error in %s.\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	/* Setup a timer for every 'interval' msec. */
+	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
+		printf("Unable to initialize wrfiles timer\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if(( exitsig = setjmp(exit_env)) != 0) {
+		db_list_done(pclt, NULL, 0, NULL, 0);
+		exit(EXIT_SUCCESS);
+	} else
+		sig_ign(sig_list, sig_hand);
+
 	if (init_sw==1)
 	{
 		Init();  
 		Init_sim_data_io();
 		init_sw=0;
 	}
-	
-	//for(;;)
-	while ( feof(st_file)==0 )
+	for (i = 0; i < num_controller_vars; i++){
+		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
+		db_clt_read(pclt, db_controller_list[i].id+1, sizeof(db_urms_t), &urms_ctl[i]);
+	}
+
+	for(;;)	
 	{
-		// shifting data buffer
 		
-		/*for(i=0;i<SecSize;i++) 	
-			moveData(detection_s[i]);			
-		for (i=0;i<NumOnRamp;i++)  // moving data
-		{
-			//if (detection_onramp[i]->detId > 0)
-				moveData(detection_onramp[i]);
-			//if (detection_offramp[i]->detId > 0)	
-				moveData(detection_offramp[i]);
-		}*/
-		
-		// Read data from file
+	for (i = 0; i < num_controller_vars; i++){
+		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
+	}
+
+
+/*#################################################################################################################
+###################################################################################################################
+
+** Cheng-Ju's code here
+
+for(int i=0; i<SecSize;i++){
+    mainline_out[i].agg_occ = occupancy_aggregation_mainline(&controller_data[i]);
+    mainline_out[i].agg_vol = flow_aggregation_mainline(&controller_data[i])
+    mainline_out[i].agg_speed = 0;
+    mainline_out[i].agg_density = 0;
+    }
+
+    for(i=0;i<NumOnRamp;i++){
+        onramp_out[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
+        offramp_out[i].turning_ratio = 0;
+        offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
+    };
+
+###################################################################################################################
+###################################################################################################################*/
+
+
 		for(i=0;i<SecSize;i++)
 		{
-			if (i==0)
-			{
-				//fscanf(st_file,"%lf %lf %lf %lf %lf ", &delta_t, &(detection_s[i]->data[Np-1].flow), &(detection_s[i]->data[Np-1].speed), 
-			    //                           &(detection_s[i]->data[Np-1].occupancy), &(detection_s[i]->data[Np-1].density)); 
-			    fscanf(st_file,"%lf %lf %lf %lf %lf ", &tmp0, &tmp1, &tmp2, &tmp3, &tmp4);
-//			    tmp1 = flow_aggragation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3)
-			    tmp1 = flow_aggragation_3_lanes(10.0 , 10.0, 10.0);
-			    timeSta=(float)tmp0;
-			    time=timeSta;
-			    detection_s[i]->data[Np-1].flow=(float)tmp1;
-			    detection_s[i]->data[Np-1].speed=(float)tmp2;
-			    detection_s[i]->data[Np-1].occupancy=(float)tmp3;
-			    detection_s[i]->data[Np-1].density=(float)tmp4; 
-			    
-			    //fprintf(st_file_out,"%lf %lf %lf %lf %lf ", tmp0, tmp1, tmp2, tmp3, tmp4);  
-			    //fprintf(st_file_out,"%lf %lf %lf %lf %lf ", time,detection_s[i]->data[Np-1].flow, (detection_s[i]->data[Np-1].speed), 
-			    //                           (detection_s[i]->data[Np-1].occupancy), (detection_s[i]->data[Np-1].density));                          
-			}                              
-			else
-			{
-				//fscanf(st_file,"%lf %lf %lf %lf ", &(detection_s[i]->data[Np-1].flow), &(detection_s[i]->data[Np-1].speed), 
-			    //                           &(detection_s[i]->data[Np-1].occupancy), &(detection_s[i]->data[Np-1].density)); 
-			    fscanf(st_file,"%lf %lf %lf %lf ", &tmp1, &tmp2, &tmp3, &tmp4);			    
-			    detection_s[i]->data[Np-1].flow=(float)tmp1;
-			    detection_s[i]->data[Np-1].speed=(float)tmp2;
-			    detection_s[i]->data[Np-1].occupancy=(float)tmp3;
-			    detection_s[i]->data[Np-1].density=(float)tmp4;  
-			    //fprintf(st_file_out,"%lf %lf %lf %lf ", tmp1, tmp2, tmp3, tmp4);
-			   // fprintf(st_file_out,"%lf %lf %lf %lf ", (detection_s[i]->data[Np-1].flow), (detection_s[i]->data[Np-1].speed), 
-			    //                           (detection_s[i]->data[Np-1].occupancy), (detection_s[i]->data[Np-1].density)); 	 
-		    }
-		   
-			                               
+			    detection_s[i]->data[Np-1].flow=mainline_out[i].agg_vol;
+			    detection_s[i]->data[Np-1].speed=mainline_out[i].agg_speed;
+			    detection_s[i]->data[Np-1].occupancy=mainline_out[i].agg_occ;
+			    detection_s[i]->data[Np-1].density=mainline_out[i].agg_density;   
 		}			                               
 	
+		
 		for(i=0;i<NumOnRamp;i++)
 		{	
-			//fscanf(st_file,"%lf %lf ", &(detection_onramp[i]->data[Np-1].flow), &(detection_onramp[i]->data[Np-1].occupancy)); 
-			fscanf(st_file,"%lf %lf ",&tmp1, &tmp2); 
-			detection_onramp[i]->data[Np-1].flow=(float)tmp1;
-			detection_onramp[i]->data[Np-1].occupancy=(float)tmp2; 
-			//fprintf(st_file_out,"%lf %lf ",tmp1, tmp2); 
-			//fprintf(st_file_out,"%lf %lf ", (detection_onramp[i]->data[Np-1].flow), (detection_onramp[i]->data[Np-1].occupancy)); 
-		}
-		for(i=0;i<NumOnRamp;i++)
-		{	
-			if (i < NumOnRamp-1)	
-			{
-				//fscanf(st_file,"%lf %lf ", &(detection_offramp[i]->data[Np-1].flow), &(detection_offramp[i]->data[Np-1].occupancy));
-				fscanf(st_file,"%lf %lf ",&tmp1, &tmp2); 
-				detection_offramp[i]->data[Np-1].flow=(float)tmp1;
-				detection_offramp[i]->data[Np-1].occupancy=(float)tmp2; 
-				//fprintf(st_file_out,"%lf %lf ",tmp1, tmp2); 
-				//fprintf(st_file_out,"%lf %lf ", (detection_offramp[i]->data[Np-1].flow), (detection_offramp[i]->data[Np-1].occupancy));
-			}
-			else
-			{
-				//fscanf(st_file,"%lf %lf[^\n]", &(detection_offramp[i]->data[Np-1].flow), &(detection_offramp[i]->data[Np-1].occupancy));
-				fscanf(st_file,"%lf %lf[^\n]",&tmp1, &tmp2); 
-				detection_offramp[i]->data[Np-1].flow=(float)tmp1;
-				detection_offramp[i]->data[Np-1].occupancy=(float)tmp2; 
-				//fprintf(st_file_out,"%lf %lf\n",tmp1, tmp2); 
-				//fprintf(st_file_out,"%lf %lf\n", (detection_offramp[i]->data[Np-1].flow), (detection_offramp[i]->data[Np-1].occupancy));
-			}
+				detection_offramp[i]->data[Np-1].flow=onramp_out[i].agg_vol;
+				detection_offramp[i]->data[Np-1].occupancy=onramp_out[i].agg_occ; 
+				detection_offramp[i]->data[Np-1].flow=offramp_out[i].agg_vol;
+				detection_offramp[i]->data[Np-1].occupancy=offramp_out[i].agg_occ; 
+				
 		}
 		
 		
-		det_data_4_contr(time);
-		//get_u_for_opt();  
-		//get_state(time);
-		get_meas(time);		
-		//get_s();
-		//get_q_main();
+		det_data_4_contr(time);		
+		get_meas(time);				
 		update_q_R();
 		opt_metering();
 		
@@ -180,22 +198,22 @@ int main(int argc, char *argv[])
 
 int Init_sim_data_io()
 {	
-	st_file=fopen("In_Data\\state_var.txt","r");	
+	//st_file=fopen("In_Data/state_var.txt","r");	
 	
-	dbg_f=fopen("Out_Data\\dbg_file.txt","w");
+	dbg_f=fopen("Out_Data/dbg_file.txt","w");
 	
-	//dmd_f=fopen("Out_Data\\dmd_file.txt","w");
+	//dmd_f=fopen("Out_Data/dmd_file.txt","w");
 	
-    vsl_crm_f=fopen("Out_Data\\crm_RT_rate.txt","w");
+    vsl_crm_f=fopen("Out_Data/crm_RT_rate.txt","w");
     
-    cal_opt_f=fopen("Out_Data\\cal_opt_RT_rt.txt","w");
+    cal_opt_f=fopen("Out_Data/cal_opt_RT_rt.txt","w");
     
-    st_file_out=fopen("Out_Data\\state_var_out.txt","w");	
+    st_file_out=fopen("Out_Data/state_var_out.txt","w");	
     
 
-	//sec_outfile=fopen("Out_Data\\section.txt","w");
+	//sec_outfile=fopen("Out_Data/section.txt","w");
 	
-	pp=fopen("Out_Data\\coeff.txt","w");
+	pp=fopen("Out_Data/coeff.txt","w");
 		
 	
 	return 1;
@@ -1311,7 +1329,7 @@ int Finish_sim_data_io()
 		fflush(pp);
 		fclose(pp);
 	}
-	fclose(st_file);
+	//fclose(st_file);
 	fflush(st_file_out);
 	fclose(st_file_out);
 
