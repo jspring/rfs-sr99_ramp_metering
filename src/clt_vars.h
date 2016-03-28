@@ -3,7 +3,6 @@
 #include <path_gps_lib.h>
 #include <atsc.h>
 #include <atsc_clt_vars.h>
-#include <msgs.h>
 #include <urms.h>
 #include "data_log.h"
 #include "wrfiles_rm.h"
@@ -68,11 +67,7 @@
 #define DB_10_29_248_157_VAR 	8200	
 #define DB_10_29_248_56_VAR 	8400	
 
-db_id_t db_vars_list[] =  {
-        {DB_URMS_VAR, sizeof(db_urms_t)},
-        {DB_URMS_STATUS_VAR, sizeof(db_urms_status_t)},
-        {DB_RAMP_DATA_VAR, sizeof(db_ramp_data_t)},
-        {DB_AGG_DATA_VAR, sizeof(db_agg_data_t)},
+db_id_t db_controller_list[] =  {
 	{DB_10_29_248_108_VAR, sizeof(db_urms_status_t)},
 	{DB_10_254_25_113_VAR, sizeof(db_urms_status_t)},
 	{DB_10_254_25_120_VAR, sizeof(db_urms_status_t)},
@@ -102,5 +97,5 @@ db_id_t db_vars_list[] =  {
 	{DB_10_29_248_157_VAR, sizeof(db_urms_status_t)},
 	{DB_10_29_248_56_VAR, sizeof(db_urms_status_t)},
 };
-int num_db_vars = sizeof(db_vars_list)/sizeof(db_id_t);
+int num_controller_vars = sizeof(db_controller_list)/sizeof(db_id_t);
 
