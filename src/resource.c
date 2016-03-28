@@ -1,5 +1,37 @@
 #include <db_include.h>
 #include "resource.h"
+#include <urms.h>
+
+const char *controller_strings[] = {
+        "10.29.248.108", //0
+        "10.254.25.113", //1
+        "10.254.25.120", //2
+        "10.29.249.46",  //3
+        "10.29.248.42",  //4
+        "10.29.248.20",  //5
+        "10.29.248.128", //6
+        "10.254.27.67",  //7
+        "10.254.27.82",  //8
+        "10.254.27.81",  //9
+        "10.29.248.76",  //10
+        "10.254.28.213", //11
+        "10.254.28.212", //12
+        "10.254.28.211", //13
+        "10.29.248.118", //14
+        "10.29.248.52",  //15
+        "10.254.24.156", //16
+        "10.254.24.157", //17
+        "10.29.248.185", //18
+        "10.29.248.66",  //19
+        "10.29.248.81",  //20
+        "10.29.248.213", //21
+        "10.29.248.155_PORT_1001",  //22
+        "10.29.248.155_PORT_1002",  //23
+        "10.29.248.124",            //24
+        "10.29.248.67",             //25
+        "10.29.248.157",            //26
+        "10.29.248.56",             //27
+};
 
 float flow_aggragation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3);
 
@@ -23,40 +55,73 @@ float mind(float a,float b)
 	}
 }
 
-int open_file(char controller_data_file[])
-{
-    int column_max;
-	column_max = 3;
-	double data[2600][3];
-	int count = 0;
-    int i = 0;
-    int j =0;
+float flow_aggregation_mainline(db_urms_status_t *controller_data){
+        int j;
+        float flow;
 
-    FILE *file;
-    file = fopen(controller_data_file,"r");
-    if(!file)
-    {
-        perror("Error opening file");
-        return -1;
-    }
+        for(j=0 ; j < controller_data->num_main; j++) {
+            if(controller_data->mainline_stat[j].lead_stat == 2)
+                flow += (float)controller_data->mainline_stat[j].lead_vol;
+            else
+                printf("Error %d controller %s detector %d\n",
+                    controller_data->mainline_stat[j].lead_stat,
+                    controller_strings[j],
+                    j
+                );
+	}
 
-	while (!feof(file)           /* Check for the end of file*/
-        &&(count < column_max))  /* To avoid memory corruption */
-    {
-        fscanf(file, "%lf", &(data[count++]));
-    }
-    fclose(file);
- 
+            return flow;
+}
 
-    /* Print data */
-    printf("Data count: %s\n", controller_data_file);
-    for(i = 0; i < 100; i++)
-    {
-		for(j=0; j<count; j++){
-        printf("Data[%d][%d] = %lf\n", i,j, data[i][j]);
-		}
-    }
-	return 0;
+float flow_aggregation_onramp(db_urms_status_t *controller_data){
+        int j;
+        float flow;
+
+        for(j=0 ; j < controller_data->num_main; j++) {
+            if(controller_data->metered_lane_stat[2].demand_stat == 2)
+                flow += (float)controller_data->metered_lane_stat[j].demand_stat;
+            else
+                printf("Error %d controller %s detector %d\n",
+                    controller_data->metered_lane_stat[j].demand_stat,
+                    controller_strings[j],
+                    j
+                );
+
+	}
+            return flow;
+}
+
+float flow_aggregation_offramp(db_urms_status_t *controller_data){
+        int j;
+        float flow;
+
+        for(j=0 ; j < controller_data->num_addl_det; j++) {
+            if(controller_data->additional_det[j].volume)
+                flow += (float)controller_data->additional_det[j].volume;
+            else
+                printf("Error %d controller %s detector %d\n",
+                    controller_data->mainline_stat[j].lead_stat,
+                    controller_strings[j],
+                    j
+                );
+
+	}
+            return flow;
+}
+
+
+float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
+        int j;
+        float occupancy;
+
+        for(j=0 ; j < controller_data->num_main; j++) {
+            if(controller_data->metered_lane_stat[2].demand_stat == 2)
+            occupancy += (float)((controller_data->mainline_stat[j].lead_occ_msb << 8) + controller_data->mainline_stat[j].lead_occ_lsb);
+	}
+
+        occupancy /= controller_data->num_main;
+
+        return occupancy;
 }
 
 float flow_aggragation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3)
