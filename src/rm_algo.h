@@ -3,6 +3,7 @@
 	database
 */
 
+#pragma once
 #include <db_include.h>
 #include "variables2.h"
 
@@ -55,13 +56,12 @@ typedef struct
 } IS_PACKED db_ramp_data_t;
 
 typedef struct {
-	float mainline_agg_speed;
-	float mainline_agg_occ;
-	float mainline_agg_vol;
-	char mainline_agg_stat;
-	float offramp_agg_occ;
-	float offramp_agg_vol;
-	char offramp_agg_stat;
-	float onramp_agg_vol;
-	char onramp_agg_stat;
-} IS_PACKED db_agg_data_t;
+        float agg_speed;
+        float agg_occ;
+        float agg_vol;
+        char  agg_stat;
+        float agg_queue_length;
+        float agg_turning_ratio;
+        float agg_density;
+} IS_PACKED agg_data_t;
+
