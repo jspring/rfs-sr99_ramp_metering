@@ -1,6 +1,9 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by app.rc
+
+#pragma once
+
 extern float maxd(float a,float b);
 extern float mind(float a,float b);
 extern int open_file(char controller_data_file[]);
@@ -27,3 +30,5 @@ extern float get_density_estimation(float in_flow, float out_flow, float section
 extern float get_off_ramp_flow_by_flow_balance(float upstream_total_flow, float on_ramp_flow, float downstream_total_flow);
 
 extern float get_on_ramp_flow_by_flow_balance(float upstream_total_flow, float downstream_total_flow, float off_ramp_flow);
+
+extern const char *controller_strings[];
