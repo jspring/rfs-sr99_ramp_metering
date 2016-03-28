@@ -9,18 +9,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-//#include <iostream>
-//#include <string>
-//#include <fstream>
-//#include <sstream>
 
 #include "resource.h"
 #include "rm_algo.h"
-//using namespace std;
-
-//#define CONTROLLER_DATA_COLUMN_MAX 3
-//#define CONTROLLER_DATA_ROW_MAX 3
-//#define TOTAL_NUNMBER_OF_CONTROLLERS 28
+#include "urms.h"
 
 // declare function
 int open_file(char* controller_data_file);
@@ -28,7 +20,14 @@ int open_file(char* controller_data_file);
 int main()
 {
 
-	db_agg_data_t agg_data;
+	agg_data_t mainline_out[28];
+	agg_data_t onramp_out[11];
+	agg_data_t offramp_out[11];
+
+	db_urms_status_t controller_data[28];
+
+	//An example of how to output aggregated data into the above struct
+//	mainline_out[0].agg_speed = cheng-ju_output;
 
 	//char controller_1_data_file_name[] = "a_10.29.248.20_0224013.dat";
     //char controller_2_data_file_name[] = "a_10.29.248.42_0224013.dat";
@@ -68,19 +67,6 @@ int main()
     
     };
 
-/*
-typedef struct {
-        float mainline_agg_speed;
-        float mainline_agg_occ;
-        float mainline_agg_vol;
-        char mainline_agg_stat;
-        float offramp_agg_occ;
-        float offramp_agg_vol;
-        char offramp_agg_stat;
-        float onramp_agg_vol;
-        char onramp_agg_stat;
-} IS_PACKED db_agg_data_t;
-*/
 	
     // variable of unit test 
 	float occ_agg_3_test,flow_agg_3_test,speed_agg_3_test;
