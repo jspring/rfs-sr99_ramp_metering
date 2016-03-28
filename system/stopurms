@@ -3,6 +3,8 @@
 echo "Stopping wrfiles_rm"
 killall wrfiles_rm
 sleep 1
+killall -s KILL wrfiles_rm
+sleep 1
 
 echo "Stopping send_urms_data"
 killall send_urms_data
