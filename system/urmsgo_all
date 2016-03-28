@@ -8,58 +8,64 @@ echo "Starting db_slv"
 /home/path/db/lnx/db_slv &
 sleep 1
 
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.108"	3000	1000
+#echo "Starting clt_vars"
+#/home/sr99_ramp_metering/src/lnx/clt_vars &
+#sleep 1
+
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.108	3000	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.25.113"	3200	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.25.113	3200	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.25.120"	3400	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.25.120	3400	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.249.46"	3600	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.249.46	3600	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.42"	3800	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.42	3800	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.20"	4000	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.20	4000	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.128"	4200 	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.128	4200 	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.27.67"	4400 	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.27.67	4400 	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.27.82"	4600 	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.27.82	4600 	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.27.81"	4800 	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.27.81	4800 	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.76" 	5000	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.76 	5000	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.28.213" 	5200	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.28.213 	5200	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.28.212" 	5400	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.28.212 	5400	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.28.211" 	5600	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.28.211 	5600	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.118" 	5800	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.118 	5800	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.52" 	6000	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.52 	6000	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.24.156" 	6200	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.24.156 	6200	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.254.24.157" 	6400	1000
+/home/sr99_ramp_metering/system/urmsgo 10.254.24.157 	6400	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.185" 	6600	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.185 	6600	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.66" 	6800	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.66 	6800	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.81" 	7000	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.81 	7000	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.213" 	7200	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.213 	7200	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.155" 	7400	1002
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.155 	7400	1002
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.155" 	7600	1001
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.155 	7600	1001
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.124" 	7800	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.124 	7800	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.67" 	8000	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.67 	8000	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.157" 	8200	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.157 	8200	1000
 sleep 1
-/home/sr99_ramp_metering/system/urmsgo "10.29.248.56" 	8400	1000
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.56 	8400	1000
+
+/home/sr99_ramp_metering/src/lnx/opt_crm 1>>/big/data/ac_rm_1/opt_crm.log 2>&1 &
