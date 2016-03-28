@@ -9,19 +9,6 @@ then
 	exit 1
 fi
 
-#echo "Executing stopurms"
-#/home/sr99_ramp_metering/system/stopurms
-#sleep 1
-#
-#echo "Starting db_slv"
-#/home/path/db/lnx/db_slv &
-#sleep 1
-#
-#echo "Starting clt_vars"
-#/home/sr99_ramp_metering/src/lnx/clt_vars &
-#sleep 1
-
-
 CONTROLLER_IP=$1
 DB_URMS_STATUS=$2
 PORT=$3
@@ -32,19 +19,10 @@ then
 	echo "Starting urms with control"
 	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -d $DB_URMS_STATUS -p $PORT >>/big/data/ac_rm_1/urms.err &
 else
-	echo "Starting urms with no control"
+	echo "Starting urms with no control, $CONTROLLER_IP $DB_URMS_STATUS $PORT"
 	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -n -d $DB_URMS_STATUS -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
 fi
 sleep 5
-
-#if [[ $1 == "sj" ]]
-#then
-#	echo "Starting ac_rm_algo"
-#	cd /home/sr99_ramp_metering/src
-#	./lnx/ac_rm_algo >>/big/data/ac_rm_1/ac_rm_algo.err &
-#	sleep 1
-#fi
-
-echo "Starting wrfiles_rm port $DB_URMS_STATUS IP address $CONTROLLER_IP"
-/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 10000 -m 30 -s $DB_URMS_STATUS -c $CONTROLLER_IP 1>>/big/data/ac_rm_1/"wrfiles_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
-#fi
+	echo "Starting wrfiles_rm, $CONTROLLER_IP $DB_URMS_STATUS $PORT"
+	/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 30 -s $DB_URMS_STATUS -c $CONTROLLER_IP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+sleep 5
