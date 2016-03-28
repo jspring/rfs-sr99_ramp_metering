@@ -25,11 +25,9 @@
 #include <path_gps_lib.h>
 #include <atsc.h>
 #include <atsc_clt_vars.h>
-#include <msgs.h>
-#include <ab3418_lib.h>
-#include <ab3418comm.h>
 #include "data_log.h"
 #include "clt_vars.h"
+#include "rm_table.h"
 
 static int sig_list[] = 
 {
@@ -61,13 +59,6 @@ buff_typ *pbuff_ac_rm;
 extern timestamp_t timestamp;                 // used when reading back in
 extern double utc_seconds_since_midnight;    // UTC seconds since midnight
 extern double seconds_since_start;       // seconds since start of run
-
-
-extern data_log_column_spec_t file_spec[];
-extern int num_file_columns;
-
-extern db_var_spec_t db_vars_ac_rm[];
-extern int num_ac_rm_vars;
 
 path_gps_point_t cabinet_gps; 		// GPS in cabinet
 
