@@ -1,3 +1,5 @@
+#pragma once
+
 typedef struct {
 	float mainline_lead_occ[3];
 	float mainline_trail_occ[3];
