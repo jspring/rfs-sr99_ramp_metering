@@ -3,26 +3,31 @@
 if [[ q$2 == 'q' ]]
 then
 	echo
-		echo "Usage: $0 <Controller IP> <Database variable number (must be a multiple of 4)> (control/no_control) (home/no_home)"
+		echo "Usage: $0 <Controller IP> <Database variable number (must be a multiple of 4)> <Port> <Timestamp(for naming files, in YYMMDD_HHMMSS format)> (Loop/Polling interval, default 5000 ms)"
 	echo "       where <> denotes necessary arguments and () denotes optional arguments"
 	echo
 	exit 1
 fi
 
 CONTROLLER_IP=$1
-DB_URMS_STATUS=$2
+URMS_STATUS_DBNUM=$2
 PORT=$3
-TIMESTAMP=`date +%m%Y%d_%H%M%S`
+TIMESTAMP=$4
+INTERVAL=$5
 
-if [[ $3 == "control" ]]
+if [[ q$INTERVAL == 'q' ]]
 then
-	echo "Starting urms with control"
-	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -d $DB_URMS_STATUS -p $PORT >>/big/data/ac_rm_1/urms.err &
-else
-	echo "Starting urms with no control, $CONTROLLER_IP $DB_URMS_STATUS $PORT"
-	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -n -d $DB_URMS_STATUS -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+        INTERVAL=5000
 fi
+
+#if [[ $3 == "control" ]]
+#then
+#	echo "Starting urms with control"
+#	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -d $URMS_STATUS_DBNUM -p $PORT >>/big/data/ac_rm_1/urms.err &
+#else
+	echo "Starting urms with no control, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT"
+	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i $INTERVAL -n -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+#fi
 sleep 5
-	echo "Starting wrfiles_rm, $CONTROLLER_IP $DB_URMS_STATUS $PORT"
-	/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 30 -s $DB_URMS_STATUS -c $CONTROLLER_IP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
-sleep 5
+	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP"
+	/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 2 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
