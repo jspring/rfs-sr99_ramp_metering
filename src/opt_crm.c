@@ -25,6 +25,7 @@ int Init_sim_data_io();
 //int optMeter(float,float,float);
 //int save_data(float);
 //int finish_data_saving();
+float Mind(float a,float b);
 int Finish_sim_data_io();
 
 /*
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 	int exitsig;
 	db_clt_typ *pclt;
 	char hostname[MAXHOSTNAMELEN+1];
-	int interval = 50;      /// Number of milliseconds between saves
+	int interval = 1000;      /// Number of milliseconds between saves
 	posix_timer_typ *ptimer;       /* Timing proxy */
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
@@ -115,7 +116,6 @@ int main(int argc, char *argv[])
 
 	for(;;)	
 	{
-		
 	for (i = 0; i < num_controller_vars; i++){
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 	}
@@ -145,21 +145,26 @@ for(int i=0; i<SecSize;i++){
 
 		for(i=0;i<SecSize;i++)
 		{
-			    detection_s[i]->data[Np-1].flow=mainline_out[i].agg_vol;
-			    detection_s[i]->data[Np-1].speed=mainline_out[i].agg_speed;
-			    detection_s[i]->data[Np-1].occupancy=mainline_out[i].agg_occ;
-			    detection_s[i]->data[Np-1].density=mainline_out[i].agg_density;   
+			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out[i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(mainline_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
+			    
+			    fprintf(st_file_out,"%f %f %f %f ", detection_s[i]->data[Np-1].flow, detection_s[i]->data[Np-1].speed, 
+			                                           detection_s[i]->data[Np-1].occupancy, detection_s[i]->data[Np-1].density); 
 		}			                               
 	
 		
 		for(i=0;i<NumOnRamp;i++)
 		{	
-				detection_offramp[i]->data[Np-1].flow=onramp_out[i].agg_vol;
-				detection_offramp[i]->data[Np-1].occupancy=onramp_out[i].agg_occ; 
-				detection_offramp[i]->data[Np-1].flow=offramp_out[i].agg_vol;
-				detection_offramp[i]->data[Np-1].occupancy=offramp_out[i].agg_occ; 
-				
+				detection_onramp[i]->data[Np-1].flow=Mind(12000.0, Maxd(onramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(onramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
+				detection_offramp[i]->data[Np-1].flow=Mind(12000.0, Maxd(offramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(offramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
+				fprintf(st_file_out,"%f %f %f %f ", detection_onramp[i]->data[Np-1].flow, detection_onramp[i]->data[Np-1].occupancy,
+														detection_offramp[i]->data[Np-1].flow, detection_offramp[i]->data[Np-1].occupancy);  			
 		}
+		fprintf(st_file_out,"\n");
 		
 		
 		det_data_4_contr(time);		
@@ -188,7 +193,7 @@ for(int i=0; i<SecSize;i++){
 			Set_Hybrid_Meter(time,time2,timeSta);  // upstream use default; downstream 11 onramps use CRM
 		else;
 	
-		
+		TIMER_WAIT(ptimer);	
 	} 
 	
 	Finish_sim_data_io();
@@ -1338,6 +1343,7 @@ int Finish_sim_data_io()
 }
 
 
+//			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
 float Mind(float a,float b)
 {
 	if(a<=b)
