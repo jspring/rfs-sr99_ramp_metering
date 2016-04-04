@@ -89,16 +89,17 @@ int main(int argc, char *argv[])
 	char *first_file_str;
 	char tripdir[80];
 	char tripstr[80];
-	char ac_rm_pre[80];
+	char ac_rm_pre[200];
 	int i;
 	int use_stdout = 0;
+	int standalone = 0;
 
 	memset(id_string, 0, sizeof(id_string));
 	memset(monthday, 0, sizeof(monthday));
 	memset(serialnum, 0, sizeof(serialnum));
 	memset(tripdir, 0, 80);
 	memset(tripstr, 0, 80);
-	memset(ac_rm_pre, 0, 80);
+	memset(ac_rm_pre, 0, 200);
 
 /*
 
@@ -130,6 +131,7 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 			db_urms_status_var = atoi(optarg); 
 			db_urms_datafile_var = db_urms_status_var + 1; 
 			db_urms_ramp_var = db_urms_status_var + 3; 
+			standalone = 1;
 			break;
 	        case 'c':
 			//Get a string that identifies the controller
@@ -201,6 +203,10 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
                         open_another_file(&f_ac_rm, ac_rm_pre,
                                   id_string, ".dat");
                 }
+		printf("controller_str %s ac_rm_pre %s\n",
+			controller_str,
+			ac_rm_pre
+		);
 	}
 
 	if(( exitsig = setjmp(exit_env)) != 0) {
