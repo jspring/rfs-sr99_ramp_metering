@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [[ z`ps -ef | grep db_slv | grep -v grep` == 'z' ]]
+then
+	/home/sr99_ramp_metering/system/urmsgo_all
+	exit 1
+fi
+
+TIMESTAMP=`date +%m%Y%d_%H%M%S`
+
+for x in `cat /home/sr99_ramp_metering/system/urmsgo_all | grep urmsgo | awk '{print $2}'`
+do 
+	if [[ q`ps -ef | grep urms | grep $x | grep -v grep` == 'q' ]]
+	then 
+		echo $x urms process not running. Attempting restart....
+		CONTROLLER_IP=$x
+		DB_URMS_STATUS=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $3}'`
+		PORT=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $4}'`
+		echo "Attempting \"/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -n -d $DB_URMS_STATUS -p $PORT >/big/data/ac_rm_1/urms_"$CONTROLLER_IP"_\"$TIMESTAMP\".err\" 2>&1"
+		/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -n -d $DB_URMS_STATUS -p $PORT >/big/data/ac_rm_1/urms_$CONTROLLER_IP_$TIMESTAMP.err 2>&1 &
+		sleep 5
+	fi
+	if [[ m`ps -ef | grep wrfiles_rm | grep $x | grep -v grep` == 'm' ]]
+	then 
+        	echo "Starting wrfiles_rm"
+ 	       /home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 30 -s $DB_URMS_STATUS -c $CONTROLLER_IP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+		sleep 5
+	fi
+done

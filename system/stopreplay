@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Stopping replay_general"
+killall replay_general
+sleep 1
+
+echo "Stopping db_slv"
+killall db_slv
+sleep 1
+
+/home/path/db/db_clean.sh

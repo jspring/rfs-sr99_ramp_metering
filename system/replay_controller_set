@@ -1,0 +1,28 @@
+#!/bin/bash
+
+FILE=$1
+
+if [[ q$FILE == 'q' ]]
+then
+	echo "Usage: $0 <one filename in set>"
+	exit 1
+fi
+
+#/big/data/ac_rm_1/a_10.254.25.113_160331_155310_0331072.dat
+#/big/data/ac_rm_1/a_10.29.248.108_160331_155310_0331072.dat
+
+MATCHSTR=`echo $FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
+echo $MATCHSTR
+echo "Executing stopreplay"
+/home/sr99_ramp_metering/system/stopreplay
+sleep 1
+
+echo "Starting db_slv"
+/home/path/db/lnx/db_slv &
+sleep 1
+
+#lnx/replay_general -d <Database number (Modulo 4!)> -f <filename> -i (loop interval)
+
+/home/sr99_ramp_metering/system/replay_controller_go	3000	"/big/data/ac_rm_1/a_10.29.248.108."$MATCHSTR".dat" 1000
+sleep 1
+/home/sr99_ramp_metering/system/replay_controller_go	3200	"/big/data/ac_rm_1/a_10.254.25."$MATCHSTR".dat" 1000
