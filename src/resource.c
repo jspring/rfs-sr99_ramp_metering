@@ -1,7 +1,7 @@
 #include <db_include.h>
 #include "resource.h"
 #include <urms.h>
-
+//
 const char *controller_strings[] = {
         "10.29.248.108", //0
         "10.254.25.113", //1
@@ -33,7 +33,7 @@ const char *controller_strings[] = {
         "10.29.248.56",             //27
 };
 
-float flow_aggragation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3);
+float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3);
 
 float maxd(float a,float b)
 {
@@ -124,7 +124,98 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
         return occupancy;
 }
 
-float flow_aggragation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3)
+float speed_aggregation_mainline(db_urms_status_t *controller_data){
+	// compute harmonic mean of speed
+	float speed;
+    int j;
+    for(j=0 ; j < controller_data->num_main; j++) {
+            if(controller_data->mainline_stat[j].lead_stat == 2)
+                speed += 1/max((float)controller_data->mainline_stat[j].speed,1);
+            else
+                printf("Error %d controller %s detector %d\n",
+                    controller_data->mainline_stat[j].lead_stat,
+                    controller_strings[j],
+                    j
+                );
+	} 
+    speed /= controller_data->num_main;
+	speed = 1/speed;
+	return speed;
+}
+
+float queue_onramp(db_urms_status_t *controller_data){
+    float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
+	//float sum_inflow = 0; // sum up the inflow
+	//float sum_outflow = 0; // sum up the outflow
+	float queue = 0;
+	float Max_queue[controller_data->num_meter]; //heck 
+          Max_queue[1]=400; // put on-ramp length table here
+	int j;
+	 for(j=0 ; j < controller_data->num_meter; j++) {
+		 if(controller_data->queue_stat[j].stat == 2){
+                queue += (float)controller_data->queue_stat[j].vol*average_vehicle_length;
+                // need to hack here, data base has no inflow detector value
+			    queue /= controller_data->num_meter; // average queue length
+		 }
+		 else if(controller_data->queue_stat[j].stat == 5){
+                queue = Max_queue[1]; // heck here  
+		 }
+		 else{ 
+			 printf("Error %d controller %s detector %d\n",
+                    controller_data->queue_stat[j].stat,
+                    controller_strings[j],
+                    j
+                );
+	      }
+	}
+
+	return queue;
+}
+
+float density_aggregation_mainline(db_urms_status_t *controller_data){
+	float density;
+	float flow;
+	float speed;
+    int j;
+	for(j=0 ; j < controller_data->num_main; j++) {
+		if(controller_data->mainline_stat[j].lead_stat == 2){
+                flow += (float)controller_data->mainline_stat[j].lead_vol; // total flow
+			    speed += (float)controller_data->mainline_stat[j].speed;
+			    speed /=  controller_data->num_main; // average speed
+				speed = maxd(speed,1);
+				density = flow/speed;
+		}else
+		{       printf("Error %d controller %s detector %d\n",
+                    controller_data->mainline_stat[j].lead_stat,
+                    controller_strings[j],
+                    j
+					);
+		}
+	}
+
+	return density;
+}
+
+//float data[3] = {0}; // add data bound here
+
+//float add_cyclic_buffer_contents(float *data[]) {
+//    // static 
+//	float output = 0;
+//	int i;
+//
+//	for( i = 1; i >= 0; i--)
+//		data[i + 1] = data[i];
+//
+//	data[0] = datum;
+//
+//	for i = 0; i < 3; i++)
+//		output += data[i];
+//	
+//	return output;
+//}
+	
+
+float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3)
 {
     float flow_agg;
 	int flow_upper_bound = 50; //the unit is per lane per 30 second
@@ -135,7 +226,7 @@ float flow_aggragation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_l
 	return flow_agg;
 }
 
-float flow_aggragation_4_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4)
+float flow_aggregation_4_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4)
 {
     float flow_agg;
 	int flow_upper_bound = 50; //the unit is per lane per 30 second
@@ -147,7 +238,7 @@ float flow_aggragation_4_lanes(float flow_lane_1,float flow_lane_2, float flow_l
 	return flow_agg;
 }
 
-float flow_aggragation_5_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4, float flow_lane_5)
+float flow_aggregation_5_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4, float flow_lane_5)
 {
     float flow_agg;
 	int flow_upper_bound = 50; //the unit is per lane per 30 second
@@ -160,7 +251,7 @@ float flow_aggragation_5_lanes(float flow_lane_1,float flow_lane_2, float flow_l
 	return flow_agg;
 }
 
-float occ_aggragation_3_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3)
+float occ_aggregation_3_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3)
 {
     float occ_agg;
     occ_lane_1 = mind(maxd(occ_lane_1,0),1);
@@ -170,7 +261,7 @@ float occ_aggragation_3_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_
 	return occ_agg;
 }
 
-float occ_aggragation_4_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4)
+float occ_aggregation_4_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4)
 {
     float occ_agg;
     occ_lane_1 = mind(maxd(occ_lane_1,0),1);
@@ -181,7 +272,7 @@ float occ_aggragation_4_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_
 	return occ_agg;
 }
 
-float occ_aggragation_5_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4, float occ_lane_5)
+float occ_aggregation_5_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4, float occ_lane_5)
 {
     float occ_agg;
     occ_lane_1 = mind(maxd(occ_lane_1,0),1);
@@ -193,7 +284,7 @@ float occ_aggragation_5_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_
 	return occ_agg;
 }
 
-float speed_aggragation_3_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3)
+float speed_aggregation_3_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3)
 {
     float speed_agg,speed_lane_1_t,speed_lane_2_t,speed_lane_3_t;
 	int speed_upper_bound = 200; // the unit is mile per hour 
@@ -208,7 +299,7 @@ float speed_aggragation_3_lanes(float speed_lane_1,float speed_lane_2, float spe
 	return speed_agg;
 }
 
-float speed_aggragation_4_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4)
+float speed_aggregation_4_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4)
 {
     float speed_agg,speed_lane_1_t,speed_lane_2_t,speed_lane_3_t,speed_lane_4_t;
 	int speed_upper_bound = 200; // the unit is mile per hour 
@@ -225,7 +316,7 @@ float speed_aggragation_4_lanes(float speed_lane_1,float speed_lane_2, float spe
 	return speed_agg;
 }
 
-float speed_aggragation_5_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4, float speed_lane_5)
+float speed_aggregation_5_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4, float speed_lane_5)
 {
     float speed_agg,speed_lane_1_t,speed_lane_2_t,speed_lane_3_t,speed_lane_4_t,speed_lane_5_t;
 	int speed_upper_bound = 200; // the unit is mile per hour 
@@ -287,31 +378,4 @@ float get_on_ramp_flow_by_flow_balance(float upstream_total_flow, float downstre
     on_ramp_flow = off_ramp_flow+downstream_total_flow-upstream_total_flow;
 	on_ramp_flow = mind(maxd(off_ramp_flow,0),on_ramp_flow_upper_bound);
 	return on_ramp_flow; 
-}
-
-int read_file(char input_file_name[], char output_file_name[])
-{   
-	float reg1, reg2, reg3;
-	int counter=1;
-     
-     FILE *fp_r = fopen(input_file_name, "r");
-     FILE *fp_w = fopen(output_file_name, "w");
-     
-     if (fp_r == NULL)
-       return -1;
-       
-     if (fp_w == NULL)
-       return -1;
-     
-     while(!feof(fp_r)) {
-       fscanf(fp_r, "%f %f %f ", &reg1, &reg2, &reg3 );
-	   printf("counter: %d_%f_%f_%f  \n", counter, reg1, reg2, reg3);
-       fprintf(fp_w, "%f %f %f \n", reg1, reg2, reg3);
-	   counter++;
-     }
-     
-     fclose(fp_r);
-     fclose(fp_w);
-
-	 return 0;
 }
