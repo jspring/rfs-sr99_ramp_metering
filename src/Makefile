@@ -22,7 +22,7 @@ PATH_OBJS += $(OBJDIR)/simplx.o
 
 PATH_LDFLAGS += -L./lnx -L$(ATSC_LIB_DIR)
 
-EXEC =  $(OBJDIR)/replay_general $(OBJDIR)/wrfiles_rm $(OBJDIR)/clt_vars $(OBJDIR)/agg_data $(OBJDIR)/opt_crm
+EXEC =  $(OBJDIR)/replay_general $(OBJDIR)/wrfiles_rm $(OBJDIR)/clt_vars $(OBJDIR)/opt_crm
 
 all: 	$(OBJDIR) $(PATH_OBJS) $(EXEC)
 
