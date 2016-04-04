@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	char strbuf[500];
 	FILE *filestream; 
 	char *filename; 
-	int use_db = 0;
+	int use_db = 1;
         int option;
         int exitsig;
         db_clt_typ *pclt;
@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
         int db_urms_status_var = 0;
         extern db_urms_status_t db_urms_status;
         extern urms_datafile_t urms_datafile;
-
 
         while ((option = getopt(argc, argv, "d:i:f:v")) != EOF) {
                 switch(option) {
@@ -86,7 +85,7 @@ int main(int argc, char *argv[]) {
 
 	if(use_db) {
 		get_local_name(hostname, MAXHOSTNAMELEN);
-		if ( (pclt = db_list_init(argv[0], hostname, domain, xport, db_vars_list, num_db_vars, db_trig_list, num_trig_variables)) == NULL) {
+		if ( (pclt = db_list_init(argv[0], hostname, domain, xport, db_vars_list, num_db_vars, NULL, 0)) == NULL) {
 			printf("Database initialization error in %s.\n", argv[0]);
 			exit(EXIT_FAILURE);
 		}
