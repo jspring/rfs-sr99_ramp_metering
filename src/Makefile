@@ -6,9 +6,6 @@ include $(CAPATH_MK_DEFS)
 
 
 PATH_CFLAGS += -I$(ATSC_INC_DIR) -pg -Wall
-PATH_OBJS += $(OBJDIR)/read_data.o
-PATH_OBJS += $(OBJDIR)/interface.o
-PATH_OBJS += $(OBJDIR)/temp_global.o
 PATH_OBJS += $(OBJDIR)/variables2.o
 PATH_OBJS += $(OBJDIR)/variables.o
 PATH_OBJS += $(OBJDIR)/rm_table.o
