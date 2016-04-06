@@ -5,7 +5,8 @@
 include $(CAPATH_MK_DEFS)
 
 
-PATH_CFLAGS += -I$(ATSC_INC_DIR) -pg -Wall
+#Removed -pg switch in favor of -mfentry. No longer need frame pointer for mcount
+PATH_CFLAGS += -I$(ATSC_INC_DIR) -Wall  -mfentry
 PATH_OBJS += $(OBJDIR)/variables2.o
 PATH_OBJS += $(OBJDIR)/variables.o
 PATH_OBJS += $(OBJDIR)/rm_table.o
