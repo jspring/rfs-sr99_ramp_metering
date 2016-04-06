@@ -59,7 +59,7 @@ static void sig_hand(int code)
                 longjmp(exit_env, code);
 }
 
-
+const char *usage = "-d (debug mode, i.e. use the two controllers in my office)";
 int main(int argc, char *argv[])
 {
 	float time, time2,timeSta;
@@ -80,7 +80,19 @@ int main(int argc, char *argv[])
 	agg_data_t mainline_out[28];
 	agg_data_t onramp_out[11];
 	agg_data_t offramp_out[11];
+	int debug = 0;
 
+	while ((option = getopt(argc, argv, "d")) != EOF) {
+		switch(option) {
+			case 'd':
+				debug = 1;
+				break;
+			default:
+				printf("\nUsage: %s %s\n", argv[0], usage);
+				exit(EXIT_FAILURE);
+				break;
+		}
+	}
 
 	memset(controller_data, 0, 28 * (sizeof(db_urms_status_t)));
 
@@ -109,6 +121,9 @@ int main(int argc, char *argv[])
 		Init_sim_data_io();
 		init_sw=0;
 	}
+	if(debug)
+		num_controller_vars = 2; //Use just the first two controllers in the list, i.e. 10.29.248.108 and 10.254.25.113.
+
 	for (i = 0; i < num_controller_vars; i++){
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 		db_clt_read(pclt, db_controller_list[i].id+1, sizeof(db_urms_t), &urms_ctl[i]);
@@ -122,24 +137,24 @@ int main(int argc, char *argv[])
 
 
 /*#################################################################################################################
-###################################################################################################################
+###################################################################################################################*/
 
-** Cheng-Ju's code here
+//** Cheng-Ju's code here **//
 
-for(int i=0; i<SecSize;i++){
-    mainline_out[i].agg_occ = occupancy_aggregation_mainline(&controller_data[i]);
-    mainline_out[i].agg_vol = flow_aggregation_mainline(&controller_data[i])
-    mainline_out[i].agg_speed = 0;
-    mainline_out[i].agg_density = 0;
-    }
+	for(i=0; i<SecSize;i++){
+		mainline_out[i].agg_occ = occupancy_aggregation_mainline(&controller_data[i]);
+		mainline_out[i].agg_vol = flow_aggregation_mainline(&controller_data[i]);
+		mainline_out[i].agg_speed = speed_aggregation_mainline(&controller_data[i]);
+		mainline_out[i].agg_density = density_aggregation_mainline(&controller_data[i]);
+	}
 
-    for(i=0;i<NumOnRamp;i++){
-        onramp_out[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
-        offramp_out[i].turning_ratio = 0;
-        offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
-    };
+	for(i=0;i<NumOnRamp;i++){
+		onramp_out[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
+		offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
+		offramp_out[i].turning_ratio = offramp_out[i].agg_vol/mainline_out[i].agg_speed;
+	}
 
-###################################################################################################################
+/*###################################################################################################################
 ###################################################################################################################*/
 
 
@@ -161,8 +176,7 @@ for(int i=0; i<SecSize;i++){
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(onramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
 				detection_offramp[i]->data[Np-1].flow=Mind(12000.0, Maxd(offramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(offramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
-				fprintf(st_file_out,"%f %f %f %f ", onramp_out[i].agg_vol, 100.0*(onramp_out[i].agg_occ,
-														offramp_out[i].agg_vol, offramp_out[i].agg_occ);  			
+				fprintf(st_file_out,"%f %f %f %f ", onramp_out[i].agg_vol, 100.0*(onramp_out[i].agg_occ), offramp_out[i].agg_vol, offramp_out[i].agg_occ);  			
 		}
 		fprintf(st_file_out,"\n");
 		
