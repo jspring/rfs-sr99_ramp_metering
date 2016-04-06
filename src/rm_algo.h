@@ -63,5 +63,6 @@ typedef struct {
         float agg_queue_length;
         float agg_turning_ratio;
         float agg_density;
+	float turning_ratio;
 } IS_PACKED agg_data_t;
 
