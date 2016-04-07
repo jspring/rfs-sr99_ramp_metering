@@ -57,7 +57,7 @@ float mind(float a,float b)
 
 float flow_aggregation_mainline(db_urms_status_t *controller_data){
         int i;
-        float flow;
+        float flow = 0;
 
         for(i=0 ; i < controller_data->num_main; i++) {
 			if(controller_data->mainline_stat[i].lead_stat == 2){
@@ -73,6 +73,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
                     controller_strings[i],
                     i
                 );
+				return -1.0 * controller_data->mainline_stat[i].lead_stat;
 			}
 	     }
 		 printf("ML-flow_agg %4.2f controller %s\n",
@@ -80,12 +81,12 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
                     controller_strings[i]
                 );
 
-            return flow;
+            return 0;
 }
 
 float flow_aggregation_onramp(db_urms_status_t *controller_data){
         int i;
-        float flow;
+        float flow = 0;
 
         for(i=0 ; i< controller_data->num_main;i++) {
 			if(controller_data->metered_lane_stat[2].demand_stat == 2){
@@ -113,7 +114,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 
 float flow_aggregation_offramp(db_urms_status_t *controller_data){
         int i;
-        float flow;
+        float flow = 0;
 
         for(i=0 ; i< controller_data->num_addl_det; i++) {
 			if(controller_data->additional_det[i].volume){
@@ -142,7 +143,7 @@ float flow_aggregation_offramp(db_urms_status_t *controller_data){
 
 float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
         int i;
-        float occupancy;
+        float occupancy = 0;
 
         for(i=0 ; i < controller_data->num_main; i++) {
 			if(controller_data->metered_lane_stat[2].demand_stat == 2){
@@ -169,7 +170,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 
 float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	// compute harmonic mean of speed
-	float speed;
+	float speed = 0.1;
     int i; //  lane number index
     for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
@@ -234,9 +235,9 @@ float queue_onramp(db_urms_status_t *controller_data){
 }
 
 float density_aggregation_mainline(db_urms_status_t *controller_data){
-	float density;
-	float flow;
-	float speed;
+	float density = 0;
+	float flow = 0;
+	float speed = 0;
     int i;
 	for(i=0 ; i< controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
@@ -287,7 +288,7 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 
 float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3)
 {
-    float flow_agg;
+    float flow_agg = 0;
 	int flow_upper_bound = 50; //the unit is per lane per 30 second
 	flow_lane_1 = mind(maxd(flow_lane_1,0),flow_upper_bound);
     flow_lane_2 = mind(maxd(flow_lane_2,0),flow_upper_bound);
@@ -298,7 +299,7 @@ float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_l
 
 float flow_aggregation_4_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4)
 {
-    float flow_agg;
+    float flow_agg = 0;
 	int flow_upper_bound = 50; //the unit is per lane per 30 second
 	flow_lane_1 = mind(maxd(flow_lane_1,0),flow_upper_bound);
     flow_lane_2 = mind(maxd(flow_lane_2,0),flow_upper_bound);
@@ -310,7 +311,7 @@ float flow_aggregation_4_lanes(float flow_lane_1,float flow_lane_2, float flow_l
 
 float flow_aggregation_5_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4, float flow_lane_5)
 {
-    float flow_agg;
+    float flow_agg = 0;
 	int flow_upper_bound = 50; //the unit is per lane per 30 second
 	flow_lane_1 = mind(maxd(flow_lane_1,0),flow_upper_bound);
     flow_lane_2 = mind(maxd(flow_lane_2,0),flow_upper_bound);
@@ -323,7 +324,7 @@ float flow_aggregation_5_lanes(float flow_lane_1,float flow_lane_2, float flow_l
 
 float occ_aggregation_3_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3)
 {
-    float occ_agg;
+    float occ_agg = 0;
     occ_lane_1 = mind(maxd(occ_lane_1,0),1);
     occ_lane_2 = mind(maxd(occ_lane_2,0),1);
 	occ_lane_3 = mind(maxd(occ_lane_3,0),1);
@@ -333,7 +334,7 @@ float occ_aggregation_3_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_
 
 float occ_aggregation_4_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4)
 {
-    float occ_agg;
+    float occ_agg = 0;
     occ_lane_1 = mind(maxd(occ_lane_1,0),1);
     occ_lane_2 = mind(maxd(occ_lane_2,0),1);
 	occ_lane_3 = mind(maxd(occ_lane_3,0),1);
@@ -344,7 +345,7 @@ float occ_aggregation_4_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_
 
 float occ_aggregation_5_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4, float occ_lane_5)
 {
-    float occ_agg;
+    float occ_agg = 0;
     occ_lane_1 = mind(maxd(occ_lane_1,0),1);
     occ_lane_2 = mind(maxd(occ_lane_2,0),1);
 	occ_lane_3 = mind(maxd(occ_lane_3,0),1);
