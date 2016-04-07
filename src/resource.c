@@ -59,85 +59,85 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
         int i;
         float flow = 0;
 
-        for(i=0 ; i < controller_data->num_main; i++) {
-			if(controller_data->mainline_stat[i].lead_stat == 2){
-                flow += (float)controller_data->mainline_stat[i].lead_vol;
-			    printf("ML-flow %4.2f of controller %s of detector %d \n",
-					   controller_data->mainline_stat[i].lead_vol,
-                       controller_strings[i],
-					   i
-					   );
-			}else{
-                printf("Error %d controller %s detector %d\n",
-                    controller_data->mainline_stat[i].lead_stat,
-                    controller_strings[i],
-                    i
-                );
-				return -1.0 * controller_data->mainline_stat[i].lead_stat;
-			}
-	     }
-		 printf("ML-flow_agg %4.2f controller %s\n",
-                    flow,
-                    controller_strings[i]
-                );
+	for(i=0 ; i < controller_data->num_main; i++) {
+		if(controller_data->mainline_stat[i].lead_stat == 2){
+			flow += (float)controller_data->mainline_stat[i].lead_vol;
+			printf("ML-flow %d of controller %s of detector %d \n",
+				controller_data->mainline_stat[i].lead_vol,
+				controller_strings[i],
+				i
+			);
+		}else{
+			printf("Error %d controller %s detector %d\n",
+				controller_data->mainline_stat[i].lead_stat,
+				controller_strings[i],
+				i
+			);
+		}
+	}
+	printf("ML-flow_agg %4.2f controller %s num_main %d\n",
 
-            return 0;
+		flow,
+		controller_strings[i],
+		controller_data->num_main
+	);
+
+	return flow;
 }
 
 float flow_aggregation_onramp(db_urms_status_t *controller_data){
         int i;
         float flow = 0;
 
-        for(i=0 ; i< controller_data->num_main;i++) {
-			if(controller_data->metered_lane_stat[2].demand_stat == 2){
-                flow += (float)controller_data->metered_lane_stat[i].demand_stat;
-			    printf("OR-flow %4.2f of controller %s of detector %d \n",
-					   controller_data->metered_lane_stat[i].demand_stat,
-                       controller_strings[i],
-					   i
-					   );
+	for(i=0 ; i< controller_data->num_main;i++) {
+		if(controller_data->metered_lane_stat[2].demand_stat == 2){
+			flow += (float)controller_data->metered_lane_stat[i].demand_vol;
+			printf("OR-flow %d of controller %s of detector %d \n",
+				controller_data->metered_lane_stat[i].demand_vol,
+				controller_strings[i],
+				i
+			);
 			}else{
-                printf("Error %d controller %s detector %d\n",
-                    controller_data->metered_lane_stat[i].demand_stat,
-                    controller_strings[i],
-                    i
-                );
+				printf("Error %d controller %s detector %d\n",
+					controller_data->metered_lane_stat[i].demand_stat,
+					controller_strings[i],
+					i
+				);
 			}
-
 	}
-		printf("OR-flow_agg %4.2f controller %s\n",
-               flow,
-               controller_strings[i]
-                );
-            return flow;
+	printf("OR-flow_agg %4.2f controller %s\n",
+		flow,
+		controller_strings[i]
+	);
+	return flow;
 }
 
 float flow_aggregation_offramp(db_urms_status_t *controller_data){
         int i;
         float flow = 0;
 
-        for(i=0 ; i< controller_data->num_addl_det; i++) {
-			if(controller_data->additional_det[i].volume){
-                flow += (float)controller_data->additional_det[i].volume;
-				printf("FR-flow %4.2f of controller %s of detector %d \n",
-					   controller_data->additional_det[i].volume,
-                       controller_strings[i],
-					   i
-					   );
-			}else{
-                printf("Error %d controller %s detector %d\n",
-                    controller_data->mainline_stat[i].lead_stat,
-                    controller_strings[i],
-                    i
-                );
-			}
+	for(i=0 ; i< controller_data->num_addl_det; i++) {
+		if(controller_data->additional_det[i].volume){
+			flow += (float)controller_data->additional_det[i].volume;
+			printf("FR-flow %d of controller %s of detector %d \n",
+				controller_data->additional_det[i].volume,
+				controller_strings[i],
+				i
+			);
+		}else{
+			printf("Error %d controller %s detector %d\n",
+				controller_data->mainline_stat[i].lead_stat,
+				controller_strings[i],
+				i
+			);
+		}
 
 	}
-		printf("FR-flow_agg %4.2f controller %s\n",
-               flow,
-               controller_strings[i]
-                );
-            return flow;
+	printf("FR-flow_agg %4.2f controller %s\n",
+		flow,
+		controller_strings[i]
+	);
+	return flow;
 }
 
 
@@ -171,66 +171,68 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	// compute harmonic mean of speed
 	float speed = 0.1;
-    int i; //  lane number index
-    for(i=0 ; i < controller_data->num_main; i++) {
+	int i; //  lane number index
+
+	for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-                speed += 1/max((float)controller_data->mainline_stat[i].speed,1);
-                printf("speed %4.2f of controller %s of detector %d \n",
-					   controller_data->mainline_stat[i].speed,
-                       controller_strings[i],
-					   i
-					   );
+			speed += 1/max((float)controller_data->mainline_stat[i].speed,1);
+			printf("speed %d of controller %s of detector %d \n",
+				controller_data->mainline_stat[i].speed,
+				controller_strings[i],
+				i
+			);
 		}else{
-                printf("Error %d controller %s detector %d\n",
-                    controller_data->mainline_stat[i].lead_stat,
-                    controller_strings[i],
-                    i
-                );
+			printf("Error %d controller %s detector %d\n",
+				controller_data->mainline_stat[i].lead_stat,
+				controller_strings[i],
+				i
+			);
 		}
 	} 
-    speed /= controller_data->num_main;
+	speed /= controller_data->num_main;
 	speed = 1/speed;
 	printf("speed_agg %4.2f controller %s\n",
-            speed,
-            controller_strings[i]
-           );
+		speed,
+		controller_strings[i]
+	);
 	return speed;
 }
 
 float queue_onramp(db_urms_status_t *controller_data){
-    float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
+	float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
 	float queue = 0;
 	float sum_inflow = 0;
 	float sum_outflow = 0;
 	int i; //  lane number index
-	 for(i=0 ;i < controller_data->num_meter; i++) {
-		 if(controller_data->queue_stat[i].stat == 2){
-			    sum_inflow += (float)controller_data->queue_stat[i].vol;  //Advance detector
-                sum_outflow +=  (float)controller_data->metered_lane_stat[i].passage_vol; // Passage detector
-				printf("OR-inflow %4.2f OR-outflow %4.2f of controller %s of detector %d \n",
-					   controller_data->queue_stat[i].vol,
-                       controller_data->metered_lane_stat[i].passage_vol,
-					   controller_strings[i],
-					   i
-					   );
-                queue = (sum_inflow-sum_outflow)*average_vehicle_length;
-			    queue /= controller_data->num_meter; // average queue length
-		 }
-		 else if(controller_data->queue_stat[i].stat == 5){
-                queue = -1; // queue attained max queue length  
-		 }
-		 else{ 
-			 printf("Error %d controller %s detector %d\n",
-                    controller_data->queue_stat[i].stat,
-                    controller_strings[i],
-                    i
-                );
-	      }
+
+	for(i=0 ;i < controller_data->num_meter; i++) {
+		if(controller_data->queue_stat[i].stat == 2){
+			sum_inflow += (float)controller_data->queue_stat[i].vol;  //Advance detector
+			sum_outflow +=  (float)controller_data->metered_lane_stat[i].passage_vol; // Passage detector
+			printf("OR-inflow %d OR-outflow %d of controller %s of detector %d \n",
+				controller_data->queue_stat[i].vol,
+				controller_data->metered_lane_stat[i].passage_vol,
+				controller_strings[i],
+				i
+			);
+			queue = (sum_inflow-sum_outflow)*average_vehicle_length;
+			queue /= controller_data->num_meter; // average queue length
+		}
+		else if(controller_data->queue_stat[i].stat == 5){
+			queue = -1; // queue attained max queue length  
+		}
+		else{ 
+			printf("Error %d controller %s detector %d\n",
+				controller_data->queue_stat[i].stat,
+				controller_strings[i],
+				i
+			);
+		}
 	}
-     printf("queue_agg %4.2f controller %s\n",
-            queue,
-            controller_strings[i]
-           );
+	printf("queue_agg %4.2f controller %s\n",
+		queue,
+		controller_strings[i]
+	);
 	return queue;
 }
 
