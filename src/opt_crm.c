@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
 	int verbose = 0;
-	agg_data_t mainline_out[28];
-	agg_data_t onramp_out[11];
-	agg_data_t offramp_out[11];
+	agg_data_t mainline_out[28] = {0};
+	agg_data_t onramp_out[11] = {0};
+	agg_data_t offramp_out[11] = {0};
 	int debug = 0;
 
 	while ((option = getopt(argc, argv, "d")) != EOF) {
@@ -140,19 +140,43 @@ int main(int argc, char *argv[])
 ###################################################################################################################*/
 
 //** Cheng-Ju's code here **//
-
-	for(i=0; i<SecSize;i++){
+	float float_temp = 0;
+	for(int i=0; i<SecSize;i++){
+		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
+			mainline_out[i].agg_vol = float_temp;
+		else {
+			mainline_out[i].flag = (int)float_temp;
+			continue;
+		}
 		mainline_out[i].agg_occ = occupancy_aggregation_mainline(&controller_data[i]);
-		mainline_out[i].agg_vol = flow_aggregation_mainline(&controller_data[i]);
 		mainline_out[i].agg_speed = speed_aggregation_mainline(&controller_data[i]);
 		mainline_out[i].agg_density = density_aggregation_mainline(&controller_data[i]);
 	}
 
-	for(i=0;i<NumOnRamp;i++){
-		onramp_out[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
-		offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
-		offramp_out[i].turning_ratio = offramp_out[i].agg_vol/mainline_out[i].agg_speed;
-	}
+    for(i=0;i<NumOnRamp;i++){
+        onramp_out[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
+        offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
+        offramp_out[i].turning_ratio = offramp_out[i].agg_vol/mainline_out[i].agg_vol;
+    }
+    
+	int NumOffRamp = 12;
+	for(i=0;i<NumOffRamp;i++){
+        offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
+    }
+
+	// hard code turning ratio calcualtion
+	offramp_out[1].turning_ratio = Mind(Maxd(offramp_out[1].agg_vol/mainline_out[1].agg_vol,0),1);
+	offramp_out[2].turning_ratio = Mind(Maxd(offramp_out[2].agg_vol/mainline_out[4].agg_vol,0),1);
+	offramp_out[3].turning_ratio = Mind(Maxd(offramp_out[3].agg_vol/mainline_out[5].agg_vol,0),1);
+	offramp_out[4].turning_ratio = Mind(Maxd(offramp_out[4].agg_vol/mainline_out[6].agg_vol,0),1);
+	offramp_out[5].turning_ratio = Mind(Maxd(offramp_out[5].agg_vol/mainline_out[8].agg_vol,0),1);
+	offramp_out[6].turning_ratio = Mind(Maxd(offramp_out[6].agg_vol/mainline_out[9].agg_vol,0),1);
+	offramp_out[7].turning_ratio = Mind(Maxd(offramp_out[7].agg_vol/mainline_out[10].agg_vol,0),1);
+	offramp_out[8].turning_ratio = Mind(Maxd(offramp_out[8].agg_vol/mainline_out[11].agg_vol,0),1);
+	offramp_out[9].turning_ratio = Mind(Maxd(offramp_out[9].agg_vol/mainline_out[12].agg_vol,0),1);
+	offramp_out[10].turning_ratio = Mind(Maxd(offramp_out[10].agg_vol/mainline_out[13].agg_vol,0),1);
+    offramp_out[11].turning_ratio = Mind(Maxd(offramp_out[11].agg_vol/mainline_out[14].agg_vol,0),1);
+    offramp_out[12].turning_ratio = Mind(Maxd(offramp_out[12].agg_vol/mainline_out[15].agg_vol,0),1);
 
 /*###################################################################################################################
 ###################################################################################################################*/
