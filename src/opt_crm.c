@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
 //** Cheng-Ju's code here **//
 	float float_temp = 0;
-	for(int i=0; i<SecSize;i++){
+	for(i=0; i<SecSize;i++){
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
 			mainline_out[i].agg_vol = float_temp;
 		else {
