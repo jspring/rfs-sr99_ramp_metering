@@ -1,4 +1,3 @@
-#pragma once
 #include <db_include.h>
 #include <path_gps_lib.h>
 #include "data_log.h"
@@ -134,6 +133,10 @@ data_log_column_spec_t file_spec[] =
 	{"%hhu ",   &db_urms_status.hour, BASE_CHAR, REPLAY_USE},		//###89
 	{"%hhu ",   &db_urms_status.minute, BASE_CHAR, REPLAY_USE},		//###90
 	{"%hhu ",   &db_urms_status.second, BASE_CHAR, REPLAY_USE},		//###91
+	{"%hhu ",   &db_urms_status.num_main, BASE_CHAR, REPLAY_USE},		//###92
+	{"%hhu ",   &db_urms_status.num_meter, BASE_CHAR, REPLAY_USE},		//###93
+	{"%hhu ",   &db_urms_status.num_addl_det, BASE_CHAR, REPLAY_USE},	//###94
+	{"%hhu ",   &db_urms_status.num_opp, BASE_CHAR, REPLAY_USE},		//###95
 };
 
 #define NUM_FILE_COLUMNS sizeof(file_spec)/sizeof(data_log_column_spec_t)
