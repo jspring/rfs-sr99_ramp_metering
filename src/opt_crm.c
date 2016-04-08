@@ -66,11 +66,15 @@ int main(int argc, char *argv[])
 	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
+//<<<<<<< HEAD
 	int NumController = 28;
 	int NumOffRamp = 12;
 	int NumOnRamp = 16;
-	db_urms_status_t controller_data[NumController];
+	//db_urms_status_t controller_data[NumController];
 	db_urms_t urms_ctl[NumController];
+//=======
+	db_urms_status_t controller_data[NUM_CONTROLLER_VARS];
+//>>>>>>> 975785f7423d546bb676bab01cd6152662a7f158
 	int option;
 	int exitsig;
 	db_clt_typ *pclt;
@@ -80,10 +84,17 @@ int main(int argc, char *argv[])
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
 	int verbose = 0;
-	agg_data_t mainline_out[NumController] = {0};
-	agg_data_t onramp_out[NumOnRamp] = {0};
-	agg_data_t offramp_out[NumOffRamp] = {0};
+//<<<<<<< HEAD
+//	agg_data_t mainline_out[NumController] = {0};
+//	agg_data_t onramp_out[NumOnRamp] = {0};
+//	agg_data_t offramp_out[NumOffRamp] = {0};
+//=======
+	agg_data_t mainline_out[NUM_CONTROLLER_VARS] = {0};
+	agg_data_t onramp_out[11] = {0};
+	agg_data_t offramp_out[11] = {0};
+//>>>>>>> 975785f7423d546bb676bab01cd6152662a7f158
 	int debug = 0;
+	int num_controller_vars = NUM_CONTROLLER_VARS;
 
 	while ((option = getopt(argc, argv, "d")) != EOF) {
 		switch(option) {
@@ -129,7 +140,6 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i < num_controller_vars; i++){
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
-		db_clt_read(pclt, db_controller_list[i].id+1, sizeof(db_urms_t), &urms_ctl[i]);
 	}
 
 	for(;;)	
@@ -170,7 +180,6 @@ int main(int argc, char *argv[])
 
 /*###################################################################################################################
 ###################################################################################################################*/
-
 
 		for(i=0;i<SecSize;i++)
 		{

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "Stopping opt_crm"
+killall opt_crm
+sleep 1
+
 echo "Stopping replay_general"
 killall replay_general
 sleep 1

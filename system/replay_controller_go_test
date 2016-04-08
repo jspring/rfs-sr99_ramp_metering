@@ -1,9 +1,14 @@
 #!/bin/bash
 
-if [[ q`ps -elf | grep -v grep | grep db_slv` == 'q' ]]
-then
-	/home/path/db/lnx/db_slv &
-fi
+sudo killall replay_general
+sudo killall clt_vars
+sudo killall db_slv
+sudo /home/path/db/db_clean.sh
+
+/home/path/db/lnx/db_slv &
+sleep 1
+/home/sr99_ramp_metering/src/lnx/clt_vars &
+sleep 1
 
 cd /home/sr99_ramp_metering/test/data/03242016/col_91/Added_num_main-num_metered-num_addl-num_opp
 
