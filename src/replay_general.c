@@ -55,6 +55,8 @@ int main(int argc, char *argv[]) {
         int db_urms_status_var = 0;
         extern db_urms_status_t db_urms_status;
         extern urms_datafile_t urms_datafile;
+	unsigned short temp_ushort = 0;
+	int i;
 
         while ((option = getopt(argc, argv, "d:i:f:v")) != EOF) {
                 switch(option) {
@@ -85,7 +87,7 @@ int main(int argc, char *argv[]) {
 
 	if(use_db) {
 		get_local_name(hostname, MAXHOSTNAMELEN);
-		if ( (pclt = db_list_init(argv[0], hostname, domain, xport, db_vars_list, num_db_vars, NULL, 0)) == NULL) {
+		if ( (pclt = db_list_init(argv[0], hostname, domain, xport, NULL, 0, NULL, 0)) == NULL) {
 			printf("Database initialization error in %s.\n", argv[0]);
 			exit(EXIT_FAILURE);
 		}
@@ -115,10 +117,15 @@ int main(int argc, char *argv[]) {
 			printf("strbuf %s\n", strbuf);
 		}
 		if(use_db) {
+#define NUM_MAINLINES           3
+#define NUM_ONRAMP_LANES        3
+#define NUM_OFFRAMP_LANES       2
+                        for(i=0; i<NUM_MAINLINES; i++) {
+                                temp_ushort = (unsigned short)(urms_datafile.mainline_lead_occ[i] * 10);
+                                db_urms_status.mainline_stat[i].lead_occ_msb = (unsigned char)( (temp_ushort >> 8) & 0xFF);
+                                db_urms_status.mainline_stat[i].lead_occ_lsb = (unsigned char)(temp_ushort & 0xFF);
+                        }
 			db_clt_write(pclt, db_urms_status_var, sizeof(db_urms_status_t), &db_urms_status);
-			db_clt_write(pclt, db_urms_status_var + 1, sizeof(urms_datafile_t), &urms_datafile);
-//			db_clt_write(pclt, DB_RAMP_DATA_VAR, sizeof(db_ramp_data_t), &db_ramp_data);
-//			timestamp_t timestamp;
 		}
 		TIMER_WAIT(ptimer);
 	}
