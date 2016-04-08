@@ -97,5 +97,4 @@ db_id_t db_controller_list[] =  {
 	{DB_10_29_248_157_VAR, sizeof(db_urms_status_t)},
 	{DB_10_29_248_56_VAR, sizeof(db_urms_status_t)},
 };
-int num_controller_vars = sizeof(db_controller_list)/sizeof(db_id_t);
-
+#define NUM_CONTROLLER_VARS (sizeof(db_controller_list)/sizeof(db_id_t))
