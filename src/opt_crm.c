@@ -66,8 +66,11 @@ int main(int argc, char *argv[])
 	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
-	db_urms_status_t controller_data[28];
-	db_urms_t urms_ctl[28];
+	int NumController = 28;
+	int NumOffRamp = 12;
+	int NumOnRamp = 16;
+	db_urms_status_t controller_data[NumController];
+	db_urms_t urms_ctl[NumController];
 	int option;
 	int exitsig;
 	db_clt_typ *pclt;
@@ -77,9 +80,9 @@ int main(int argc, char *argv[])
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
 	int verbose = 0;
-	agg_data_t mainline_out[28] = {0};
-	agg_data_t onramp_out[11] = {0};
-	agg_data_t offramp_out[11] = {0};
+	agg_data_t mainline_out[NumController] = {0};
+	agg_data_t onramp_out[NumOnRamp] = {0};
+	agg_data_t offramp_out[NumOffRamp] = {0};
 	int debug = 0;
 
 	while ((option = getopt(argc, argv, "d")) != EOF) {
@@ -94,7 +97,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	memset(controller_data, 0, 28 * (sizeof(db_urms_status_t)));
+	memset(controller_data, 0, NumController * (sizeof(db_urms_status_t)));
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
 	if ((pclt = db_list_init(argv[0], hostname, domain, xport,
@@ -140,8 +143,12 @@ int main(int argc, char *argv[])
 ###################################################################################################################*/
 
 //** Cheng-Ju's code here **//
+    int NumController = 28;
+    int NumOffRamp = 12;
+	int OnRampIndex [] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
+	int OffRampIndex [] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
 	float float_temp = 0;
-	for(i=0; i<SecSize;i++){
+	for(i=0;i<NumController;i++){
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
 			mainline_out[i].agg_vol = float_temp;
 		else {
@@ -151,32 +158,15 @@ int main(int argc, char *argv[])
 		mainline_out[i].agg_occ = occupancy_aggregation_mainline(&controller_data[i]);
 		mainline_out[i].agg_speed = speed_aggregation_mainline(&controller_data[i]);
 		mainline_out[i].agg_density = density_aggregation_mainline(&controller_data[i]);
+        
+        if(i==OffRampIndex[i]){
+		offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
+        offramp_out[i].turning_ratio = Mind(Maxd(offramp_out[i].agg_vol/mainline_out[i-1].agg_vol,0),1);
+		}
+		if(i==OnRampIndex[i]){
+		onramp_out[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
+		}
 	}
-
-    for(i=0;i<NumOnRamp;i++){
-        onramp_out[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
-        offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
-        offramp_out[i].turning_ratio = offramp_out[i].agg_vol/mainline_out[i].agg_vol;
-    }
-    
-	int NumOffRamp = 12;
-	for(i=0;i<NumOffRamp;i++){
-        offramp_out[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
-    }
-
-	// hard code turning ratio calcualtion
-	offramp_out[1].turning_ratio = Mind(Maxd(offramp_out[1].agg_vol/mainline_out[1].agg_vol,0),1);
-	offramp_out[2].turning_ratio = Mind(Maxd(offramp_out[2].agg_vol/mainline_out[4].agg_vol,0),1);
-	offramp_out[3].turning_ratio = Mind(Maxd(offramp_out[3].agg_vol/mainline_out[5].agg_vol,0),1);
-	offramp_out[4].turning_ratio = Mind(Maxd(offramp_out[4].agg_vol/mainline_out[6].agg_vol,0),1);
-	offramp_out[5].turning_ratio = Mind(Maxd(offramp_out[5].agg_vol/mainline_out[8].agg_vol,0),1);
-	offramp_out[6].turning_ratio = Mind(Maxd(offramp_out[6].agg_vol/mainline_out[9].agg_vol,0),1);
-	offramp_out[7].turning_ratio = Mind(Maxd(offramp_out[7].agg_vol/mainline_out[10].agg_vol,0),1);
-	offramp_out[8].turning_ratio = Mind(Maxd(offramp_out[8].agg_vol/mainline_out[11].agg_vol,0),1);
-	offramp_out[9].turning_ratio = Mind(Maxd(offramp_out[9].agg_vol/mainline_out[12].agg_vol,0),1);
-	offramp_out[10].turning_ratio = Mind(Maxd(offramp_out[10].agg_vol/mainline_out[13].agg_vol,0),1);
-    offramp_out[11].turning_ratio = Mind(Maxd(offramp_out[11].agg_vol/mainline_out[14].agg_vol,0),1);
-    offramp_out[12].turning_ratio = Mind(Maxd(offramp_out[12].agg_vol/mainline_out[15].agg_vol,0),1);
 
 /*###################################################################################################################
 ###################################################################################################################*/
