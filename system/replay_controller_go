@@ -22,4 +22,3 @@ echo "Starting replay_controller, $DBNUM $FILENAME $INTERVAL"
 #Usage: ../src/lnx/replay_general -d <Database number (Modulo 4!)> -f <filename> -i (loop interval) -v (verbose)
 
 /home/sr99_ramp_metering/src/lnx/replay_general -d $DBNUM -f $FILENAME -i $INTERVAL -v 1>>/big/data/ac_rm_1/replay_general.err 2>&1 &
-sleep 1
