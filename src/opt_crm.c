@@ -144,15 +144,8 @@ int main(int argc, char *argv[])
 ###################################################################################################################*/
 
 //** Cheng-Ju's code here **//
-<<<<<<< HEAD
-    int NumController = 28;
-    //int NumOffRamp = 12;
-	int OnRampIndex[NumController] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
-	int OffRampIndex[NumController] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
-=======
 	int OnRampIndex [] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
 	int OffRampIndex [] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
->>>>>>> ccb6b14a6483bf50cd2db058608c27977749929f
 	float float_temp = 0;
 	for(i=0;i<NUM_CONTROLLER_VARS;i++){
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
