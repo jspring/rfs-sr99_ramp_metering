@@ -12,6 +12,9 @@
 //#define USE_FIELD_BOUND
 //#define DBG_COEFF
 
+#define NUM_ONRAMPS     16
+#define NUM_OFFRAMPS    12
+
 #define OPT_SHORT
 	
 #ifndef OPT_SHORT                      // It was used for all lane coorinated; not used anymore 11_28_14;

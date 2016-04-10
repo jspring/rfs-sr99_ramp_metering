@@ -60,21 +60,18 @@ static void sig_hand(int code)
 }
 
 const char *usage = "-d (debug mode, i.e. use the two controllers in my office)";
+
+#define NUM_ONRAMPS	16
+#define NUM_OFFRAMPS	12
+
 int main(int argc, char *argv[])
 {
 	float time, time2,timeSta;
 	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
-//<<<<<<< HEAD
-	int NumController = 28;
-	int NumOffRamp = 12;
-	int NumOnRamp = 16;
-	//db_urms_status_t controller_data[NumController];
-	db_urms_t urms_ctl[NumController];
-//=======
+	db_urms_t urms_ctl[NUM_CONTROLLER_VARS];
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS];
-//>>>>>>> 975785f7423d546bb676bab01cd6152662a7f158
 	int option;
 	int exitsig;
 	db_clt_typ *pclt;
@@ -84,15 +81,9 @@ int main(int argc, char *argv[])
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
 	int verbose = 0;
-//<<<<<<< HEAD
-//	agg_data_t mainline_out[NumController] = {0};
-//	agg_data_t onramp_out[NumOnRamp] = {0};
-//	agg_data_t offramp_out[NumOffRamp] = {0};
-//=======
 	agg_data_t mainline_out[NUM_CONTROLLER_VARS] = {0};
-	agg_data_t onramp_out[11] = {0};
-	agg_data_t offramp_out[11] = {0};
-//>>>>>>> 975785f7423d546bb676bab01cd6152662a7f158
+	agg_data_t onramp_out[NUM_ONRAMPS] = {0};
+	agg_data_t offramp_out[NUM_OFFRAMPS] = {0};
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS;
 
@@ -108,7 +99,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	memset(controller_data, 0, NumController * (sizeof(db_urms_status_t)));
+	memset(controller_data, 0, NUM_CONTROLLER_VARS * (sizeof(db_urms_status_t)));
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
 	if ((pclt = db_list_init(argv[0], hostname, domain, xport,
@@ -153,12 +144,17 @@ int main(int argc, char *argv[])
 ###################################################################################################################*/
 
 //** Cheng-Ju's code here **//
+<<<<<<< HEAD
     int NumController = 28;
     //int NumOffRamp = 12;
 	int OnRampIndex[NumController] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
 	int OffRampIndex[NumController] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
+=======
+	int OnRampIndex [] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
+	int OffRampIndex [] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
+>>>>>>> ccb6b14a6483bf50cd2db058608c27977749929f
 	float float_temp = 0;
-	for(i=0;i<NumController;i++){
+	for(i=0;i<NUM_CONTROLLER_VARS;i++){
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
 			mainline_out[i].agg_vol = float_temp;
 		else {
@@ -193,7 +189,7 @@ int main(int argc, char *argv[])
 		}			                               
 	
 		
-		for(i=0;i<NumOnRamp;i++)
+		for(i=0;i<NUM_ONRAMPS;i++)
 		{	
 				detection_onramp[i]->data[Np-1].flow=Mind(12000.0, Maxd(onramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(onramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
@@ -210,9 +206,9 @@ int main(int argc, char *argv[])
 		opt_metering();
 		
 		fprintf(cal_opt_f,"%lf ", time);
-		for (i=0;i<NumOnRamp;i++)
+		for (i=0;i<NUM_ONRAMPS;i++)
 		{
-			if (i<NumOnRamp-1)
+			if (i<NUM_ONRAMPS-1)
 				fprintf(cal_opt_f,"%lf ",opt_r[i][0]);
 			else
 				fprintf(cal_opt_f,"%lf\n", opt_r[i][1]);
@@ -231,6 +227,7 @@ int main(int argc, char *argv[])
 		else;
 	
 		TIMER_WAIT(ptimer);	
+
 	} 
 	
 	Finish_sim_data_io();
@@ -302,19 +299,19 @@ int Init()  // A major function; Called by AAPI.cxx: the top function for intial
 	memset(&Q_o,0,sizeof(Q_o));
 	memset(&Q_min,0,sizeof(Q_min));
 	memset(&(detection_s_0[0]),0,sizeof(detection_s_0[SecSize]));
-	memset(&(detection_onramp_0[0]),0,sizeof(detection_onramp_0[NumOnRamp]));
-	memset(&(detection_offramp_0[0]),0,sizeof(detection_offramp_0[NumOnRamp]));
+	memset(&(detection_onramp_0[0]),0,sizeof(detection_onramp_0[NUM_ONRAMPS]));
+	memset(&(detection_offramp_0[0]),0,sizeof(detection_offramp_0[NUM_ONRAMPS]));
 	memset(&a_w,0,sizeof(a_w));
 	
 	for(i=0; i<SecSize;i++)
 		detection_s[i] = &(detection_s_0[i]);	
-	for(i=0; i<NumOnRamp;i++)
+	for(i=0; i<NUM_ONRAMPS;i++)
 	{
 		detection_onramp[i] = &(detection_onramp_0[i]);	
 		detection_offramp[i] = &(detection_offramp_0[i]);	
 	}
 	
-	for(i=0;i<NumOnRamp;i++)
+	for(i=0;i<NUM_ONRAMPS;i++)
 	{
 		dmd[i]=0.0;
 		dyna_min_r[i]=200.0;
@@ -342,7 +339,7 @@ int Init()  // A major function; Called by AAPI.cxx: the top function for intial
 	//get_onramp_length();
 	
 	
-	u[NumOnRamp]=104;   // Dim Ok	
+	u[NUM_ONRAMPS]=104;   // Dim Ok	
 	ControlOn=0;
 	StateOn=0;
 	StateOff=0;
@@ -385,7 +382,7 @@ int update_queue(float time)  // This will not be used since we have onramp leng
 //	StructAkiEstadSection onramp_info;
 
 	//for(i=0;i<SecSize;i++)
-	for(i=0;i<NumOnRamp;i++)
+	for(i=0;i<NUM_ONRAMPS;i++)
 	{
 		w=0;
 		for(j=0;j<max_onramp_ln;j++)
@@ -414,12 +411,12 @@ int det_data_4_contr(float time) // not used anymore
 	
 	//update_queue(time);
 	
-	for(i=0;i<NumOnRamp;i++)
+	for(i=0;i<NUM_ONRAMPS;i++)
 	{
 		pre_w[i]=(float)queue[i];
 	}
 
-	for(i=0;i<NumOnRamp;i++) // est demnd, odd-ramp flow and queue
+	for(i=0;i<NUM_ONRAMPS;i++) // est demnd, odd-ramp flow and queue
 	{
 		for(j=0;j<Np;j++)
 		{				
@@ -438,7 +435,7 @@ int det_data_4_contr(float time) // not used anymore
 
 	for(j=0;j<Np;j++)		
 		up_rho[j]=(float)((detection_s[0]->data[Np-1].density));		
-	for(i=0;i<NumOnRamp;i++)		
+	for(i=0;i<NUM_ONRAMPS;i++)		
 		pre_rho[i]=(float)((detection_s[i+1]->data[Np-1].density));  // exclude the most upstream
 	
 	return 1;
@@ -448,7 +445,7 @@ int update_q_R()       // update flow for each cell
 {
 	int i;
 	
-	for(i=1;i<=NumOnRamp;i++)
+	for(i=1;i<=NUM_ONRAMPS;i++)
 	{		
 		R[i-1]=get_min(dmd[i-1],get_min(Q_o[i-1],qc[i]-q_main[i-1]));                                     // use filtered onramp flow
 		q[i]=q_main[i]+R[i-1]-ss[i-1][Np-1];                       // flow of currect cell          // index of R changed;  01/03/13		
@@ -474,7 +471,7 @@ int get_meas(float T)
 		u2[i]=(detection_s[i]->data[Np-1].speed)*1609.0/3600.0;
 	}
 	
-	for(i=0;i<NumOnRamp;i++)
+	for(i=0;i<NUM_ONRAMPS;i++)
 	{
 		if (detection_offramp[i]->detId > 0)					
 			s[i]=exp_flt*(detection_offramp[i]->data[Np-1].flow)+(1-exp_flt)*s[i]; // changed on 03/03/14
@@ -494,7 +491,7 @@ int ln_rm_distrib()
 	float tt_flw;
 //	char str[len_str];
 
-	for (i=0;i<NumOnRamp;i++)
+	for (i=0;i<NUM_ONRAMPS;i++)
 	{
 		tt_flw=0.0;
 		for(j=0;j<max_onramp_ln;j++)
@@ -553,7 +550,7 @@ int Set_Hybrid_Meter(float time,float time2,float timeSta)
 		// Coorfdinated Opt Metering for downstream 11 Onramps
 		////////////////////////////////////////////////////////
 
-		for(i=0;i<NumOnRamp;i++)  
+		for(i=0;i<NUM_ONRAMPS;i++)  
 		{
 			#ifdef DYNAMIC_BOUNBDS		
 			if (detection_s[i+1]->data[Np-1].density < 30)  
@@ -667,7 +664,7 @@ int Set_Hybrid_Meter(float time,float time2,float timeSta)
 		
 
 		// Activate downstream metering only with queue over-write
-		for(i=0;i<NumOnRamp;i++) 
+		for(i=0;i<NUM_ONRAMPS;i++) 
 		{
 			for (j=0;j<max_onramp_ln;j++)
 			{				
@@ -699,7 +696,7 @@ int Set_Hybrid_Meter(float time,float time2,float timeSta)
 
 		// Output time and RM rate
 		fprintf(vsl_crm_f,"%10.2f\t", timeSta);
-		for(i=0;i<NumOnRamp+5;i++)
+		for(i=0;i<NUM_ONRAMPS+5;i++)
 			fprintf(vsl_crm_f,"%10.2f\t", (float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]));
 		fprintf(vsl_crm_f,"\n");
 			
@@ -727,7 +724,7 @@ int Set_Opt_Meter(float time,float time2,float timeSta)
 
 	if(ISUPDATE2>=0)  // set every step
 	{
-		for(i=0;i<NumOnRamp;i++)
+		for(i=0;i<NUM_ONRAMPS;i++)
 		{
 			//for (j=0;j<max_onramp_ln;j++)
 			//	Green[i][j]=0;
@@ -774,7 +771,7 @@ int Set_Opt_Meter(float time,float time2,float timeSta)
 		}
 		//fprintf(dbg_f,"\n");
 
-		for(i=0;i<NumOnRamp;i++)
+		for(i=0;i<NUM_ONRAMPS;i++)
 		{	
 			for (j=0;j<max_onramp_ln;j++)
 			{
@@ -862,7 +859,7 @@ int Set_Opt_Meter(float time,float time2,float timeSta)
 		ISUPDATE2=0;
 
 		fprintf(vsl_crm_f,"%10.2f\t", timeSta);
-		for(i=0;i<NumOnRamp;i++)
+		for(i=0;i<NUM_ONRAMPS;i++)
 			 fprintf(vsl_crm_f,"%10.2f\t", (float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]));
 		fprintf(vsl_crm_f,"\n");
 	} // if ISUPDATE2 loop 
@@ -887,7 +884,7 @@ int Set_Coord_ALINEA(float time,float time2,float timeSta)
 	tmp_err=0; tmp_err1=0; 
 	if(ISUPDATE2>=0)  // set every step
 	{
-		for(i=0;i<NumOnRamp+5;i++)
+		for(i=0;i<NUM_ONRAMPS+5;i++)
 		{	
 			
 			for (j=0;j<max_mainline_ln;j++)
@@ -902,11 +899,11 @@ int Set_Coord_ALINEA(float time,float time2,float timeSta)
 			//fprintf(dbg_f,"%10.2f %10.2f ", SR99_RM_rate_tbl[0][i], SR99_RM_occ_tbl[0][i]);
 		}
 		corridor_mean_occ=0.0;
-		for(i=0;i<NumOnRamp;i++)
+		for(i=0;i<NUM_ONRAMPS;i++)
 			corridor_mean_occ+=RM_occ[i];
-		corridor_mean_occ=Maxd(corridor_mean_occ/NumOnRamp, 30.0);
+		corridor_mean_occ=Maxd(corridor_mean_occ/NUM_ONRAMPS, 30.0);
 		
-		for(i=0;i<NumOnRamp+5;i++)
+		for(i=0;i<NUM_ONRAMPS+5;i++)
 		{	
 			Ramp_rt[i]=0.0;
 			for (j=0;j<max_onramp_ln;j++)
@@ -942,7 +939,7 @@ int Set_Coord_ALINEA(float time,float time2,float timeSta)
 		} // for i-loop
 		//fprintf(dbg_f,"\n");
 
-		for(i=0;i<NumOnRamp;i++)
+		for(i=0;i<NUM_ONRAMPS;i++)
 		{	
 			for (j=0;j<max_onramp_ln;j++)
 			{				
@@ -967,7 +964,7 @@ int Set_Coord_ALINEA(float time,float time2,float timeSta)
 		ISUPDATE2=0;
 
 		fprintf(vsl_crm_f,"%10.2f\t", timeSta);
-		for(i=0;i<NumOnRamp;i++)
+		for(i=0;i<NUM_ONRAMPS;i++)
 			 fprintf(vsl_crm_f,"%10.2f\t", (float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]));
 		fprintf(vsl_crm_f,"\n");
 
@@ -987,7 +984,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	float w_const[SecSize][Np]={0.0}; 					// Used to construct b_u; 
 	float p_const[SecSize][Np]={0.0};					// Used to construct b_u; 	
-	float f[(NumOnRamp)*Np]={0.0};
+	float f[(NUM_ONRAMPS)*Np]={0.0};
 	
 	float b_u[M1]={0.0};
 	float b_l[M2]={0.0};   // upper bound of r
@@ -1008,7 +1005,7 @@ int set_coef(float c[MP][NP],float Qm)
 	
 
 
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{
 		if (m==0)
 		{
@@ -1028,41 +1025,41 @@ int set_coef(float c[MP][NP],float Qm)
 	
 
 //obj fnc
-	for(m=0;m<(NumOnRamp);m++)
+	for(m=0;m<(NUM_ONRAMPS);m++)
 	{
 		if(m==0)
 		{			
 			f[m]=(float)( (2-T*u2[m+1]/L[m])*T  -2*a_w[m]*T +a_ttd*(2-T*u2[m+1]/L[m])*T*u2[m+1]);
-			f[NumOnRamp+m]=(float)(T-T*a_w[m]+a_ttd*T*u2[m+1]);			
+			f[NUM_ONRAMPS+m]=(float)(T-T*a_w[m]+a_ttd*T*u2[m+1]);			
 		}
-		if (m<NumOnRamp-1)
+		if (m<NUM_ONRAMPS-1)
 		{
 			f[m]=(float)( (2-T*u2[m+1]/L[m])*T + (lambda[m+1]*T*T*u2[m]/(lambda[m]*L[m])) + (lambda[m+1]*T*T*u2[m]*u2[m+1])/(lambda[m]*L[m])-2*a_w[m]*T +a_ttd*(2-T*u2[m+1]/L[m])*T*u2[m+1]);
-			f[NumOnRamp+m]=(float)(T-T*a_w[m]+a_ttd*T*u2[m+1]);
+			f[NUM_ONRAMPS+m]=(float)(T-T*a_w[m]+a_ttd*T*u2[m+1]);
 		}
-		if (m==NumOnRamp-1)
+		if (m==NUM_ONRAMPS-1)
 		{
 			f[m]=(float)( (lambda[m+1]*T*T*u2[m]/(lambda[m]*L[m])) - 2*a_w[m]*T );
-			f[NumOnRamp+m]=(float)(T-T*a_w[m]+a_ttd*T*u2[m+1]);
+			f[NUM_ONRAMPS+m]=(float)(T-T*a_w[m]+a_ttd*T*u2[m+1]);
 		}
 	}
 
 	// lower and upper bounds
 	
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{		
 		b_u[m]=Rou_J-p_const[m][0];
-		b_u[NumOnRamp+m]=Rou_J-p_const[m][1];
-		b_u[2*NumOnRamp+m]=pre_w[m]+dd[m][0];
-		b_u[3*NumOnRamp+m]=pre_w[m]+T*dd[m][0]+T*dd[m][1];
-		//b_u[4*NumOnRamp+m]=Mins(dd[m][1],Q_o[m]);
-		b_u[4*NumOnRamp+m]=Mins(dd[m][1],R[m]);
-		b_u[5*NumOnRamp+m]=Mins(Q_o[m],dd[m][0]);
-		//b_u[5*NumOnRamp+m]=R[m];
+		b_u[NUM_ONRAMPS+m]=Rou_J-p_const[m][1];
+		b_u[2*NUM_ONRAMPS+m]=pre_w[m]+dd[m][0];
+		b_u[3*NUM_ONRAMPS+m]=pre_w[m]+T*dd[m][0]+T*dd[m][1];
+		//b_u[4*NUM_ONRAMPS+m]=Mins(dd[m][1],Q_o[m]);
+		b_u[4*NUM_ONRAMPS+m]=Mins(dd[m][1],R[m]);
+		b_u[5*NUM_ONRAMPS+m]=Mins(Q_o[m],dd[m][0]);
+		//b_u[5*NUM_ONRAMPS+m]=R[m];
 	
 		
 		b_l[m]=pre_w[m]+T*dd[m][0]-onrampL[m]*Rou_J;
-		b_l[NumOnRamp+m]=pre_w[m]+T*dd[m][0]+T*dd[m][1]-onrampL[m]*Rou_J;
+		b_l[NUM_ONRAMPS+m]=pre_w[m]+T*dd[m][0]+T*dd[m][1]-onrampL[m]*Rou_J;
 	}
 	
 	for(m=0;m<M1;m++)	
@@ -1073,70 +1070,70 @@ int set_coef(float c[MP][NP],float Qm)
 			//b_u[m]=Maxs(b_u[m],500.0);
 	}	
 			
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{	
 		b_l[m]=Maxs(b_l[m],Q_min[m]);
-		b_l[NumOnRamp+m]=Maxs(b_l[NumOnRamp+m],Q_min[m]);
+		b_l[NUM_ONRAMPS+m]=Maxs(b_l[NUM_ONRAMPS+m],Q_min[m]);
 		//b_l[m]=Maxs(b_l[m],0.0);
-		//b_l[NumOnRamp+m]=Maxs(b_l[NumOnRamp+m],0.0);
+		//b_l[NUM_ONRAMPS+m]=Maxs(b_l[NUM_ONRAMPS+m],0.0);
 	}
 
 	// Assign f to Matrix c
-	for(j=0;j<2*NumOnRamp;j++)	
+	for(j=0;j<2*NUM_ONRAMPS;j++)	
 		c[0][j+1]=f[i];			
 	
 	// Assign Upper &  lower Bounds to Matrix c
 	for(i=1;i<=M1;i++)
 		c[i][0]=b_u[i-1];		
 	for(i=1;i<=M2;i++)
-		c[10*NumOnRamp+i][0]=b_l[i-1];		
+		c[10*NUM_ONRAMPS+i][0]=b_l[i-1];		
 
 	// Matrix c
-	for(i=1;i<=NumOnRamp;i++)
+	for(i=1;i<=NUM_ONRAMPS;i++)
 	{
-		for(j=1;j<=NumOnRamp;j++)	
+		for(j=1;j<=NUM_ONRAMPS;j++)	
 			c[i][j]=T/(L[j]*lambda[j]);
 			
 		if (i==1)
 		{
-			for(j=1;j<=NumOnRamp;j++)
+			for(j=1;j<=NUM_ONRAMPS;j++)
 			{		
-				c[NumOnRamp+i][j]=(1-T*u2[j]/L[j])*T/(L[j]*lambda[j]);
-				c[NumOnRamp+i][NumOnRamp+j]=T/(L[j]*lambda[j]);
+				c[NUM_ONRAMPS+i][j]=(1-T*u2[j]/L[j])*T/(L[j]*lambda[j]);
+				c[NUM_ONRAMPS+i][NUM_ONRAMPS+j]=T/(L[j]*lambda[j]);
 			}		
 		}
 		else
 		{
-			for (j=1;j<=NumOnRamp;j++)
+			for (j=1;j<=NUM_ONRAMPS;j++)
 			{
 				if (j==1)
 				{					
-					c[NumOnRamp+i][j]=(1-T*u2[j]/L[j])*T/(L[j]*lambda[j]);
-					c[NumOnRamp+i][NumOnRamp+j]=T/(L[j]*lambda[j]);
+					c[NUM_ONRAMPS+i][j]=(1-T*u2[j]/L[j])*T/(L[j]*lambda[j]);
+					c[NUM_ONRAMPS+i][NUM_ONRAMPS+j]=T/(L[j]*lambda[j]);
 				}
 				else
 				{
-					c[NumOnRamp+i][j-1]=T*T*u2[j]/(L[j]*L[j-1]*lambda[j-1]);
-					c[NumOnRamp+i][j]=(1-T*u2[j]/L[j])*T/(L[j]*lambda[j]);
-					c[NumOnRamp+i][NumOnRamp+j]=T/(L[j]*lambda[j]);
+					c[NUM_ONRAMPS+i][j-1]=T*T*u2[j]/(L[j]*L[j-1]*lambda[j-1]);
+					c[NUM_ONRAMPS+i][j]=(1-T*u2[j]/L[j])*T/(L[j]*lambda[j]);
+					c[NUM_ONRAMPS+i][NUM_ONRAMPS+j]=T/(L[j]*lambda[j]);
 				}				
 			}
 		}
 		
-		for(j=1;j<=NumOnRamp;j++)	
-			c[2*NumOnRamp+i][j]=T;
+		for(j=1;j<=NUM_ONRAMPS;j++)	
+			c[2*NUM_ONRAMPS+i][j]=T;
 		
-		for(j=1;j<=NumOnRamp;j++)	
+		for(j=1;j<=NUM_ONRAMPS;j++)	
 		{
-			c[3*NumOnRamp+i][j]=T;
-			c[3*NumOnRamp+i][NumOnRamp+j]=T;
+			c[3*NUM_ONRAMPS+i][j]=T;
+			c[3*NUM_ONRAMPS+i][NUM_ONRAMPS+j]=T;
 		}
 		
-		for(j=1;j<=NumOnRamp;j++)	
-			c[4*NumOnRamp+i][j]=1;
+		for(j=1;j<=NUM_ONRAMPS;j++)	
+			c[4*NUM_ONRAMPS+i][j]=1;
 	
-		for(j=1;j<=NumOnRamp;j++)	
-			c[5*NumOnRamp+i][NumOnRamp+j]=1;
+		for(j=1;j<=NUM_ONRAMPS;j++)	
+			c[5*NUM_ONRAMPS+i][NUM_ONRAMPS+j]=1;
 	}	// Matrix c: i-loop end	
 
 	// The sign of the coefficient matrix sould be reversed; ecept the coeff of objective function (1st row) and b_u, b_l (1st column)
@@ -1175,7 +1172,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	sprintf(str,"pre_w:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{
 		fprintf(pp,"%lf ",pre_w[m]);		
 	}
@@ -1183,7 +1180,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	//sprintf(str,"Q_o:");
 	/*fprintf(pp,"Q_o=:\n");
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{
 		fprintf(pp,"%lf ",Q_o[m]);		
 	}
@@ -1192,7 +1189,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	sprintf(str,"Onramp Length:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{
 		fprintf(pp,"%lf ",onrampL[m]);		
 	}
@@ -1201,7 +1198,7 @@ int set_coef(float c[MP][NP],float Qm)
 	
 	sprintf(str,"dd:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{
 		for(j=0;j<Np;j++)
 		{
@@ -1212,7 +1209,7 @@ int set_coef(float c[MP][NP],float Qm)
 	
 	sprintf(str,"ss:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)
+	for(m=0;m<NUM_ONRAMPS;m++)
 	{
 		for(j=0;j<Np;j++)
 		{
@@ -1247,7 +1244,7 @@ int set_coef(float c[MP][NP],float Qm)
 	
 	sprintf(str,"f:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<(NumOnRamp)*Np;m++)
+	for(m=0;m<(NUM_ONRAMPS)*Np;m++)
 	{
 		fprintf(pp,"%f ",f[m]);		
 	}
@@ -1262,8 +1259,8 @@ int set_coef(float c[MP][NP],float Qm)
 	//}
 	for(i=0;i<10;i++)
 	{
-		for(m=0;m<NumOnRamp;m++)
-			fprintf(pp,"%f ",b_u[NumOnRamp*i+m]);	
+		for(m=0;m<NUM_ONRAMPS;m++)
+			fprintf(pp,"%f ",b_u[NUM_ONRAMPS*i+m]);	
 		fprintf(pp,"\n");	
 	}
 	
@@ -1325,15 +1322,15 @@ int opt_metering(void)
 	if (icase == 0)
 	{	
 	
-			for(i=1;i<=NumOnRamp;i++)
+			for(i=1;i<=NUM_ONRAMPS;i++)
 				{	
 					opt_r[i-1][0]=a[iposv[i+1]][1];							
 					//fprintf(dbg_f,"i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i][0]);	
 				}	
-			for(i=NumOnRamp+1;i<=2*NumOnRamp;i++)	
+			for(i=NUM_ONRAMPS+1;i<=2*NUM_ONRAMPS;i++)	
 				{
-					opt_r[i-1-NumOnRamp][1]=a[iposv[i+1]][1];								
-					//fprintf(dbg_f,"i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i-1-NumOnRamp][1]);					
+					opt_r[i-1-NUM_ONRAMPS][1]=a[iposv[i+1]][1];								
+					//fprintf(dbg_f,"i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i-1-NUM_ONRAMPS][1]);					
 				}	
 	}
 	else
