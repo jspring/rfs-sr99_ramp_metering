@@ -196,6 +196,36 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	return speed;
 }
 
+float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
+	// compute mean of speed
+	float speed = 0.0;
+	int i; //  lane number index
+
+	for(i=0 ; i < controller_data->num_main; i++) {
+		if(controller_data->mainline_stat[i].lead_stat == 2){
+			speed += (float)controller_data->mainline_stat[i].speed;
+			printf("mean speed %d of controller %s of detector %d \n",
+				controller_data->mainline_stat[i].speed,
+				controller_strings[i],
+				i
+			);
+		}else{
+			printf("mean_speed_aggregation_mainline: Error %d controller %s detector %d\n",
+				controller_data->mainline_stat[i].lead_stat,
+				controller_strings[i],
+				i
+			);
+		}
+	} 
+	speed /= controller_data->num_main;
+	printf("mean_speed_agg %4.2f controller %s\n",
+		speed,
+		controller_strings[i]
+	);
+	return speed;
+}
+
+
 float queue_onramp(db_urms_status_t *controller_data){
 	float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
 	float queue = 0;
@@ -285,7 +315,7 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 //	return output;
 //}
 	
-
+/*
 float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3)
 {
     float flow_agg = 0;
@@ -405,7 +435,9 @@ float speed_aggregation_5_lanes(float speed_lane_1,float speed_lane_2, float spe
 	
 	return speed_agg;
 }
+*/
 
+/*
 float get_split_ratio(float upstream_total_flow, float off_ramp_flow)
 {   
 	float split_ratio;
@@ -450,3 +482,4 @@ float get_on_ramp_flow_by_flow_balance(float upstream_total_flow, float downstre
 	on_ramp_flow = mind(maxd(off_ramp_flow,0),on_ramp_flow_upper_bound);
 	return on_ramp_flow; 
 }
+*/
