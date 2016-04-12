@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
         
         if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data[i]) ) );
-        controller_offramp_data[i].turning_ratio = Mind(1.0,Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol) ) );
+        controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
 		}
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i]) ) );
