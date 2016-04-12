@@ -57,7 +57,7 @@ typedef struct
 
 typedef struct {
 	    float agg_mean_speed;  // mean speed
-        float agg_speed; // harmonic mean speed 
+        float agg_speed;       // harmonic mean speed 
         float agg_occ;
         float agg_vol;
         char  agg_stat;
@@ -67,4 +67,3 @@ typedef struct {
 	    float turning_ratio;
 	    int   flag;
 } IS_PACKED agg_data_t;
-
