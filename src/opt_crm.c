@@ -154,22 +154,23 @@ int main(int argc, char *argv[])
 	float float_temp = 0;
 	for(i=0;i<NUM_CONTROLLER_VARS;i++){
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
-			controller_mainline_data[i].agg_vol = float_temp;
+			controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, float_temp ) );
 		else {
 			controller_mainline_data[i].flag = (int)float_temp;
 			continue;
 		}
-		controller_mainline_data[i].agg_occ = occupancy_aggregation_mainline(&controller_data[i]);
-		controller_mainline_data[i].agg_speed = speed_aggregation_mainline(&controller_data[i]);
-		controller_mainline_data[i].agg_density = density_aggregation_mainline(&controller_data[i]);
-		controller_mainline_data[i].agg_mean_speed = mean_speed_aggregation_mainline(&controller_data[i]);
+		// min max function bound the data range and exclude nans. 
+		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i]) ) );
+		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, speed_aggregation_mainline(&controller_data[i]) ) );
+		controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(&controller_data[i]) ) );
+		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i]) ) );
         
         if(i==OffRampIndex[i]){
-		controller_offramp_data[i].agg_vol = flow_aggregation_offramp(&controller_data[i]);
-        controller_offramp_data[i].turning_ratio = Mind(Maxd(controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol,0),1);
+		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data[i]) ) );
+        controller_offramp_data[i].turning_ratio = Mind(1.0,Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol) ) );
 		}
 		if(i==OnRampIndex[i]){
-		controller_onramp_data[i].agg_vol = flow_aggregation_onramp(&controller_data[i]);
+		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i]) ) );
 		}
 	}
 
