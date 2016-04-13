@@ -55,7 +55,7 @@ float mind(float a,float b)
 	}
 }
 
-float flow_aggregation_mainline(db_urms_status_t *controller_data, char controller_strings){
+float flow_aggregation_mainline(db_urms_status_t *controller_data){
         int i;
         float flow = 0;
 
@@ -66,7 +66,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, char controll
 		}else{
 			printf("flow_aggregation_mainline: Error %d controller %s detector %d\n",
 				controller_data->mainline_stat[i].lead_stat,
-				controller_strings,
+				controller_strings[i],
 				i
 			);
 		}
@@ -157,7 +157,7 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 
 	for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			speed += 1/max(200,min(0,(float)controller_data->mainline_stat[i].speed));
+			speed = speed + 1.0/max(200,min(0,(float)controller_data->mainline_stat[i].speed));
 			printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed, i);
 		}else{
 			printf("speed_aggregation_mainline: Error %d controller %s detector %d\n",
