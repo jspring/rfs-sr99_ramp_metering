@@ -183,7 +183,7 @@ const char *controller_ip_strings[] = {
 	int OffRampIndex [NUM_CONTROLLER_VARS] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
 	float float_temp = 0;
 	for(i=0;i<NUM_CONTROLLER_VARS;i++){
-		printf("IP %d controller is called by opt_crm.c \n", &controller_ip_strings[i]);
+		printf("IP %s controller is called by opt_crm.c \n", &controller_ip_strings[i]);
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
 			controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, float_temp ) );
 		else {
