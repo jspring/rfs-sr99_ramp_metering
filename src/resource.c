@@ -71,6 +71,9 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			);
 		}
 	}
+	if(flow != flow ){
+		flow = 0;
+	}
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
 	return flow;
 }
@@ -91,6 +94,9 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 				);
 			}
 	}
+	if(flow != flow ){
+		flow = 0;
+	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
 	return flow;
 }
@@ -110,6 +116,9 @@ float flow_aggregation_offramp(db_urms_status_t *controller_data){
 				i
 			);
 		}
+	}
+	if(flow != flow ){
+		flow = 0;
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
 	return flow;
@@ -133,7 +142,10 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	}
 
 	occupancy /= controller_data->num_main;
-
+    // check Nan 
+	if(occupancy != occupancy){
+		occupancy = 0;
+	}
 	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
 	return occupancy;
 }
@@ -156,6 +168,10 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 		}
 	} 
 	speed = (controller_data->num_main)/speed;
+	// check Nan 
+	if(speed != speed){
+		speed = 0;
+	}
 	printf("speed_agg %4.2f num_main %d\n", speed,controller_data->num_main);
 	return speed;
 }
@@ -178,6 +194,10 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 		}
 	} 
 	speed /= controller_data->num_main;
+	// check Nan 
+	if(speed != speed){
+		speed = 0;
+	}
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
 	return speed;
 }
@@ -213,6 +233,10 @@ float queue_onramp(db_urms_status_t *controller_data){
 			);
 		}
 	}
+	// check Nan 
+	if(queue != queue){
+		queue = 0;
+	}
 	printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
 	return queue;
 }
@@ -241,6 +265,10 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
                     i
 					);
 		}
+	}
+	// check Nan 
+	if(density != density){
+		density = 0;
 	}
      printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
 			flow,
