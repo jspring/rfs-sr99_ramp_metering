@@ -152,12 +152,13 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 
 float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	// compute harmonic mean of speed
+	float tmp = 0.0;
 	float speed = 0.0;
 	int i; //  lane number index
 
 	for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			speed = speed + 1.0/max(200,min(0,(float)controller_data->mainline_stat[i].speed));
+			tmp += (1.0/((float)controller_data->mainline_stat[i].speed));
 			printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed, i);
 		}else{
 			printf("speed_aggregation_mainline: Error %d controller %s detector %d\n",
@@ -167,12 +168,12 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 			);
 		}
 	} 
-	speed = (controller_data->num_main)/speed;
+	speed = (controller_data->num_main)/tmp;
 	// check Nan 
 	if(speed != speed){
 		speed = 0;
 	}
-	printf("speed_agg %4.2f num_main %d\n", speed,controller_data->num_main);
+	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
 	return speed;
 }
 
