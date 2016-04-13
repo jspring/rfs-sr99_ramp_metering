@@ -148,11 +148,42 @@ int main(int argc, char *argv[])
 
 //** Cheng-Ju's code here **//
 // 4 off-ramp is missing, total number of off-ramps is 9. After D3 fix those missing off-ramps, OffRampIndex table need to be updated. 
+const char *controller_ip_strings[] = {
+        "10.29.248.108",             //0, OR1
+        "10.254.25.113",             //1
+        "10.254.25.120",             //2, OR2, FR1
+        "10.29.249.46",              //3, OR3,
+        "10.29.248.42",              //4
+        "10.29.248.20",              //5, OR4, FR2
+        "10.29.248.128",             //6, OR5
+        "10.254.27.67",              //7,
+        "10.254.27.82",              //8, OR6, FR3
+        "10.254.27.81",              //9, OR7
+        "10.29.248.76",             //10     , FR4
+        "10.254.28.213",            //11, OR8
+        "10.254.28.212",            //12, OR9
+        "10.254.28.211",            //13
+        "10.29.248.118",            //14
+        "10.29.248.52",             //15
+        "10.254.24.156",            //16, OR10, FR5
+        "10.254.24.157",            //17, OR11
+        "10.29.248.185",            //18       
+        "10.29.248.66",             //19, OR12
+        "10.29.248.81",             //20, OR13
+        "10.29.248.213",            //21      , FR9
+        "10.29.248.155_PORT_1001",  //22, OR14
+        "10.29.248.155_PORT_1002",  //23, OR15, FR10
+        "10.29.248.124",            //24
+        "10.29.248.67",             //25, OR16 
+        "10.29.248.157",            //26
+        "10.29.248.56",             //27      , FR12
+}; //FR6, FR7, FR8, and FR11 are missing
 //** This part aggregate data for each URMS2070 controller in the field   
 	int OnRampIndex [NUM_CONTROLLER_VARS] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
 	int OffRampIndex [NUM_CONTROLLER_VARS] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
 	float float_temp = 0;
 	for(i=0;i<NUM_CONTROLLER_VARS;i++){
+		printf("IP %d controller is called by opt_crm.c \n", controller_ip_strings[i]);
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
 			controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, float_temp ) );
 		else {
