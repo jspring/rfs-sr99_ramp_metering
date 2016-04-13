@@ -243,22 +243,17 @@ float queue_onramp(db_urms_status_t *controller_data){
 }
 
 float density_aggregation_mainline(db_urms_status_t *controller_data){
-	float density = 0;
-	float flow = 0;
-	float speed = 0;
-    int i;
+	float density = 0.0;
+	float flow = 0.0;
+	float speed = 0.0;
+    
+	int i;
 	for(i=0 ; i< controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
                 flow += (float)controller_data->mainline_stat[i].lead_vol; // total flow
 			    speed += (float)controller_data->mainline_stat[i].speed;
-				printf("flow %4.2f speed %4.2f of detector %d \n",
-					   flow,
-                       speed,
-					   i
-					   );
-			    speed /=  controller_data->num_main; // average speed
-				speed = maxd(speed,0);
-				density = maxd(flow/speed,0);
+				
+				printf("flow %4.2f speed %4.2f of detector %d \n", flow, speed, i );
 		}else
 		{       printf("density_aggregation_mainline: Error %d controller %s detector %d\n",
                     controller_data->mainline_stat[i].lead_stat,
@@ -267,6 +262,11 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 					);
 		}
 	}
+	
+	speed /= controller_data->num_main; // average speed
+	speed = maxd(speed,0);
+	density = maxd(flow/speed,0);
+    
 	// check Nan 
 	if(density != density){
 		density = -1;
@@ -277,7 +277,7 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	if(speed != speed){
 		speed = -1;
 	}
-     printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
+	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
 			flow,
 			speed,
 			density
