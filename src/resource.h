@@ -33,7 +33,7 @@ extern float mind(float a,float b);
 
 extern const char *controller_strings[];
 
-extern float flow_aggregation_mainline(db_urms_status_t *controller_dat);
+extern float flow_aggregation_mainline(db_urms_status_t *controller_dat, char controller_strings);
 extern float flow_aggregation_onramp(db_urms_status_t *controller_data);
 extern float occupancy_aggregation_mainline(db_urms_status_t *controller_data);
 

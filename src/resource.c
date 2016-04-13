@@ -55,7 +55,7 @@ float mind(float a,float b)
 	}
 }
 
-float flow_aggregation_mainline(db_urms_status_t *controller_data){
+float flow_aggregation_mainline(db_urms_status_t *controller_data, char controller_strings){
         int i;
         float flow = 0;
 
@@ -66,7 +66,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 		}else{
 			printf("flow_aggregation_mainline: Error %d controller %s detector %d\n",
 				controller_data->mainline_stat[i].lead_stat,
-				controller_strings[i],
+				controller_strings,
 				i
 			);
 		}
@@ -133,7 +133,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 			occupancy += (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb);
 			printf("Occ %d of detector %d \n", occupancy,i);
 		}else{
-			printf("Error %d controller %s detector %d\n",
+			printf("occupancy_aggregation_mainline: Error %d controller %s detector %d\n",
 				controller_data->mainline_stat[i].lead_stat,
 				controller_strings[i],
 				i
