@@ -271,10 +271,9 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 		}
 	}
 	
-	speed = controller_data->num_main/temp_speed; // average speed
-	speed = maxd(speed,0);
-	flow = temp_flow;
-	density = maxd(flow/speed,0);
+	speed = mind(200,maxd(controller_data->num_main/temp_speed,0));
+	flow = mind(10000, maxd(temp_flow,0));
+	density = mind(1000,maxd(flow/speed,0));
     
 	// check Nan 
 	if(isnan(density)){
