@@ -77,12 +77,9 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			);
 		}
 	}
-	if(!isfinite(flow)){
-		flow = flow;
-	}else{
-	    flow = -1;
+	if(isnan(flow)){
+		flow = -1;
 	}
-
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
 	return flow;
 }
