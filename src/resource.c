@@ -77,9 +77,12 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			);
 		}
 	}
-	if(!!isfinite(flow)){
-		flow = -1;
+	if(!isfinite(flow)){
+		flow = flow;
+	}else{
+	    flow = -1;
 	}
+
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
 	return flow;
 }
@@ -99,8 +102,10 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 				);
 			}
 	}
-	if(!isfinite(flow)){
-		flow = -1;
+	if(isfinite(flow)){
+		flow = flow;
+	}else{
+	    flow = -1;
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
 	return flow;
@@ -121,8 +126,10 @@ float flow_aggregation_offramp(db_urms_status_t *controller_data){
 			);
 		}
 	}
-	if(!isfinite(flow)){
-		flow = -1;
+	if(isfinite(flow)){
+		flow = flow;
+	}else{
+	    flow = -1;
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
 	return flow;
@@ -149,9 +156,12 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 
 	occupancy /= controller_data->num_main;
     // check Nan 
-	if(!isfinite(occupancy)){
-		occupancy = -1;
+	if(isfinite(occupancy)){
+		occupancy = occupancy;
+	}else{
+	    occupancy = -1;
 	}
+
 	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
 	return occupancy;
 }
@@ -175,7 +185,9 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	} 
 	speed = max((controller_data->num_main)/tmp,0);
 	// check Nan 
-	if(!isfinite(speed)){
+	if(isfinite(speed)){
+		speed = speed;
+	}else{
 		speed = -1;
 	}
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
@@ -200,7 +212,9 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 	} 
 	speed /= controller_data->num_main;
 	// check Nan 
-	if(!isfinite(speed)){
+	if(isfinite(speed)){
+		speed = speed;
+	}else{
 		speed = -1;
 	}
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
@@ -238,8 +252,10 @@ float queue_onramp(db_urms_status_t *controller_data){
 		}
 	}
 	// check Nan 
-	if(!isfinite(queue)){
-		queue = -1;
+	if(isfinite(queue)){
+		queue = queue;
+	}else{
+	    queue = -1;
 	}
 	printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
 	return queue;
@@ -276,14 +292,21 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	density = maxd(flow/speed,0);
     
 	// check Nan 
-	if(!isfinite(density)){
-		density = -1;
+	if(isfinite(density)){
+		density = density;
+	}else{
+	    density = -1; 
 	}
-	if(!isfinite(flow)){
+
+	if(isfinite(flow)){
+		flow = flow;
+	}else{
 		flow = -1;
 	}
-	if(!isfinite(speed)){
-		speed = -1;
+	if(isfinite(speed)){
+	    speed = speed;
+	}else{
+	   	speed = -1; 
 	}
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
 			flow,
