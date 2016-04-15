@@ -79,6 +79,8 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 	}
 	if(isnan(flow)){
 		flow = -1;
+	}else{
+	    flow = flow * 120;
 	}
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
 	return flow;
@@ -101,6 +103,8 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	}
 	if(isnan(flow)){
 		flow = -1;
+	}else{
+	    flow = flow * 120;
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
 	return flow;
@@ -123,6 +127,8 @@ float flow_aggregation_offramp(db_urms_status_t *controller_data){
 	}
 	if(isnan(flow)){
 		flow = -1;
+	}else{
+		flow = flow *120;
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
 	return flow;
@@ -178,6 +184,8 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	// check Nan 
 	if(isnan(speed)){
 		speed = -1;
+	}else{
+	    speed = speed*1.6;
 	}
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
 	return speed;
@@ -203,6 +211,8 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 	// check Nan 
 	if(isnan(speed)){
 		speed = -1;
+	}else{
+		speed = speed * 1.6;
 	}
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
 	return speed;
@@ -272,8 +282,10 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	}
 	
 	speed = mind(200,maxd(controller_data->num_main/temp_speed,0));
+	speed = speed * 1.6;
 	flow = mind(10000, maxd(temp_flow,0));
-	density = mind(1000,maxd(flow/speed,0));
+	flow = flow * 120;
+	density = mind(2000,maxd(flow/speed,0));
     
 	// check Nan 
 	if(isnan(density)){
