@@ -1,6 +1,13 @@
 #include <db_include.h>
 #include "resource.h"
 #include <urms.h>
+#include <math.h>
+
+// units
+// flow is vehicle per hour
+// speed is miles per hour
+// occupancy is 0 to 100
+
 //
 const char *controller_strings[] = {
         "10.29.248.108",             //0, OR1
@@ -70,7 +77,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			);
 		}
 	}
-	if(flow != flow ){
+	if(isnan(flow)){
 		flow = -1;
 	}
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
@@ -92,7 +99,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 				);
 			}
 	}
-	if(flow != flow ){
+	if(isnan(flow)){
 		flow = -1;
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
@@ -114,7 +121,7 @@ float flow_aggregation_offramp(db_urms_status_t *controller_data){
 			);
 		}
 	}
-	if(flow != flow ){
+	if(isnan(flow)){
 		flow = -1;
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
@@ -129,8 +136,9 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 		if(controller_data->metered_lane_stat[i].demand_stat == 2){
 			occupancy += (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb);
 			printf("Occ %d of detector %d \n", 
-				   (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb)
-				   ,i);
+				   (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb),
+				   i
+		    );
 		}else{
 			printf("occupancy_aggregation_mainline: Error %d detector %d\n",
 				controller_data->mainline_stat[i].lead_stat,
@@ -141,7 +149,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 
 	occupancy /= controller_data->num_main;
     // check Nan 
-	if(occupancy != occupancy){
+	if(isnan(occupancy)){
 		occupancy = -1;
 	}
 	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
@@ -165,9 +173,9 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 			);
 		}
 	} 
-	speed = (controller_data->num_main)/tmp;
+	speed = max((controller_data->num_main)/tmp,0);
 	// check Nan 
-	if(speed != speed){
+	if(isnan(speed)){
 		speed = -1;
 	}
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
@@ -192,7 +200,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 	} 
 	speed /= controller_data->num_main;
 	// check Nan 
-	if(speed != speed){
+	if(isnan(speed)){
 		speed = -1;
 	}
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
@@ -230,7 +238,7 @@ float queue_onramp(db_urms_status_t *controller_data){
 		}
 	}
 	// check Nan 
-	if(queue != queue){
+	if(isnan(queue)){
 		queue = -1;
 	}
 	printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
@@ -248,7 +256,7 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	for(i=0 ; i< controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
                 temp_flow += (float)controller_data->mainline_stat[i].lead_vol; // total flow
-			    temp_speed += (float)controller_data->mainline_stat[i].speed;
+			    temp_speed += (1./(float)controller_data->mainline_stat[i].speed); // harmonic mean speed
 				
 				printf("flow %4.2f speed %4.2f of detector %d \n",
 					(float)controller_data->mainline_stat[i].lead_vol, 
@@ -262,19 +270,19 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 		}
 	}
 	
-	speed = temp_speed/controller_data->num_main; // average speed
+	speed = controller_data->num_main/temp_speed; // average speed
 	speed = maxd(speed,0);
 	flow = temp_flow;
 	density = maxd(flow/speed,0);
     
 	// check Nan 
-	if(density != density){
+	if(isnan(density)){
 		density = -1;
 	}
-	if(flow != flow){
+	if(isnan(flow)){
 		flow = -1;
 	}
-	if(speed != speed){
+	if(isnan(speed)){
 		speed = -1;
 	}
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
