@@ -128,7 +128,9 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->metered_lane_stat[i].demand_stat == 2){
 			occupancy += (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb);
-			printf("Occ %d of detector %d \n", occupancy,i);
+			printf("Occ %d of detector %d \n", 
+				   (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb)
+				   ,i);
 		}else{
 			printf("occupancy_aggregation_mainline: Error %d detector %d\n",
 				controller_data->mainline_stat[i].lead_stat,
@@ -239,14 +241,19 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	float density = 0.0;
 	float flow = 0.0;
 	float speed = 0.0;
-    
+	float temp_flow = 0.0;
+    float temp_speed = 0.0;
+	
 	int i;
 	for(i=0 ; i< controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-                flow += (float)controller_data->mainline_stat[i].lead_vol; // total flow
-			    speed += (float)controller_data->mainline_stat[i].speed;
+                temp_flow += (float)controller_data->mainline_stat[i].lead_vol; // total flow
+			    temp_speed += (float)controller_data->mainline_stat[i].speed;
 				
-				printf("flow %4.2f speed %4.2f of detector %d \n", flow, speed, i );
+				printf("flow %4.2f speed %4.2f of detector %d \n",
+					(float)controller_data->mainline_stat[i].lead_vol, 
+					(float)controller_data->mainline_stat[i].speed, 
+					 i );
 		}else
 		{       printf("density_aggregation_mainline: Error %d detector %d\n",
                     controller_data->mainline_stat[i].lead_stat,
@@ -255,8 +262,9 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 		}
 	}
 	
-	speed /= controller_data->num_main; // average speed
+	speed = temp_speed/controller_data->num_main; // average speed
 	speed = maxd(speed,0);
+	flow = temp_flow;
 	density = maxd(flow/speed,0);
     
 	// check Nan 
