@@ -190,7 +190,8 @@ const char *controller_ip_strings[] = {
 			//controller_mainline_data[i].flag = (int)float_temp;
 			continue;
 		}
-		// min max function bound the data range and exclude nans. 
+		// min max function bound the data range and exclude nans.
+        controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, flow_aggregation_mainline(&controller_data[i]) ) );
 		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i]) ) );
 		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, speed_aggregation_mainline(&controller_data[i]) ) );
 		controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(&controller_data[i]) ) );
@@ -278,7 +279,7 @@ int j; //
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(mainline_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
 			    
-			    fprintf(st_file_out,"%f %f %f %f ", 999.999, mainline_out[i].agg_speed, 
+			    fprintf(st_file_out,"%f %f %f %f ",mainline_out[i].agg_vol, mainline_out[i].agg_speed, 
 			                                           mainline_out[i].agg_occ, mainline_out[i].agg_density); 
 		}			                               
 	
