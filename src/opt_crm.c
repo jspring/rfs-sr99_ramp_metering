@@ -220,16 +220,15 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 							 {23, -1, -1, -1}, // controller in section 11 
 							 {24, 25, 26, -1}}; // controller in section 12 
 int j; //
-float temp_num_ct = 0.0; // number of controllers per section
-float temp_vol = 0.0;
-float temp_speed = 0.0;
-float temp_occ = 0.0;
-float temp_density = 0.0;
-float temp_mean_speed = 0.0;
-
 //This part aggregate mainline data for each section
  	for(i=0;i<SecSize;i++){
 		// this loop aggregates all controller data in each section
+		float temp_num_ct = 0.0; // number of controllers per section
+		float temp_vol = 0.0;
+		float temp_speed = 0.0;
+		float temp_occ = 0.0;
+		float temp_density = 0.0;
+		float temp_mean_speed = 0.0;	
 		for(j=0;j<4;j++){
 			if(secCTidx[i][j]>0){
 				temp_vol += controller_mainline_data[secCTidx[i][j]].agg_vol;   
