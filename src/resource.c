@@ -83,7 +83,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 	    flow = flow * 120;
 	}
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
-	return flow;
+	return mind(12000.0, maxd(flow,0));
 }
 
 float flow_aggregation_onramp(db_urms_status_t *controller_data){
@@ -107,7 +107,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	    flow = flow * 120;
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
-	return flow;
+	return mind(12000.0, maxd(flow,0));
 }
 
 float flow_aggregation_offramp(db_urms_status_t *controller_data){
@@ -131,7 +131,7 @@ float flow_aggregation_offramp(db_urms_status_t *controller_data){
 		flow = flow *120;
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
-	return flow;
+	return mind(12000.0, maxd(flow,0));
 }
 
 float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
@@ -160,7 +160,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	}
 
 	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
-	return occupancy;
+	return  mind(100.0, maxd(occupancy,0));
 }
 
 float speed_aggregation_mainline(db_urms_status_t *controller_data){
@@ -188,7 +188,7 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	    speed = speed*1.6;
 	}
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
-	return speed;
+	return mind(100.0, maxd(speed,0));
 }
 
 float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
@@ -215,7 +215,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 		speed = speed * 1.6;
 	}
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
-	return speed;
+	return mind(100.0, maxd(speed,0));
 }
 
 
@@ -253,7 +253,7 @@ float queue_onramp(db_urms_status_t *controller_data){
 		queue = -1;
 	}
 	printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
-	return queue;
+	return mind(500.0, maxd(queue,0));
 }
 
 float density_aggregation_mainline(db_urms_status_t *controller_data){
@@ -266,7 +266,7 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	int i;
 	for(i=0 ; i< controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-                temp_flow += (float)controller_data->mainline_stat[i].lead_vol; // total flow
+                temp_flow += (float)controller_data->mainline_stat[i].lead_vol;     // total flow
 			    temp_speed += (1./(float)controller_data->mainline_stat[i].speed); // harmonic mean speed
 				
 				printf("flow %4.2f speed %4.2f of detector %d \n",
@@ -299,12 +299,13 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	if(isnan(speed)){
 	    speed = -1;
 	}
+
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
 			flow,
 			speed,
 			density
            );
-	return density;
+	return mind(1200.0, maxd(density,0));
 }
 
 //float data[3] = {0}; // add data bound here
