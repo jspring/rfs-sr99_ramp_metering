@@ -240,11 +240,11 @@ float temp_mean_speed = 0.0;
 				temp_num_ct ++;
 			}
 		}
-		mainline_out[i].agg_vol =  temp_vol/temp_num_ct;
-		mainline_out[i].agg_speed = temp_speed/temp_num_ct;
-	    mainline_out[i].agg_occ =  temp_occ/temp_num_ct;
-		mainline_out[i].agg_density = temp_density/temp_num_ct;
-		mainline_out[i].agg_mean_speed =  temp_mean_speed/temp_num_ct;
+		mainline_out[i].agg_vol =  Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
+		mainline_out[i].agg_speed = Mind(100.0, Maxd(temp_speed/temp_num_ct,0));
+	    mainline_out[i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
+		mainline_out[i].agg_density = Mind(1200.0, Maxd(temp_density/temp_num_ct,0));
+		mainline_out[i].agg_mean_speed =  Mind(100.0, Maxd(temp_mean_speed/temp_num_ct,0));
 		
 		// Initialize all temp variables
 		temp_num_ct = 0.0; 
@@ -259,13 +259,13 @@ float temp_mean_speed = 0.0;
 //This part aggregate onramp data for each section
 	int onrampCTidx[NumOnRamp] = {8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 
 	for(i=0;i<NumOnRamp;i++){
-		onramp_out[i].agg_vol = controller_onramp_data[onrampCTidx[i]].agg_vol;
+		onramp_out[i].agg_vol = Mind(12000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
 	}
 
 //This part aggregate onramp data for each section
 	int offrampCTidx[5] = {10, 16, 21, 23, 27}; // 4 off-ramp is missing, total number of off-ramps is 9 		 
 	for(i=0;i<5;i++){
-		offramp_out[i].agg_vol = controller_offramp_data[offrampCTidx[i]].agg_vol;
+		offramp_out[i].agg_vol = Mind(12000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
 	}
 
 
