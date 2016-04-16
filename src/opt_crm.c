@@ -279,7 +279,7 @@ float temp_mean_speed = 0.0;
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(mainline_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
 			    
-			    fprintf(st_file_out,"check here | %f | %f | %f | %f |", mainline_out[i].agg_vol, mainline_out[i].agg_speed, 
+			    fprintf(st_file_out," %4.2f %4.2f %4.2f %4.2f ", mainline_out[i].agg_vol, mainline_out[i].agg_speed, 
 			                                           mainline_out[i].agg_occ, mainline_out[i].agg_density); 
 		}			                               
 	
@@ -290,7 +290,7 @@ float temp_mean_speed = 0.0;
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(onramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
 				detection_offramp[i]->data[Np-1].flow=Mind(12000.0, Maxd(offramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(offramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
-				fprintf(st_file_out,"check here | %f | %f | %f | %f | ", onramp_out[i].agg_vol, 100.0*(onramp_out[i].agg_occ), offramp_out[i].agg_vol, offramp_out[i].agg_occ);  			
+				fprintf(st_file_out," %4.2f %4.2f %4.2f %4.2f ", onramp_out[i].agg_vol, 100.0*(onramp_out[i].agg_occ), offramp_out[i].agg_vol, offramp_out[i].agg_occ);  			
 		}
 		fprintf(st_file_out,"\n");
 		
