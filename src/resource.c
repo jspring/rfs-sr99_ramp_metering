@@ -282,9 +282,9 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	}
 	
 	speed = mind(200,maxd(controller_data->num_main/temp_speed,0));
-	speed = speed * 1.6;
+	speed =  mind(200,maxd(speed * 1.6,0));
 	flow = mind(10000, maxd(temp_flow,0));
-	flow = flow * 120;
+	flow = mind(10000, maxd(flow * 120,0));
 	density = mind(2000,maxd(flow/speed,0));
     
 	// check Nan 
@@ -301,7 +301,7 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	}
 
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
-			flow,
+			mind(10000, maxd(flow,0)),
 			speed,
 			density
            );
