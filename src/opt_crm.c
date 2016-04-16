@@ -234,7 +234,7 @@ int j; //
 		float temp_mean_speed = 0.0;	
 		for(j=0;j<4;j++){
 			if(secCTidx[i][j]>0){
-				temp_vol += 99999999999999;//controller_mainline_data[secCTidx[i][j]].agg_vol;   
+				temp_vol += controller_mainline_data[secCTidx[i][j]].agg_vol;   
 				temp_speed += controller_mainline_data[secCTidx[i][j]].agg_speed; 
 			   	temp_occ += controller_mainline_data[secCTidx[i][j]].agg_occ;
 				temp_density += controller_mainline_data[secCTidx[i][j]].agg_density;
@@ -281,6 +281,8 @@ int j; //
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd(100.0*(mainline_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
 			    
+				printf("Cheng-Ju: %f %f %f %f ",mainline_out[i].agg_vol, mainline_out[i].agg_speed, 
+			                                           mainline_out[i].agg_occ, mainline_out[i].agg_density);
 			    fprintf(st_file_out,"%f %f %f %f ",mainline_out[i].agg_vol, mainline_out[i].agg_speed, 
 			                                           mainline_out[i].agg_occ, mainline_out[i].agg_density); 
 		}			                               
