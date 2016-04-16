@@ -187,7 +187,7 @@ const char *controller_ip_strings[] = {
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
 			controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, float_temp ) );
 		else {
-			controller_mainline_data[i].flag = (int)float_temp;
+			//controller_mainline_data[i].flag = (int)float_temp;
 			continue;
 		}
 		// min max function bound the data range and exclude nans. 
