@@ -194,6 +194,7 @@ const char *controller_ip_strings[] = {
 		*/
 		// min max function bound the data range and exclude nans.
         controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, flow_aggregation_mainline(&controller_data[i]) ) );
+		printf("ct_ML_data: sec %d %f",i,controller_mainline_data[i].agg_vol);
 		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i]) ) );
 		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, speed_aggregation_mainline(&controller_data[i]) ) );
 		controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(&controller_data[i]) ) );
@@ -243,7 +244,7 @@ int j; //
 			}
 		}
 		mainline_out[i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
-		printf("Cheng-Ju mainlin_out_agg_vol: %f",mainline_out[i].agg_vol); // <- you can see this in screen but it cannot save to file.
+		printf("Cheng-Ju mainlin_out_agg_vol: %d %f",i,mainline_out[i].agg_vol); // <- you can see this in screen but it cannot save to file.
 			    
 		mainline_out[i].agg_speed = Mind(100.0, Maxd(temp_speed/temp_num_ct,0));
 	    mainline_out[i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
