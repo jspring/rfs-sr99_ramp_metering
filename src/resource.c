@@ -2,7 +2,7 @@
 #include "resource.h"
 #include <urms.h>
 #include <math.h>
-
+#define FLOAT_ERROR -1.0 
 // units
 // flow is vehicle per hour
 // speed is miles per hour
@@ -78,7 +78,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 		}
 	}
 	if(isnan(flow)){
-		flow = -1;
+		flow = FLOAT_ERROR;
 	}else{
 	    flow = flow * 120;
 	}
@@ -102,7 +102,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 			}
 	}
 	if(isnan(flow)){
-		flow = -1;
+		flow = FLOAT_ERROR;
 	}else{
 	    flow = flow * 120;
 	}
@@ -126,7 +126,7 @@ float flow_aggregation_offramp(db_urms_status_t *controller_data){
 		}
 	}
 	if(isnan(flow)){
-		flow = -1;
+		flow = FLOAT_ERROR;
 	}else{
 		flow = flow *120;
 	}
@@ -156,7 +156,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	occupancy /= controller_data->num_main;
     // check Nan 
 	if(isnan(occupancy)){
-		occupancy = -1;
+		occupancy = FLOAT_ERROR;
 	}
 
 	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
@@ -183,7 +183,7 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	speed = max((controller_data->num_main)/tmp,0);
 	// check Nan 
 	if(isnan(speed)){
-		speed = -1;
+		speed = FLOAT_ERROR;
 	}else{
 	    speed = speed*1.6;
 	}
@@ -210,7 +210,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 	speed /= controller_data->num_main;
 	// check Nan 
 	if(isnan(speed)){
-		speed = -1;
+		speed = FLOAT_ERROR;
 	}else{
 		speed = speed * 1.6;
 	}
@@ -250,7 +250,7 @@ float queue_onramp(db_urms_status_t *controller_data){
 	}
 	// check Nan 
 	if(isnan(queue)){
-		queue = -1;
+		queue = FLOAT_ERROR;
 	}
 	printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
 	return mind(500.0, maxd(queue,0));
@@ -289,15 +289,15 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
     
 	// check Nan 
 	if(isnan(density)){
-		density = -1;
+		density = FLOAT_ERROR;
 	}
 
 	if(isnan(flow)){
-		flow = -1;
+		flow = FLOAT_ERROR;
 	}
 
 	if(isnan(speed)){
-	    speed = -1;
+	    speed = FLOAT_ERROR;
 	}
 
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
