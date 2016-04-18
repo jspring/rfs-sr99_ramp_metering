@@ -247,7 +247,7 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	    speed = speed*1.6;
 	}
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
-	return mind(100.0, maxd(speed,0));
+	return mind(150.0, maxd(speed,0));
 }
 
 float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
@@ -274,7 +274,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 		speed = speed * 1.6;
 	}
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
-	return mind(100.0, maxd(speed,0));
+	return mind(150.0, maxd(speed,0));
 }
 
 
@@ -298,7 +298,7 @@ float queue_onramp(db_urms_status_t *controller_data){
 			queue /= controller_data->num_meter; // average queue length
 		}
 		else if(controller_data->queue_stat[i].stat == 5){
-			queue = -1; // queue attained max queue length  
+			queue = FLOAT_ERROR; // queue attained max queue length  
 		}
 		else{ 
 			printf("queue_onramp: Error %d detector %d\n",
@@ -361,8 +361,8 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
 			mind(10000, maxd(flow,0)),
-			speed,
-			density
+			mind(150, maxd(speed,0)),
+			mind(1200.0, maxd(density,0)) 
            );
 	return mind(1200.0, maxd(density,0));
 }

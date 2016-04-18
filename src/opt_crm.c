@@ -237,7 +237,6 @@ int j; //
 		for(j=0;j<4;j++){
 			if(secCTidx[i][j]>0){
 				temp_vol += controller_mainline_data[secCTidx[i][j]].agg_vol;
-				printf("sec i=%d, lane j= %d, vol=%f",i,j,controller_mainline_data[secCTidx[i][j]].agg_vol);
 				temp_speed += controller_mainline_data[secCTidx[i][j]].agg_speed; 
 			   	temp_occ += controller_mainline_data[secCTidx[i][j]].agg_occ;
 				temp_density += controller_mainline_data[secCTidx[i][j]].agg_density;
@@ -246,12 +245,10 @@ int j; //
 			}
 		}
 		mainline_out[i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
-		//printf("Cheng-Ju mainlin_out_agg_vol: %d %f",i,mainline_out[i].agg_vol); // <- you can see this in screen but it cannot save to file.
-			    
-		mainline_out[i].agg_speed = Mind(100.0, Maxd(temp_speed/temp_num_ct,0));
+		mainline_out[i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,0));
 	    mainline_out[i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
 		mainline_out[i].agg_density = Mind(1200.0, Maxd(temp_density/temp_num_ct,0));
-		mainline_out[i].agg_mean_speed =  Mind(100.0, Maxd(temp_mean_speed/temp_num_ct,0));
+		mainline_out[i].agg_mean_speed =  Mind(150.0, Maxd(temp_mean_speed/temp_num_ct,0));
 		
 		// Initialize all temp variables
 		temp_num_ct = 0.0; 
