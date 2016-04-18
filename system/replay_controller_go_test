@@ -1,9 +1,6 @@
 #!/bin/bash
 
-sudo killall replay_general
-sudo killall clt_vars
-sudo killall db_slv
-sudo /home/path/db/db_clean.sh
+sudo /home/sr99_ramp_metering/system/stopreplay
 
 /home/path/db/lnx/db_slv &
 sleep 1
