@@ -36,6 +36,9 @@ extern const char *controller_strings[];
 extern float flow_aggregation_mainline(db_urms_status_t *controller_data);
 extern float flow_aggregation_onramp(db_urms_status_t *controller_data);
 extern float occupancy_aggregation_mainline(db_urms_status_t *controller_data);
+extern float occupancy_aggregation_onramp(db_urms_status_t *controller_data);
+extern float occupancy_aggregation_offramp(db_urms_status_t *controller_data);
+
 
 extern float queue_onramp(db_urms_status_t *controller_data);
 extern float speed_aggregation_mainline(db_urms_status_t *controller_data);     // harmonic mean speed 

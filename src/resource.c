@@ -139,7 +139,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	float occupancy = 0;
 
 	for(i=0 ; i < controller_data->num_main; i++) {
-		if(controller_data->metered_lane_stat[i].demand_stat == 2){
+		if(controller_data->mainline_stat[i].lead_stat == 2){
 			occupancy += (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb);
 			printf("Occ %d of detector %d \n", 
 				   (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb),
@@ -162,6 +162,65 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
 	return  mind(100.0, maxd(occupancy,0));
 }
+
+float occupancy_aggregation_onramp(db_urms_status_t *controller_data){
+	int i;
+	float occupancy = 0;
+
+	for(i=0 ; i < controller_data->num_meter; i++) {
+		if(controller_data->queue_stat[i].stat == 2){
+			occupancy += (float)((controller_data->queue_stat[i].occ_msb << 8) + controller_data->queue_stat[i].occ_lsb);
+			printf("Occ %d of detector %d \n", 
+				   (float)((controller_data->queue_stat[i].occ_msb << 8) + controller_data->queue_stat[i].occ_lsb),
+				   i
+		    );
+		}else{
+			printf("occupancy_aggregation_onramp: Error %d detector %d\n",
+				controller_data->queue_stat[i].stat,
+				i
+			);
+		}
+	}
+
+	occupancy /= controller_data->num_meter;
+    // check Nan 
+	if(isnan(occupancy)){
+		occupancy = FLOAT_ERROR;
+	}
+
+	printf("Occ_agg %4.2f num_meter %d\n", occupancy, controller_data->num_meter);
+	return  mind(100.0, maxd(occupancy,0));
+}
+
+float occupancy_aggregation_offramp(db_urms_status_t *controller_data){
+	int i;
+	float occupancy = 0;
+
+	for(i=0 ; i < controller_data->num_addl_det; i++) {
+		if(controller_data->additional_det[i].stat == 2){
+			occupancy += (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
+			printf("Occ %d of detector %d \n", 
+				   (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb),
+				   i
+		    );
+		}else{
+			printf("occupancy_aggregation_offramp: Error %d detector %d\n",
+				controller_data->additional_det[i].stat,
+				i
+			);
+		}
+	}
+
+	occupancy /= controller_data->num_addl_det;
+    // check Nan 
+	if(isnan(occupancy)){
+		occupancy = FLOAT_ERROR;
+	}
+
+	printf("Occ_agg %4.2f num_addl_det %d\n", occupancy, controller_data->num_addl_det);
+	return  mind(100.0, maxd(occupancy,0));
+}
+
 
 float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	// compute harmonic mean of speed
