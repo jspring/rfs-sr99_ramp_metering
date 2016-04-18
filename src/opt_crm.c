@@ -246,7 +246,7 @@ int j; //
 			}
 		}
 		mainline_out[i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
-		printf("Cheng-Ju mainlin_out_agg_vol: %d %f",i,mainline_out[i].agg_vol); // <- you can see this in screen but it cannot save to file.
+		//printf("Cheng-Ju mainlin_out_agg_vol: %d %f",i,mainline_out[i].agg_vol); // <- you can see this in screen but it cannot save to file.
 			    
 		mainline_out[i].agg_speed = Mind(100.0, Maxd(temp_speed/temp_num_ct,0));
 	    mainline_out[i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
@@ -288,7 +288,9 @@ int j; //
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
 			    fprintf(st_file_out,"sec %d %.6f ",i,mainline_out[i].agg_vol); 
-			    fprintf(st_file_out,"%.6f %.6f %.6f ", mainline_out[i].agg_speed, mainline_out[i].agg_occ, mainline_out[i].agg_density); 
+			    fprintf(st_file_out,"%.6f ", mainline_out[i].agg_speed); 
+				fprintf(st_file_out,"%.6f %.6f ",  mainline_out[i].agg_occ, mainline_out[i].agg_density); 
+
 		}			                               
 	
 		
