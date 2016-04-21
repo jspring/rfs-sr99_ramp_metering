@@ -9,8 +9,10 @@
 
 //Ramp meter inputs
 db_urms_status_t db_urms_status;
+db_urms_status2_t db_urms_status2;
 urms_datafile_t urms_datafile;
 db_ramp_data_t db_ramp_data;
+db_urms_t db_urms;
 
 timestamp_t timestamp;
 
@@ -21,7 +23,9 @@ db_var_spec_t db_vars_ac_rm[] =
 {
         {1, sizeof(db_urms_status_t), &db_urms_status},
         {2, sizeof(urms_datafile_t), &urms_datafile},
-        {3, sizeof(db_ramp_data_t), &db_ramp_data},
+        {3, sizeof(db_urms_t), &db_urms},
+        {4, sizeof(db_urms_status2_t), &db_urms_status2},
+        {5, sizeof(db_ramp_data_t), &db_ramp_data},
 };
 int num_ac_rm_vars = (sizeof(db_vars_ac_rm)/sizeof(db_var_spec_t));
 
@@ -84,27 +88,27 @@ data_log_column_spec_t file_spec[] =
         {"%.3f ",   &urms_datafile.queue_occ[0], BASE_FLOAT, REPLAY_USE},	//###46
         {"%hhu ",   &db_urms_status.queue_stat[0].vol, BASE_CHAR, REPLAY_USE},	//###47
         {"%hu ",   &urms_datafile.metering_rate[0], BASE_SHORT, REPLAY_USE},	//###48
-        {"%hhu ",   &db_urms_status.cmd_src[0], BASE_CHAR, REPLAY_USE},		//###49
-        {"%hhu ",   &db_urms_status.action[0], BASE_CHAR, REPLAY_USE},		//###50
-        {"%hhu ",   &db_urms_status.plan[0], BASE_CHAR, REPLAY_USE},		//###51
+        {"%hhu ",   &db_urms_status2.cmd_src[0], BASE_CHAR, REPLAY_USE},		//###49
+        {"%hhu ",   &db_urms_status2.action[0], BASE_CHAR, REPLAY_USE},		//###50
+        {"%hhu ",   &db_urms_status2.plan[0], BASE_CHAR, REPLAY_USE},		//###51
 
         {"%hhu ",   &db_urms_status.metered_lane_stat[1].demand_vol, BASE_CHAR, REPLAY_USE},	//###52
         {"%hhu ",   &db_urms_status.metered_lane_stat[1].passage_vol, BASE_CHAR, REPLAY_USE},	//###53
         {"%.3f ",   &urms_datafile.queue_occ[1], BASE_FLOAT, REPLAY_USE},	//###54
         {"%hhu ",   &db_urms_status.queue_stat[1].vol, BASE_CHAR, REPLAY_USE},	//###55
         {"%hu ",    &urms_datafile.metering_rate[1], BASE_SHORT, REPLAY_USE},	//###56
-        {"%hhu ",   &db_urms_status.cmd_src[1], BASE_CHAR, REPLAY_USE},		//###57
-        {"%hhu ",   &db_urms_status.action[1], BASE_CHAR, REPLAY_USE},		//###58
-        {"%hhu ",   &db_urms_status.plan[1], BASE_CHAR, REPLAY_USE},		//###59
+        {"%hhu ",   &db_urms_status2.cmd_src[1], BASE_CHAR, REPLAY_USE},		//###57
+        {"%hhu ",   &db_urms_status2.action[1], BASE_CHAR, REPLAY_USE},		//###58
+        {"%hhu ",   &db_urms_status2.plan[1], BASE_CHAR, REPLAY_USE},		//###59
 
         {"%hhu ",   &db_urms_status.metered_lane_stat[2].demand_vol, BASE_CHAR, REPLAY_USE},	//###60
         {"%hhu ",   &db_urms_status.metered_lane_stat[2].passage_vol, BASE_CHAR, REPLAY_USE},	//###61
         {"%.3f ",   &urms_datafile.queue_occ[2], BASE_FLOAT, REPLAY_USE},	//###62
         {"%hhu ",   &db_urms_status.queue_stat[2].vol, BASE_CHAR, REPLAY_USE},	//###63
         {"%hu ",    &urms_datafile.metering_rate[2], BASE_SHORT, REPLAY_USE},	//###64
-        {"%hhu ",   &db_urms_status.cmd_src[2], BASE_CHAR, REPLAY_USE},		//###65
-        {"%hhu ",   &db_urms_status.action[2], BASE_CHAR, REPLAY_USE},		//###66
-        {"%hhu ",   &db_urms_status.plan[2], BASE_CHAR, REPLAY_USE},		//###67
+        {"%hhu ",   &db_urms_status2.cmd_src[2], BASE_CHAR, REPLAY_USE},		//###65
+        {"%hhu ",   &db_urms_status2.action[2], BASE_CHAR, REPLAY_USE},		//###66
+        {"%hhu ",   &db_urms_status2.plan[2], BASE_CHAR, REPLAY_USE},		//###67
 
         {"%hhu ",   &db_urms_status.additional_det[0].volume, BASE_CHAR, REPLAY_USE},	//###68
         {"%hhu ",   &db_urms_status.additional_det[0].occ_msb, BASE_CHAR, REPLAY_USE},	//###69
@@ -117,26 +121,26 @@ data_log_column_spec_t file_spec[] =
         {"%hhu ",   &db_urms_status.additional_det[1].stat, BASE_CHAR, REPLAY_USE},	//###75
 
 
-        {"%hhu ",   &db_urms_status.rm2rmc_ctr, BASE_CHAR, REPLAY_USE},		//###76
-	{"%hhu ",   &db_urms_status.is_metering, BASE_CHAR, REPLAY_USE},	//###77
-	{"%hhu ",   &db_urms_status.computation_finished, BASE_CHAR, REPLAY_USE}, //###78
-	{"%hx ",    &db_urms_status.checksum, BASE_CHAR, REPLAY_USE}, 		//###89
+        {"%hhu ",   &db_urms_status2.rm2rmc_ctr, BASE_CHAR, REPLAY_USE},		//###76
+	{"%hhu ",   &db_urms_status2.is_metering, BASE_CHAR, REPLAY_USE},	//###77
+	{"%hhu ",   &db_urms_status2.computation_finished, BASE_CHAR, REPLAY_USE}, //###78
+	{"%hx ",    &db_urms_status2.checksum, BASE_CHAR, REPLAY_USE}, 		//###89
         {"%hu ",    &urms_datafile.metering_rate[2], BASE_SHORT, REPLAY_USE},	//###80
 	{"%.1f ",   &db_ramp_data.new_meter_rate, BASE_FLOAT, REPLAY_USE}, 	//###81
 	{"%.1f ",   &db_ramp_data.data_time, BASE_FLOAT, REPLAY_USE}, 		//###82
 	{"%.1f ",   &db_ramp_data.prev_update_data, BASE_FLOAT, REPLAY_USE}, 	//###83
 	{"%.3f ",   &db_ramp_data.prev_occ_out, BASE_FLOAT, REPLAY_USE}, 	//###84
 	{"%hhu ",   &db_ramp_data.passage_vol[2], BASE_CHAR, REPLAY_USE}, 	//###85
-	{"%hhu ",   &db_urms_status.plan_base_lvl[0], BASE_CHAR, REPLAY_USE},	//###86
-	{"%hhu ",   &db_urms_status.plan_base_lvl[1], BASE_CHAR, REPLAY_USE},	//###87
-	{"%hhu ",   &db_urms_status.plan_base_lvl[2], BASE_CHAR, REPLAY_USE},	//###88
+	{"%hhu ",   &db_urms_status2.plan_base_lvl[0], BASE_CHAR, REPLAY_USE},	//###86
+	{"%hhu ",   &db_urms_status2.plan_base_lvl[1], BASE_CHAR, REPLAY_USE},	//###87
+	{"%hhu ",   &db_urms_status2.plan_base_lvl[2], BASE_CHAR, REPLAY_USE},	//###88
 	{"%hhu ",   &db_urms_status.hour, BASE_CHAR, REPLAY_USE},		//###89
 	{"%hhu ",   &db_urms_status.minute, BASE_CHAR, REPLAY_USE},		//###90
 	{"%hhu ",   &db_urms_status.second, BASE_CHAR, REPLAY_USE},		//###91
 	{"%hhu ",   &db_urms_status.num_main, BASE_CHAR, REPLAY_USE},		//###92
 	{"%hhu ",   &db_urms_status.num_meter, BASE_CHAR, REPLAY_USE},		//###93
 	{"%hhu ",   &db_urms_status.num_addl_det, BASE_CHAR, REPLAY_USE},	//###94
-	{"%hhu ",   &db_urms_status.num_opp, BASE_CHAR, REPLAY_USE},		//###95
+	{"%hhu ",   &db_urms_status2.num_opp, BASE_CHAR, REPLAY_USE},		//###95
 };
 
 #define NUM_FILE_COLUMNS sizeof(file_spec)/sizeof(data_log_column_spec_t)
