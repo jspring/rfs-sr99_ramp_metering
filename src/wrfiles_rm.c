@@ -75,9 +75,13 @@ int main(int argc, char *argv[])
 	char monthday[80];
 	char serialnum[80];
 	char *controller_str;
+
 	int db_urms_status_var = 0;
 	int db_urms_datafile_var = 0;
+	int db_urms_ctl_var = 0;
+	int db_urms_status2_var = 0;
 	int db_urms_ramp_var = 0;
+
 	int retval;
 
 	int file_time = 15;     /// Number of minutes to record to a file 
@@ -125,12 +129,18 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 			use_stdout = 1; 
 			break;
 	        case 's':
-			//Get DB_URMS_STATUS_VAR number. DB_URMS_DATAFILE_VAR is DEFINED in urms.c as DB_URMS_STATUS_VAR + 1!
+			//Get DB_URMS_STATUS_VAR number. 
+			//DB_URMS_DATAFILE_VAR is DEFINED in urms.c as DB_URMS_STATUS_VAR + 1!
 			//DB_URMS_VAR is DEFINED in urms.c as DB_URMS_STATUS_VAR + 2!
-			//DB_URMS_RAMP_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 3!
+			//DB_URMS_STATUS2_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 3!
+			//DB_URMS_RAMP_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 4!
+
 			db_urms_status_var = atoi(optarg); 
 			db_urms_datafile_var = db_urms_status_var + 1; 
-			db_urms_ramp_var = db_urms_status_var + 3; 
+			db_urms_ctl_var = db_urms_status_var + 2; 
+			db_urms_status2_var = db_urms_status_var + 3; 
+			db_urms_ramp_var = db_urms_status_var + 4; 
+
 			standalone = 1;
 			break;
 	        case 'c':
@@ -150,7 +160,9 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 	}
 	db_vars_ac_rm[0].db_id_num = db_urms_status_var;
 	db_vars_ac_rm[1].db_id_num = db_urms_datafile_var;
-	db_vars_ac_rm[2].db_id_num = db_urms_ramp_var;
+	db_vars_ac_rm[2].db_id_num = db_urms_ctl_var;
+	db_vars_ac_rm[3].db_id_num = db_urms_status2_var;
+	db_vars_ac_rm[4].db_id_num = db_urms_ramp_var;
 
 	if(use_stdout == 0) {
 		strcpy(tripstr, tripdir+17);
