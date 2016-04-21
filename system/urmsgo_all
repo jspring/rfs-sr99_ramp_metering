@@ -8,9 +8,9 @@ echo "Starting db_slv"
 /home/path/db/lnx/db_slv &
 sleep 1
 
-#echo "Starting clt_vars"
-#/home/sr99_ramp_metering/src/lnx/clt_vars &
-#sleep 1
+echo "Starting clt_vars"
+/home/sr99_ramp_metering/src/lnx/clt_vars &
+sleep 1
 
 TIMESTAMP=`date +%y%m%d_%H%M%S`
 
@@ -70,4 +70,5 @@ sleep 1
 sleep 1
 /home/sr99_ramp_metering/system/urmsgo 10.29.248.56 	8400	1000	$TIMESTAMP
 
-/home/sr99_ramp_metering/src/lnx/opt_crm 1>>/big/data/ac_rm_1/opt_crm.log 2>&1 &
+cd /home/sr99_ramp_metering/src
+./lnx/opt_crm 1>>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.log 2>&1 &
