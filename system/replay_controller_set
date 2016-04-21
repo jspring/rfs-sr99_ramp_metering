@@ -13,6 +13,10 @@ fi
 
 MATCHSTR=`echo $FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
 echo $MATCHSTR
+echo "Executing stopurms"
+/home/sr99_ramp_metering/system/stopurms
+sleep 1
+
 echo "Executing stopreplay"
 /home/sr99_ramp_metering/system/stopreplay
 sleep 1
@@ -21,7 +25,9 @@ echo "Starting db_slv"
 /home/path/db/lnx/db_slv &
 sleep 1
 
-#lnx/replay_general -d <Database number (Modulo 4!)> -f <filename> -i (loop interval)
+echo "Starting clt_vars"
+/home/sr99_ramp_metering/src/lnx/clt_vars &
+sleep 1
 
 /home/sr99_ramp_metering/system/replay_controller_go	3000	"/big/data/ac_rm_1/a_10.29.248.108."$MATCHSTR".dat" 1000
 sleep 1
