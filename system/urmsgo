@@ -26,8 +26,8 @@ fi
 #	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 5000 -d $URMS_STATUS_DBNUM -p $PORT >>/big/data/ac_rm_1/urms.err &
 #else
 	echo "Starting urms with no control, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT"
-	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i $INTERVAL -n -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i $INTERVAL -n -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 #fi
 sleep 5
 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP"
-	/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 2 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$TIMESTAMP".err" 2>&1 &
+	/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 2 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
