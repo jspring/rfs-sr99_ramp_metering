@@ -1,4 +1,11 @@
-
+/* opt_crm.c - SR99 data aggregation and control
+**
+** WARNING!! NUM_CONTROLLER_VARS includes db_urms_status_t, urms_datafile_t, db_urms_t, db_urms_status2_t. 
+** and db_ramp_data_t.
+** For the present purposes (i.e. 4/20/2016) we're using only db_urms_status_t, which contains the data 
+** Cheng-Ju needs for data aggregation. We will eventually need all 28*5=140 database variables.
+**
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,8 +77,8 @@ int main(int argc, char *argv[])
 	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
-	db_urms_t urms_ctl[NUM_CONTROLLER_VARS];
-	db_urms_status_t controller_data[NUM_CONTROLLER_VARS];
+	db_urms_t urms_ctl[NUM_CONTROLLER_VARS/5];
+	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/5];  //See warning at top of file
 	int option;
 	int exitsig;
 	db_clt_typ *pclt;
@@ -84,11 +91,11 @@ int main(int argc, char *argv[])
 	agg_data_t mainline_out[SecSize] = {0};      // data aggregated section by section
 	agg_data_t onramp_out[NumOnRamp] = {0};      // data aggregated section by section
 	agg_data_t offramp_out[NUM_OFFRAMPS] = {0};  // data aggregated section by section
-    agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS] = {0};     // data aggregated controller by controller 
+	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/5] = {0};     // data aggregated controller by controller 
 	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {0};               // data aggregated controller by controller
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {0};             // data aggregated controller by controller
 	int debug = 0;
-	int num_controller_vars = NUM_CONTROLLER_VARS;
+	int num_controller_vars = NUM_CONTROLLER_VARS/5; //See warning at top of file
 
 	while ((option = getopt(argc, argv, "d")) != EOF) {
 		switch(option) {
@@ -102,7 +109,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	memset(controller_data, 0, NUM_CONTROLLER_VARS * (sizeof(db_urms_status_t)));
+	memset(controller_data, 0, NUM_CONTROLLER_VARS/5 * (sizeof(db_urms_status_t)));//See warning at top of file
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
 	if ((pclt = db_list_init(argv[0], hostname, domain, xport,
@@ -132,13 +139,13 @@ int main(int argc, char *argv[])
 	if(debug)
 		num_controller_vars = 2; //Use just the first two controllers in the list, i.e. 10.29.248.108 and 10.254.25.113.
 
-	for (i = 0; i < num_controller_vars; i++){
+	for (i = 0; i < num_controller_vars; i++){   //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 	}
 
 	for(;;)	
 	{
-	for (i = 0; i < num_controller_vars; i++){
+	for (i = 0; i < num_controller_vars; i++){  //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 	}
 
@@ -178,10 +185,10 @@ const char *controller_ip_strings[] = {
         "10.29.248.56",             //27      , FR12
 }; //FR6, FR7, FR8, and FR11 are missing
 //** This part aggregate data for each URMS2070 controller in the field   
-	int OnRampIndex [NUM_CONTROLLER_VARS] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
-	int OffRampIndex [NUM_CONTROLLER_VARS] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
+	int OnRampIndex [NUM_CONTROLLER_VARS/5] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
+	int OffRampIndex [NUM_CONTROLLER_VARS/5] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
 	float float_temp = 0;
-	for(i=0;i<NUM_CONTROLLER_VARS;i++){
+	for(i=0;i<NUM_CONTROLLER_VARS/5;i++){
 		printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
 		/*
 		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
