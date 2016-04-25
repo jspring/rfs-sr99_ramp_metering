@@ -28,5 +28,6 @@ void free_submatrix(float **b, long nrl, long nrh, long ncl, long nch);
 void free_convert_matrix(float **b, long nrl, long nrh, long ncl, long nch);
 void free_f3tensor(float ***t, long nrl, long nrh, long ncl, long nch,
 	long ndl, long ndh);
+void simplx(float **a, int m, int n, int m1, int m2, int m3, int *icase, int izrov[], int iposv[]);
 
 #endif /* _NR_UTILS_H_ */

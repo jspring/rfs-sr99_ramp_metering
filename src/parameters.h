@@ -64,7 +64,7 @@ const float T=30/3600.0;  // 30s RM control time interval in [hr]
 #define Rou_J 210
 #define Gama 0.004
 #define QM 7200
-static int ISUPDATE=3;         // for VSL update
+//static int ISUPDATE=3;         // for VSL update
 static int ISUPDATE2=1;
 #define Compliance_Level 0.3   // VSL compliance level: 1.0 is full level
 #define	exp_flt 0.85           // sensor measure exp filter gain
@@ -105,7 +105,7 @@ static float a_w[NumOnRamp]={0.0};
 static int ControlOn;
 static int StateOn=0;
 static int StateOff=0;
-static int count=1;
+//static int count=1;
 
 static float u[SecSize]={0};    // For all cells
 float alpha[SecSize]={0};
@@ -120,22 +120,22 @@ static float s[NumOnRamp]={0.0};          // off-ramp flow
 static float R[NumOnRamp]={0.0};   // composite onramp flow;  changed on 01/03/13
 static float dmd[NumOnRamp]={0.0};          // onramp demand flow;     changed on 01/03/13
 static float Q_o[NumOnRamp]={0.0};  // Onramp capacity; total onramp max RM rate
-static float Q_min[NumOnRamp]={0.0};  // Total Onramp minimum RM rate
-static float ss[NumOnRamp][Np]={0};
-static float dd[NumOnRamp][Np]={0};     // onramp dmd
-static float pre_w[NumOnRamp]={0};
+static float Q_min[NumOnRamp]={0,0};  // Total Onramp minimum RM rate
+static float ss[NumOnRamp][Np]={{0},{0}};
+static float dd[NumOnRamp][Np]={{0},{0}};// onramp dmd
+static float pre_w[NumOnRamp]={0.0};
 
 static float q_main[SecSize]={0.0};     // mainline flow of all cells   
 static float u2[SecSize]={0};           // speed to feed into the model
 
-static float pre_rho[SecSize]={0};
-static float opt_r[SecSize][Np]={0};
-static float metering_rate_change_time=0.0;
-static float up_rho[Np]={0};
+static float pre_rho[SecSize]={0.0};
+static float opt_r[SecSize][Np]={{0},{0}};
+//static float metering_rate_change_time=0.0;
+static float up_rho[Np]={0.0};
 
 
 unsigned int replication=0;
-static int detectorNum=0,sectionNum=0,nodeNum=0,centroidNum=0;  // moved from data_save.h and readdetectordata.h; 05_29_13
+//static int detectorNum=0,sectionNum=0,nodeNum=0,centroidNum=0;  // moved from data_save.h and readdetectordata.h; 05_29_13
 
 
 //const int secIDS[ShortSecSize]={17570,17556,2383,2384,2385,2386,2387,17234,17240,17248,17266,17276,17298,17338,17374,17382,17398,17508,16687,16695,16711,16733,16743,16783,16786,16573,16823,16847,16873,16883}; // Lane-wise detectin for I66
@@ -148,7 +148,7 @@ static float dyna_min_r[NumOnRamp]={0.0};
 static float dyna_max_r[NumOnRamp]={0.0};
 static float Ramp_rt[NumOnRamp]={0.0,0.0,0.0};
 static float RM_occ[NumOnRamp]={0.0,0.0,0.0};
-static float RM_occ_All[NumOnRamp+5]={0.0,0.0,0.0};
+//static float RM_occ_All[NumOnRamp+5]={0.0,0.0,0.0};
 static float ln_metering_rate[NumOnRamp][max_onramp_ln];
 const int ln_meteringId[16][max_onramp_ln]={{21044,21045,21046},{19780,0,0},{19782,0,0},{19789,0,0},{21063,21062,21060},
                        {19892,0,19796},{21080,21081,21082},{19924,0,19801},{19936,0,19804},{19811,0,0},{19968,0,19815},

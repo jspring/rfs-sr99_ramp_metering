@@ -32,6 +32,8 @@ int Init_sim_data_io();
 //int optMeter(float,float,float);
 //int save_data(float);
 //int finish_data_saving();
+int opt_metering(void);
+int Set_Opt_Meter(float time,float time2,float timeSta);
 float Mind(float a,float b);
 int Finish_sim_data_io();
 
@@ -73,12 +75,13 @@ const char *usage = "-d (debug mode, i.e. use the two controllers in my office)"
 
 int main(int argc, char *argv[])
 {
-	float time, time2,timeSta;
-	double tmp0, tmp1, tmp2, tmp3, tmp4;
+	float time = 0, time2 = 0,timeSta = 0;
+//	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
-	db_urms_t urms_ctl[NUM_CONTROLLER_VARS/5];
+//	db_urms_t urms_ctl[NUM_CONTROLLER_VARS/5];
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/5];  //See warning at top of file
+	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/5];  //See warning at top of file
 	int option;
 	int exitsig;
 	db_clt_typ *pclt;
@@ -87,13 +90,13 @@ int main(int argc, char *argv[])
 	posix_timer_typ *ptimer;       /* Timing proxy */
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
-	int verbose = 0;
-	agg_data_t mainline_out[SecSize] = {0};      // data aggregated section by section
-	agg_data_t onramp_out[NumOnRamp] = {0};      // data aggregated section by section
-	agg_data_t offramp_out[NUM_OFFRAMPS] = {0};  // data aggregated section by section
-	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/5] = {0};     // data aggregated controller by controller 
-	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {0};               // data aggregated controller by controller
-	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {0};             // data aggregated controller by controller
+//	int verbose = 0;
+	agg_data_t mainline_out[SecSize] = {{0}};      // data aggregated section by section
+	agg_data_t onramp_out[NumOnRamp] = {{0}};      // data aggregated section by section
+	agg_data_t offramp_out[NUM_OFFRAMPS] = {{0}};  // data aggregated section by section
+	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/5] = {{0}};     // data aggregated controller by controller 
+	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};               // data aggregated controller by controller
+	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};             // data aggregated controller by controller
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/5; //See warning at top of file
 
@@ -110,6 +113,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(controller_data, 0, NUM_CONTROLLER_VARS/5 * (sizeof(db_urms_status_t)));//See warning at top of file
+	memset(controller_data2, 0, NUM_CONTROLLER_VARS/5 * (sizeof(db_urms_status2_t)));//See warning at top of file
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
 	if ((pclt = db_list_init(argv[0], hostname, domain, xport,
@@ -141,12 +145,14 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i < num_controller_vars; i++){   //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
+		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data2[i]);
 	}
 
 	for(;;)	
 	{
 	for (i = 0; i < num_controller_vars; i++){  //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
+		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data2[i]);
 	}
 
 /*#################################################################################################################
@@ -187,7 +193,7 @@ const char *controller_ip_strings[] = {
 //** This part aggregate data for each URMS2070 controller in the field   
 	int OnRampIndex [NUM_CONTROLLER_VARS/5] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
 	int OffRampIndex [NUM_CONTROLLER_VARS/5] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
-	float float_temp = 0;
+//	float float_temp = 0;
 	for(i=0;i<NUM_CONTROLLER_VARS/5;i++){
 		printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
 		/*
@@ -206,14 +212,14 @@ const char *controller_ip_strings[] = {
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i]) ) );
         
         if(i==OffRampIndex[i]){
-		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data[i]) ) );
-        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data[i]) ) );
+		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data2[i]) ) );
+        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data2[i]) ) );
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
 		
 		}
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i]) ) );
-		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0,occupancy_aggregation_onramp(&controller_data[i]) ) );
+		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0,occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i]) ) );
 		}
 	}
 
@@ -380,9 +386,9 @@ int Init_sim_data_io()
 int Init()  // A major function; Called by AAPI.cxx: the top function for intialization of the whole system
 {
 	int i; //j;
-	int id;
-	int ori=0, dest=0;	
-	float tmp_buff=0.0;
+//	int id;
+//	int ori=0, dest=0;	
+//	float tmp_buff=0.0;
 //	errno_t err;
 
 	// Memory set for variables
@@ -650,14 +656,15 @@ int ln_rm_distrib()
 int Set_Hybrid_Meter(float time,float time2,float timeSta)
 {
 //	AKIPrintString("metering");
-	int i,j,k, tmp_err, tmp_err1, tmp_err2, tmp_err3, tmp_err4;
-	float flow=0.0;
-	float amax=0.0;
-	float amin=0.0;
+	int i,j;
+//	int k, tmp_err, tmp_err1, tmp_err2, tmp_err3, tmp_err4;
+//	float flow=0.0;
+//	float amax=0.0;
+//	float amin=0.0;
 	float new_rate=0.0;
 //	char str[len_str];
 
-	tmp_err=0; tmp_err1=0; tmp_err2=0; tmp_err3=0; tmp_err4=0; 
+//	tmp_err=0; tmp_err1=0; tmp_err2=0; tmp_err3=0; tmp_err4=0; 
 	
 	
 	
@@ -829,16 +836,17 @@ int Set_Hybrid_Meter(float time,float time2,float timeSta)
 int Set_Opt_Meter(float time,float time2,float timeSta)
 {
 //	AKIPrintString("metering");
-	int i,j, tmp_err, tmp_err1, tmp_err2, tmp_err3, tmp_err4;
-	float flow=0.0;
-	float amax=0.0;
-	float amin=0.0;
-	float tmp_occ=0.0;
+	int i,j; 
+//	int tmp_err, tmp_err1, tmp_err2, tmp_err3, tmp_err4;
+//	float flow=0.0;
+//	float amax=0.0;
+//	float amin=0.0;
+//	float tmp_occ=0.0;
 	static float new_rate=0.0;	
 //	char str[len_str];
 	//static int release_cycle=0;
 
-	tmp_err=0; tmp_err1=0; tmp_err2=0; tmp_err3=0; tmp_err4=0;
+//	tmp_err=0; tmp_err1=0; tmp_err2=0; tmp_err3=0; tmp_err4=0;
 
 	if(ISUPDATE2>=0)  // set every step
 	{
@@ -990,16 +998,17 @@ int Set_Opt_Meter(float time,float time2,float timeSta)
 int Set_Coord_ALINEA(float time,float time2,float timeSta)
 {
 //	AKIPrintString("metering");
-	int i,j,tmp_err, tmp_err1; // tmp_err2;
-	float flow=0.0;
-	float amax=0.0;
+	int i,j;
+//	int tmp_err, tmp_err1; // tmp_err2;
+//	float flow=0.0;
+//	float amax=0.0;
 	float amin=0.0;
 	float corridor_mean_occ=0.0, tmp_occ=0.0;
 	//int tmp_deno=0;
 //	char str[len_str];
 	//static int release_cycle=0;
 
-	tmp_err=0; tmp_err1=0; 
+//	tmp_err=0; tmp_err1=0; 
 	if(ISUPDATE2>=0)  // set every step
 	{
 		for(i=0;i<NumOnRamp+5;i++)
@@ -1100,14 +1109,14 @@ int set_coef(float c[MP][NP],float Qm)
 {
 	char str[len_str];
 
-	float w_const[SecSize][Np]={0.0}; 					// Used to construct b_u; 
-	float p_const[SecSize][Np]={0.0};					// Used to construct b_u; 	
+	float w_const[SecSize][Np]={{0.0}}; 					// Used to construct b_u; 
+	float p_const[SecSize][Np]={{0.0}};					// Used to construct b_u; 	
 	float f[(NumOnRamp)*Np]={0.0};
 	
 	float b_u[M1]={0.0};
 	float b_l[M2]={0.0};   // upper bound of r
 
-	int m,i,j;
+	int m = 0,i = 0,j = 0;
 	static unsigned short memset_sw=1;
 	
 	if (memset_sw==1)
@@ -1417,7 +1426,7 @@ int opt_metering(void)
 {
 	int i,icase,*izrov,*iposv;
 
-	float cc[MP][NP]={0.0};
+	float cc[MP][NP]={{0.0}};
 	
 	float **a;
 

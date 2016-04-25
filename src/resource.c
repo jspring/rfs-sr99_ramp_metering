@@ -110,7 +110,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	return mind(12000.0, maxd(flow,0));
 }
 
-float flow_aggregation_offramp(db_urms_status_t *controller_data){
+float flow_aggregation_offramp(db_urms_status2_t *controller_data){
         int i;
         float flow = 0;
 
@@ -141,7 +141,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
 			occupancy += (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb);
-			printf("Occ %d of detector %d \n", 
+			printf("Occ %f of detector %d \n", 
 				   (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb),
 				   i
 		    );
@@ -163,23 +163,26 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	return  mind(100.0, maxd(occupancy,0));
 }
 
-float occupancy_aggregation_onramp(db_urms_status_t *controller_data){
+float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2){ 
 	int i;
+	int j;
 	float occupancy = 0;
 
 	for(i=0 ; i < controller_data->num_meter; i++) {
-		if(controller_data->queue_stat[i].stat == 2){
-			occupancy += (float)((controller_data->queue_stat[i].occ_msb << 8) + controller_data->queue_stat[i].occ_lsb);
-			printf("Occ %d of detector %d \n", 
-				   (float)((controller_data->queue_stat[i].occ_msb << 8) + controller_data->queue_stat[i].occ_lsb),
+	   for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
+		if(controller_data2->queue_stat[i][j].stat == 2){
+			occupancy += (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb);
+			printf("Occ %f of detector %d \n", 
+				   (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb),
 				   i
 		    );
 		}else{
 			printf("occupancy_aggregation_onramp: Error %d detector %d\n",
-				controller_data->queue_stat[i].stat,
+				controller_data2->queue_stat[i][j].stat,
 				i
 			);
 		}
+	    }
 	}
 
 	occupancy /= controller_data->num_meter;
@@ -192,14 +195,14 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data){
 	return  mind(100.0, maxd(occupancy,0));
 }
 
-float occupancy_aggregation_offramp(db_urms_status_t *controller_data){
+float occupancy_aggregation_offramp(db_urms_status2_t *controller_data){
 	int i;
 	float occupancy = 0;
 
 	for(i=0 ; i < controller_data->num_addl_det; i++) {
 		if(controller_data->additional_det[i].stat == 2){
 			occupancy += (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
-			printf("Occ %d of detector %d \n", 
+			printf("Occ %f of detector %d \n", 
 				   (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb),
 				   i
 		    );
@@ -278,34 +281,37 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 }
 
 
-float queue_onramp(db_urms_status_t *controller_data){
+float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2){
 	float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
 	float queue = 0;
 	float sum_inflow = 0;
 	float sum_outflow = 0;
 	int i; //  lane number index
+	int j; //  queue loop number index
 
 	for(i=0 ;i < controller_data->num_meter; i++) {
-		if(controller_data->queue_stat[i].stat == 2){
-			sum_inflow += (float)controller_data->queue_stat[i].vol;  //Advance detector
+	    for(j=0 ;j < MAX_QUEUE_LOOPS; j++) {
+		if(controller_data2->queue_stat[i][j].stat == 2){
+			sum_inflow += (float)controller_data2->queue_stat[i][j].vol;  //Advance detector
 			sum_outflow +=  (float)controller_data->metered_lane_stat[i].passage_vol; // Passage detector
 			printf("OR-inflow %d OR-outflow %d of detector %d \n", 
-				controller_data->queue_stat[i].vol,
+				controller_data2->queue_stat[i][j].vol,
 				controller_data->metered_lane_stat[i].passage_vol,
 				i
 			);
 			queue = (sum_inflow-sum_outflow)*average_vehicle_length;
 			queue /= controller_data->num_meter; // average queue length
 		}
-		else if(controller_data->queue_stat[i].stat == 5){
+		else if(controller_data2->queue_stat[i][j].stat == 5){
 			queue = FLOAT_ERROR; // queue attained max queue length  
 		}
 		else{ 
 			printf("queue_onramp: Error %d detector %d\n",
-				controller_data->queue_stat[i].stat,
+				controller_data2->queue_stat[i][j].stat,
 				i
 			);
 		}
+	    }
 	}
 	// check Nan 
 	if(isnan(queue)){
