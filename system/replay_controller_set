@@ -8,10 +8,9 @@ then
 	exit 1
 fi
 
-#/big/data/ac_rm_1/a_10.254.25.113_160331_155310_0331072.dat
-#/big/data/ac_rm_1/a_10.29.248.108_160331_155310_0331072.dat
-
 MATCHSTR=`echo $FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
+MYPATH=`echo $FILE | sed '{s/a_10/ &/g}'| awk '{print $1}'`
+
 echo $MATCHSTR
 echo "Executing stopurms"
 /home/sr99_ramp_metering/system/stopurms
@@ -29,6 +28,24 @@ echo "Starting clt_vars"
 /home/sr99_ramp_metering/src/lnx/clt_vars &
 sleep 1
 
-/home/sr99_ramp_metering/system/replay_controller_go	3000	"/big/data/ac_rm_1/a_10.29.248.108."$MATCHSTR".dat" 1000
-sleep 1
-/home/sr99_ramp_metering/system/replay_controller_go	3200	"/big/data/ac_rm_1/a_10.254.25."$MATCHSTR".dat" 1000
+y=3000
+for x in `ls $MYPATH/*$MATCHSTR.dat`
+do
+	/home/sr99_ramp_metering/system/replay_controller_go $y $x 1000
+	y=$(($y+200))
+done
+
+echo "Starting opt_crm"
+cd /home/sr99_ramp_metering/src
+./lnx/opt_crm &
+
+while [[ 1 ]] 
+do
+	ps -ef | grep replay_general | grep -v grep
+	if [[ $? != 0 ]]
+	then
+		killall opt_crm
+		exit 1
+	fi
+	sleep 1
+done
