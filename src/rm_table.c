@@ -112,15 +112,15 @@ data_log_column_spec_t file_spec[] =
         {"%hhu ",   &db_urms_status3.action[2], BASE_CHAR, REPLAY_USE},		//###66
         {"%hhu ",   &db_urms_status3.plan[2], BASE_CHAR, REPLAY_USE},		//###67
 
-        {"%hhu ",   &db_urms_status2.additional_det[0].volume, BASE_CHAR, REPLAY_USE},	//###68
-        {"%hhu ",   &db_urms_status2.additional_det[0].occ_msb, BASE_CHAR, REPLAY_USE},	//###69
-        {"%hhu ",   &db_urms_status2.additional_det[0].occ_lsb, BASE_CHAR, REPLAY_USE},	//###70
-        {"%hhu ",   &db_urms_status2.additional_det[0].stat, BASE_CHAR, REPLAY_USE},	//###71
+        {"%hhu ",   &db_urms_status3.additional_det[0].volume, BASE_CHAR, REPLAY_USE},	//###68
+        {"%hhu ",   &db_urms_status3.additional_det[0].occ_msb, BASE_CHAR, REPLAY_USE},	//###69
+        {"%hhu ",   &db_urms_status3.additional_det[0].occ_lsb, BASE_CHAR, REPLAY_USE},	//###70
+        {"%hhu ",   &db_urms_status3.additional_det[0].stat, BASE_CHAR, REPLAY_USE},	//###71
 
-        {"%hhu ",   &db_urms_status2.additional_det[1].volume, BASE_CHAR, REPLAY_USE},	//###72
-        {"%hhu ",   &db_urms_status2.additional_det[1].occ_msb, BASE_CHAR, REPLAY_USE},	//###73
-        {"%hhu ",   &db_urms_status2.additional_det[1].occ_lsb, BASE_CHAR, REPLAY_USE},	//###74
-        {"%hhu ",   &db_urms_status2.additional_det[1].stat, BASE_CHAR, REPLAY_USE},	//###75
+        {"%hhu ",   &db_urms_status3.additional_det[1].volume, BASE_CHAR, REPLAY_USE},	//###72
+        {"%hhu ",   &db_urms_status3.additional_det[1].occ_msb, BASE_CHAR, REPLAY_USE},	//###73
+        {"%hhu ",   &db_urms_status3.additional_det[1].occ_lsb, BASE_CHAR, REPLAY_USE},	//###74
+        {"%hhu ",   &db_urms_status3.additional_det[1].stat, BASE_CHAR, REPLAY_USE},	//###75
 
 
         {"%hhu ",   &db_urms_status3.rm2rmc_ctr, BASE_CHAR, REPLAY_USE},		//###76
@@ -141,7 +141,7 @@ data_log_column_spec_t file_spec[] =
 	{"%hhu ",   &db_urms_status.second, BASE_CHAR, REPLAY_USE},		//###91
 	{"%hhu ",   &db_urms_status.num_main, BASE_CHAR, REPLAY_USE},		//###92
 	{"%hhu ",   &db_urms_status.num_meter, BASE_CHAR, REPLAY_USE},		//###93
-	{"%hhu ",   &db_urms_status2.num_addl_det, BASE_CHAR, REPLAY_USE},	//###94
+	{"%hhu ",   &db_urms_status3.num_addl_det, BASE_CHAR, REPLAY_USE},	//###94
 	{"%hhu ",   &db_urms_status3.num_opp, BASE_CHAR, REPLAY_USE},		//###95
 };
 

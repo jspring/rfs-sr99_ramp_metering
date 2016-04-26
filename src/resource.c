@@ -110,7 +110,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	return mind(12000.0, maxd(flow,0));
 }
 
-float flow_aggregation_offramp(db_urms_status2_t *controller_data){
+float flow_aggregation_offramp(db_urms_status3_t *controller_data){
         int i;
         float flow = 0;
 
@@ -195,7 +195,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	return  mind(100.0, maxd(occupancy,0));
 }
 
-float occupancy_aggregation_offramp(db_urms_status2_t *controller_data){
+float occupancy_aggregation_offramp(db_urms_status3_t *controller_data){
 	int i;
 	float occupancy = 0;
 
