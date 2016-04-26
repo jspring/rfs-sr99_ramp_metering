@@ -71,4 +71,8 @@ sleep 1
 /home/sr99_ramp_metering/system/urmsgo 10.29.248.56 	8400	1000	$TIMESTAMP
 
 cd /home/sr99_ramp_metering/src
+if [[ ! -d Out_Data ]]
+then
+	mkdir Out_Data
+fi
 ./lnx/opt_crm 1>>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.log 2>&1 &

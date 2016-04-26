@@ -37,6 +37,11 @@ done
 
 echo "Starting opt_crm"
 cd /home/sr99_ramp_metering/src
+if [[ ! -d Out_Data ]]
+then
+	mkdir Out_Data
+fi
+
 ./lnx/opt_crm &
 
 while [[ 1 ]] 

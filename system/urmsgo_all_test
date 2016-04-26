@@ -18,5 +18,9 @@ TIMESTAMP=`date +%y%m%d_%H%M%S`
 sleep 1
 /home/sr99_ramp_metering/system/urmsgo 10.254.25.113	3200	1000	$TIMESTAMP	2000
 sleep 5
-/home/sr99_ramp_metering/src/lnx/opt_crm -d
+if [[ ! -d Out_Data ]]
+then
+        mkdir Out_Data
+fi
+./lnx/opt_crm -d &
 #/home/sr99_ramp_metering/src/lnx/opt_crm 1>>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.log 2>&1 &
