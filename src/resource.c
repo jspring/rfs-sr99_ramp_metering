@@ -109,7 +109,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
 	//mind(1000.0*controller_data->num_meter, maxd(flow,0));
-return flow
+return flow;
 }
 
 float flow_aggregation_offramp(db_urms_status3_t *controller_data){
