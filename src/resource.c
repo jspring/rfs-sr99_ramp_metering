@@ -104,7 +104,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
-	    flow = flow * 120;
+	    flow = flow * 120 / controller_data->num_meter; // this is average onramp flow
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
 	return mind(12000.0, maxd(flow,0));
@@ -128,7 +128,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
-		flow = flow *120;
+		flow = flow *120 / controller_data->num_addl_det; // this is average offramp flow
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
 	return mind(12000.0, maxd(flow,0));
@@ -185,7 +185,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	    }
 	}
 
-	occupancy /= controller_data->num_meter;
+	occupancy /= controller_data->num_meter; // this is average onramp occupancy
     // check Nan 
 	if(isnan(occupancy)){
 		occupancy = FLOAT_ERROR;
@@ -214,7 +214,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data){
 		}
 	}
 
-	occupancy /= controller_data->num_addl_det;
+	occupancy /= controller_data->num_addl_det; // this is average offramp occupancy
     // check Nan 
 	if(isnan(occupancy)){
 		occupancy = FLOAT_ERROR;
