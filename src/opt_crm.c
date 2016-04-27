@@ -276,14 +276,14 @@ int j; //
 //This part aggregate onramp data for each section
 	int onrampCTidx[NumOnRamp] = {8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 
 	for(i=0;i<NumOnRamp;i++){
-		onramp_out[i].agg_vol = Mind(12000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
+		onramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
 	    onramp_out[i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0));
 	}
 
 //This part aggregate onramp data for each section
 	int offrampCTidx[5] = {10, 16, 21, 23, 27}; // 4 off-ramp is missing, total number of off-ramps is 9 		 
 	for(i=0;i<5;i++){
-		offramp_out[i].agg_vol = Mind(12000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
+		offramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
 		offramp_out[i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
 	}
 
@@ -308,9 +308,9 @@ int j; //
 		
 		for(i=0;i<NumOnRamp;i++)
 		{	
-				detection_onramp[i]->data[Np-1].flow=Mind(12000.0, Maxd(onramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
-				detection_offramp[i]->data[Np-1].flow=Mind(12000.0, Maxd(offramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
 				fprintf(st_file_out,"ramp %d %f ", i, onramp_out[i].agg_vol);  			
 				fprintf(st_file_out,"%f ", onramp_out[i].agg_occ);  			
