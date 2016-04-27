@@ -276,7 +276,7 @@ int j; //
 //This part aggregate onramp data for each section
 	int onrampCTidx[NumOnRamp] = {8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 
 	for(i=0;i<NumOnRamp;i++){
-		onramp_out[i].agg_vol = 999.999;//Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
+		onramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
 	    onramp_out[i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0));
 	}
 
