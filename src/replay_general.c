@@ -1,7 +1,7 @@
 
 
 #include "rm_table.h"
-#include "wrfiles_rm.h"
+//#include "wrfiles_rm.h"
 #include "clt_vars.h"
 
 static int sig_list[] =

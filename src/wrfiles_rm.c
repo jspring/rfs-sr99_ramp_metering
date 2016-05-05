@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 	int db_urms_datafile_var = 0;
 	int db_urms_ctl_var = 0;
 	int db_urms_status2_var = 0;
+	int db_urms_status3_var = 0;
 	int db_urms_ramp_var = 0;
 
 	int retval;
@@ -133,13 +134,15 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 			//DB_URMS_DATAFILE_VAR is DEFINED in urms.c as DB_URMS_STATUS_VAR + 1!
 			//DB_URMS_VAR is DEFINED in urms.c as DB_URMS_STATUS_VAR + 2!
 			//DB_URMS_STATUS2_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 3!
-			//DB_URMS_RAMP_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 4!
+			//DB_URMS_STATUS3_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 4!
+			//DB_URMS_RAMP_VAR is therefore defined HERE as DB_URMS_STATUS_VAR + 5!
 
 			db_urms_status_var = atoi(optarg); 
 			db_urms_datafile_var = db_urms_status_var + 1; 
 			db_urms_ctl_var = db_urms_status_var + 2; 
 			db_urms_status2_var = db_urms_status_var + 3; 
-			db_urms_ramp_var = db_urms_status_var + 4; 
+			db_urms_status3_var = db_urms_status_var + 4; 
+			db_urms_ramp_var = db_urms_status_var + 5; 
 
 			standalone = 1;
 			break;
@@ -162,7 +165,8 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 	db_vars_ac_rm[1].db_id_num = db_urms_datafile_var;
 	db_vars_ac_rm[2].db_id_num = db_urms_ctl_var;
 	db_vars_ac_rm[3].db_id_num = db_urms_status2_var;
-	db_vars_ac_rm[4].db_id_num = db_urms_ramp_var;
+	db_vars_ac_rm[4].db_id_num = db_urms_status3_var;
+	db_vars_ac_rm[5].db_id_num = db_urms_ramp_var;
 
 	if(use_stdout == 0) {
 		strcpy(tripstr, tripdir+17);

@@ -2,7 +2,7 @@
 #include <path_gps_lib.h>
 #include "data_log.h"
 #include <urms.h>
-#include "wrfiles_rm.h"
+//#include "wrfiles_rm.h"
 #include "variables2.h"
 #include "meter_lib.h"
 #include "rm_algo.h"
@@ -26,8 +26,8 @@ db_var_spec_t db_vars_ac_rm[] =
         {2, sizeof(urms_datafile_t), &urms_datafile},
         {3, sizeof(db_urms_t), &db_urms},
         {4, sizeof(db_urms_status2_t), &db_urms_status2},
-        {5, sizeof(db_ramp_data_t), &db_ramp_data},
-        {6, sizeof(db_urms_status3_t), &db_urms_status3},
+        {5, sizeof(db_urms_status3_t), &db_urms_status3},
+        {6, sizeof(db_ramp_data_t), &db_ramp_data},
 };
 int num_ac_rm_vars = (sizeof(db_vars_ac_rm)/sizeof(db_var_spec_t));
 

@@ -30,4 +30,4 @@ fi
 #fi
 sleep 5
 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP"
-	/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 2 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+	/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 5000 -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
