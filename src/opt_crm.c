@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
 //	db_urms_t urms_ctl[NUM_CONTROLLER_VARS/5];
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/5];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/5];  //See warning at top of file
+	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/5];  //See warning at top of file
 	int option;
 	int exitsig;
 	db_clt_typ *pclt;
@@ -212,8 +213,8 @@ const char *controller_ip_strings[] = {
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i]) ) );
         
         if(i==OffRampIndex[i]){
-		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data2[i]) ) );
-        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data2[i]) ) );
+		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data3[i]) ) );
+        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data3[i]) ) );
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
 		
 		}
