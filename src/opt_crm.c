@@ -75,6 +75,7 @@ const char *usage = "-d (debug mode, i.e. use the two controllers in my office)"
 
 int main(int argc, char *argv[])
 {
+	timestamp_t ts;
 	float time = 0, time2 = 0,timeSta = 0;
 //	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
@@ -295,6 +296,8 @@ int j; //
 /*###################################################################################################################
 ###################################################################################################################*/
 
+		get_current_timestamp(&ts);
+		print_timestamp(st_file_out, &ts);
 		for(i=0;i<SecSize;i++)
 		{
 			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
