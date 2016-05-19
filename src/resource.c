@@ -62,14 +62,77 @@ float mind(float a,float b)
 	}
 }
 
+float sum_array(float a[], int num_elements)
+{
+   int i;
+   float sum=0.0;
+   for (i=0; i<num_elements; i++)
+   {
+	 sum = sum + a[i];
+   }
+   return(sum);
+}
+
+float mean_array(float a[], int num_elements)
+{   
+	float temp = 0.0;
+	float mean = 0.0;
+    temp = sum_array(a , num_elements);
+	temp /= (float)num_elements;
+    return mean = temp;
+}
+
+float var_array(float a[], int num_elements)
+{
+	float sum=0.0;
+	float mean=0.0;
+	float var=0.0;
+
+    mean = mean_array(a , num_elements);
+	  
+    for(int i=0;i<num_elements;i++)
+	{
+		sum=sum+(a[i]-mean)*(a[i]-mean);
+		var=sum/(float)num_elements;
+	}
+	return var;
+}
+/* Function to calculate factorial */
+long int factorial(int x)
+{
+    int i,f=1;
+    for (i=2 ; i<=x ; i++)
+        f = f * i;
+    return (f);
+}
+
+long int nCr(int n, int r)
+{   
+    int ncr=0;
+	int npr=0;
+    npr = factorial(n)/factorial(n-r);
+    ncr = npr / factorial(r);
+	return ncr;
+}
+
 float flow_aggregation_mainline(db_urms_status_t *controller_data){
         int i;
         float flow = 0.0;
-
+		float mean_flow = 0.0;
+		float var_flow = 0.0;
+		int num_lane = 1;
+        num_lane = controller_data->num_main;
+		float flow_temp [num_lane];
+    // this loop get data from data base
 	for(i=0 ; i < controller_data->num_main; i++) {
-		if(controller_data->mainline_stat[i].lead_stat == 2){
-			flow += (float)controller_data->mainline_stat[i].lead_vol;
-			printf("ML-flow %d of detector %d \n",controller_data->mainline_stat[i].lead_vol,i);
+		if(controller_data->mainline_stat[i].lead_stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
+			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
+			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
+			}else{  // replce the flow measurement if it is not in the range
+                flow_temp[i]=0;
+			}
+			//flow += (float)controller_data->mainline_stat[i].lead_vol;
+			//printf("ML-flow %d of detector %d \n",controller_data->mainline_stat[i].lead_vol,i);
 		}else{
 			printf("flow_aggregation_mainline: Error %d detector %d\n",
 				controller_data->mainline_stat[i].lead_stat, 
@@ -77,10 +140,19 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			);
 		}
 	}
+	mean_flow = mean_array(flow_temp, num_lane);
+    var_flow = var_array(flow_temp, num_lane);
+
+	// this loop replace data with large variance
+    for(i=0 ; i < controller_data->num_main; i++) {
+	    if (abs(flow_temp[i]-mean_flow)>3*var_flow)
+            flow_temp[i] = mean_flow;
+	}
+	 
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
-	    flow = flow * 120;
+	    flow = flow * 120; // convert 30 second data into hour data
 	}
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
 	return mind(12000.0, maxd(flow,0));

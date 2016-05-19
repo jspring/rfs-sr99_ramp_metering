@@ -6,6 +6,11 @@
 #include <urms.h>
 extern float maxd(float a,float b);
 extern float mind(float a,float b);
+extern float sum_array(float a[], int num_elements);
+extern float mean_array(float a[], int num_elements);
+extern float var_array(float a[], int num_elements);
+extern long int factorial(int x);
+extern long int nCr(int n, int r);
 //extern int open_file(char controller_data_file[]);
 //extern int read_file(char input_file_name[], char output_file_name[]);
 
