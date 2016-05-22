@@ -87,10 +87,11 @@ float var_array(float a[], int num_elements)
 	float sum=0.0;
 	float mean=0.0;
 	float var=0.0;
+	int i;
 
     mean = mean_array(a , num_elements);
 	  
-    for(int i=0;i<num_elements;i++)
+    for(i=0;i<num_elements;i++)
 	{
 		sum=sum+(a[i]-mean)*(a[i]-mean);
 		var=sum/(float)num_elements;

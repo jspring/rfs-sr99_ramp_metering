@@ -10,6 +10,7 @@ fi
 
 MATCHSTR=`echo $FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
 MYPATH=`echo $FILE | sed '{s/a_10/ &/g}'| awk '{print $1}'`
+TIMESTAMP=`date +%y%m%d_%H%M%S`
 
 echo $MATCHSTR
 echo "Executing stopurms"
@@ -42,7 +43,7 @@ then
 	mkdir Out_Data
 fi
 
-./lnx/opt_crm &
+./lnx/opt_crm 1>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.log 2>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.err &
 
 while [[ 1 ]] 
 do
