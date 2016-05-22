@@ -130,15 +130,20 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
 			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
 			}else{  // replce the flow measurement if it is not in the range
-                flow_temp[i]=0;
+                flow_temp[i]= 200; // if the lane i has no valid data, then assign it a flow value.
 			}
 			//flow += (float)controller_data->mainline_stat[i].lead_vol;
 			//printf("ML-flow %d of detector %d \n",controller_data->mainline_stat[i].lead_vol,i);
 		}else{
-			printf("flow_aggregation_mainline: Error %d detector %d\n",
-				controller_data->mainline_stat[i].lead_stat, 
-				i
-			);
+            if(i=0){
+			   flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
+			}else{
+			   flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+			}
+			//printf("flow_aggregation_mainline: Error %d detector %d\n",
+			//	controller_data->mainline_stat[i].lead_stat, 
+			//	i
+			//);
 		}
 	}
 	mean_flow = mean_array(flow_temp, num_lane);
@@ -146,7 +151,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 
 	// this loop replace data with large variance
     for(i=0 ; i < controller_data->num_main; i++) {
-	    if (abs(flow_temp[i]-mean_flow)>3*var_flow)
+	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
             flow_temp[i] = mean_flow;
 	}
 	 
@@ -162,17 +167,41 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 float flow_aggregation_onramp(db_urms_status_t *controller_data){
         int i;
         float flow = 0;
+		float mean_flow = 0.0;
+		float var_flow = 0.0;
+		int num_lane = 1;
+        num_lane = controller_data->num_meter;
+		float flow_temp [num_lane];
+    // this loop get data from data base
 
 	for(i=0 ; i< controller_data->num_meter;i++) {
 		if(controller_data->metered_lane_stat[i].demand_stat == 2){
-			flow += (float)controller_data->metered_lane_stat[i].demand_vol;
-			printf("OR-flow %d of detector %d \n", controller_data->metered_lane_stat[i].demand_vol, i);
-			}else{
-				printf("flow_aggregation_onramp: Error %d detector %d\n",
-					controller_data->metered_lane_stat[i].demand_stat,
-					i
-				);
+			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
+			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
+			}else{  // replce the flow measurement if it is not in the range
+                flow_temp[i]=200; // if the lane i has no valid data, then assign it a flow value.
 			}
+			//flow += (float)controller_data->metered_lane_stat[i].demand_vol;
+			//printf("OR-flow %d of detector %d \n", controller_data->metered_lane_stat[i].demand_vol, i);
+			}else{
+				 if(i=0){
+			        flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
+			     }else{
+			        flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+			     }
+			//   printf("flow_aggregation_onramp: Error %d detector %d\n",
+			//		controller_data->metered_lane_stat[i].demand_stat,
+			//		i
+			//	);
+			}
+	}
+	mean_flow = mean_array(flow_temp, num_lane);
+    var_flow = var_array(flow_temp, num_lane);
+
+	// this loop replace data with large variance
+    for(i=0 ; i < controller_data->num_main; i++) {
+	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
+            flow_temp[i] = mean_flow;
 	}
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
@@ -185,19 +214,44 @@ return mind(1000.0*controller_data->num_meter, maxd(flow,0));
 
 float flow_aggregation_offramp(db_urms_status3_t *controller_data){
         int i;
-        float flow = 0;
+        float flow = 0.0;
+		float mean_flow = 0.0;
+		float var_flow = 0.0;
+		int num_lane = 1;
+        num_lane = controller_data->num_addl_det;
+		float flow_temp [num_lane];
 
-	for(i=0 ; i< controller_data->num_addl_det; i++) {
-		if(controller_data->additional_det[i].stat == 2){
-			flow += (float)controller_data->additional_det[i].volume;
-			printf("FR-flow %d of detector %d \n", controller_data->additional_det[i].volume,i);
+	for(i=0 ; i< controller_data->num_addl_det; i++){  
+            if(controller_data->additional_det[i].stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
+			    if((float)controller_data->additional_det[i].volume> 0 && (float)controller_data->additional_det[i].volume < 2000){ // if flow is in the range
+			        flow_temp[i]=(float)controller_data->additional_det[i].volume;  
+				}else{  // replce the flow measurement if it is not in the range
+					flow_temp[i]=200; // if the lane i has no valid data, then assign it a flow value.
+				}   
+			//flow += (float)controller_data->additional_det[i].volume;
+			//printf("FR-flow %d of detector %d \n", controller_data->additional_det[i].volume,i);
 		}else{
-			printf("flow_aggregation_offramp: Error %d detector %d\n",
-				controller_data->additional_det[i].stat,
-				i
-			);
+			if(i=0){
+			   flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
+			}else{
+			   flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+			}
+			//printf("flow_aggregation_offramp: Error %d detector %d\n",
+			//	controller_data->additional_det[i].stat,
+			//	i
+			//);
 		}
 	}
+
+	mean_flow = mean_array(flow_temp, num_lane);
+    var_flow = var_array(flow_temp, num_lane);
+
+	// this loop replace data with large variance
+    for(i=0 ; i < controller_data->num_addl_det; i++) {
+	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
+            flow_temp[i] = mean_flow;
+	}
+
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
@@ -303,18 +357,38 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	float tmp = 0.0;
 	float speed = 0.0;
 	int i; //  lane number index
+	float mean_speed = 0.0;
+	float var_speed = 0.0;
+	int num_lane = 1;
+	num_lane = controller_data->num_main;
+	float speed_temp [num_lane];
 
 	for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			tmp += (1.0/((float)controller_data->mainline_stat[i].speed));
-			printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed, i);
+			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed < 150){ // if flow is in the range
+			    speed_temp[i]=(float)controller_data->mainline_stat[i].speed;  
+			}else{  // replce the flow measurement if it is not in the range
+                speed_temp[i]=50; // if lane i has no valid data, then assign it to be free flow speed.
+			}
+			//tmp += (1.0/((float)controller_data->mainline_stat[i].speed));
+			//printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed, i);
 		}else{
-			printf("speed_aggregation_mainline: Error %d detector %d\n",
-				controller_data->mainline_stat[i].lead_stat,
-				i
-			);
+			if(i=0){
+			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
+			}else{
+			   speed_temp[i] = speed_temp[i-1];
+			}
+			//printf("speed_aggregation_mainline: Error %d detector %d\n",
+			//	controller_data->mainline_stat[i].lead_stat,
+			//	i
+			//);
 		}
-	} 
+	}
+    
+    // compute harmonic mean
+	for(i=0 ; i < controller_data->num_main; i++) {
+	    tmp += (1.0/speed_temp[i]);
+	}
 	speed = max((controller_data->num_main)/tmp,0);
 	// check Nan 
 	if(isnan(speed)){
@@ -330,18 +404,43 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 	// compute mean of speed
 	float speed = 0.0;
 	int i; //  lane number index
-
+    float mean_speed = 0.0;
+	float var_speed = 0.0;
+	int num_lane = 1;
+	num_lane = controller_data->num_main;
+	float speed_temp [num_lane];
+	
 	for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			speed += (float)controller_data->mainline_stat[i].speed;
-			printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed,i);
+			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed < 150){ // if flow is in the range
+			    speed_temp[i]=(float)controller_data->mainline_stat[i].speed;  
+			}else{  // replce the flow measurement if it is not in the range
+                speed_temp[i]=50; // if lane i has no valid data, then assign it to be free flow speed.
+			}
+			//speed += (float)controller_data->mainline_stat[i].speed;
+			//printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed,i);
 		}else{
-			printf("mean_speed_aggregation_mainline: Error %d detector %d\n",
-				controller_data->mainline_stat[i].lead_stat,
-				i
-			);
+			if(i=0){
+			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
+			}else{
+			   speed_temp[i] = speed_temp[i-1];
+			}
+			//printf("mean_speed_aggregation_mainline: Error %d detector %d\n",
+			//	controller_data->mainline_stat[i].lead_stat,
+			//	i
+			//);
 		}
-	} 
+	}
+    
+	mean_speed = mean_array(speed_temp, num_lane);
+    var_speed = var_array(speed_temp, num_lane);
+
+	// this loop replace data with large variance
+    for(i=0 ; i < controller_data->num_main; i++) {
+	    if (abs(speed_temp[i]-mean_speed)>5*var_speed)
+            speed_temp[i] = mean_speed;
+	}
+
 	speed /= controller_data->num_main;
 	// check Nan 
 	if(isnan(speed)){
@@ -401,27 +500,29 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	float temp_flow = 0.0;
     float temp_speed = 0.0;
 	
-	int i;
-	for(i=0 ; i< controller_data->num_main; i++) {
-		if(controller_data->mainline_stat[i].lead_stat == 2){
-                temp_flow += (float)controller_data->mainline_stat[i].lead_vol;     // total flow
-			    temp_speed += (1./(float)controller_data->mainline_stat[i].speed); // harmonic mean speed
-				
-				printf("flow %4.2f speed %4.2f of detector %d \n",
-					(float)controller_data->mainline_stat[i].lead_vol, 
-					(float)controller_data->mainline_stat[i].speed, 
-					 i );
-		}else
-		{       printf("density_aggregation_mainline: Error %d detector %d\n",
-                    controller_data->mainline_stat[i].lead_stat,
-                    i
-					);
-		}
-	}
+	speed = mean_speed_aggregation_mainline(&controller_data);
+	flow = flow_aggregation_mainline(&controller_data);
+	//int i;
+	//for(i=0 ; i< controller_data->num_main; i++) {
+	//	if(controller_data->mainline_stat[i].lead_stat == 2){
+ //               temp_flow += (float)controller_data->mainline_stat[i].lead_vol;     // total flow
+	//		    temp_speed += (1./(float)controller_data->mainline_stat[i].speed); // harmonic mean speed
+	//			
+	//			printf("flow %4.2f speed %4.2f of detector %d \n",
+	//				(float)controller_data->mainline_stat[i].lead_vol, 
+	//				(float)controller_data->mainline_stat[i].speed, 
+	//				 i );
+	//	}else
+	//	{       printf("density_aggregation_mainline: Error %d detector %d\n",
+ //                   controller_data->mainline_stat[i].lead_stat,
+ //                   i
+	//				);
+	//	}
+	//}
 	
-	speed = mind(200,maxd(controller_data->num_main/temp_speed,0));
+	//speed = mind(200,maxd(controller_data->num_main/temp_speed,0));
 	speed =  mind(200,maxd(speed * 1.6,0));
-	flow = mind(10000, maxd(temp_flow,0));
+	//flow = mind(10000, maxd(temp_flow,0));
 	flow = mind(10000, maxd(flow * 120,0));
 	density = mind(2000,maxd(flow/speed,0));
     
