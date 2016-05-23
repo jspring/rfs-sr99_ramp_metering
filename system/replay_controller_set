@@ -36,12 +36,13 @@ do
 	y=$(($y+200))
 done
 
-echo "Starting opt_crm"
 cd /home/sr99_ramp_metering/src
-if [[ ! -d Out_Data ]]
+if [[ ! -d Out_Data_$TIMESTAMP ]] 
 then
-	mkdir Out_Data
+	mkdir Out_Data_$TIMESTAMP
 fi
+
+ln -s Out_Data_$TIMESTAMP Out_Data
 
 ./lnx/opt_crm 1>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.log 2>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.err &
 

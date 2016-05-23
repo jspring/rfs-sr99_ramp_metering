@@ -125,7 +125,8 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
         num_lane = controller_data->num_main;
 		float flow_temp [num_lane];
     // this loop get data from data base
-	for(i=0 ; i < controller_data->num_main; i++) {
+	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
+	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
 			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
 			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
@@ -135,7 +136,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			//flow += (float)controller_data->mainline_stat[i].lead_vol;
 			//printf("ML-flow %d of detector %d \n",controller_data->mainline_stat[i].lead_vol,i);
 		}else{
-            if(i=0){
+            if(i == 0){
 			   flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
 			}else{
 			   flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
@@ -145,7 +146,11 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			//	i
 			//);
 		}
+	    }
 	}
+	else
+		return FLOAT_ERROR;
+
 	mean_flow = mean_array(flow_temp, num_lane);
     var_flow = var_array(flow_temp, num_lane);
 
@@ -174,7 +179,8 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 		float flow_temp [num_lane];
     // this loop get data from data base
 
-	for(i=0 ; i< controller_data->num_meter;i++) {
+	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
+	    for(i=0 ; i< controller_data->num_meter;i++) {
 		if(controller_data->metered_lane_stat[i].demand_stat == 2){
 			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
 			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
@@ -184,7 +190,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 			//flow += (float)controller_data->metered_lane_stat[i].demand_vol;
 			//printf("OR-flow %d of detector %d \n", controller_data->metered_lane_stat[i].demand_vol, i);
 			}else{
-				 if(i=0){
+				 if(i== 0){
 			        flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
 			     }else{
 			        flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
@@ -194,12 +200,15 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 			//		i
 			//	);
 			}
+	    }
 	}
+	else
+		return FLOAT_ERROR;
 	mean_flow = mean_array(flow_temp, num_lane);
     var_flow = var_array(flow_temp, num_lane);
 
 	// this loop replace data with large variance
-    for(i=0 ; i < controller_data->num_main; i++) {
+    for(i=0 ; i < controller_data->num_meter; i++) {
 	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
             flow_temp[i] = mean_flow;
 	}
@@ -221,6 +230,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
         num_lane = controller_data->num_addl_det;
 		float flow_temp [num_lane];
 
+	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	for(i=0 ; i< controller_data->num_addl_det; i++){  
             if(controller_data->additional_det[i].stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
 			    if((float)controller_data->additional_det[i].volume> 0 && (float)controller_data->additional_det[i].volume < 2000){ // if flow is in the range
@@ -231,7 +241,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 			//flow += (float)controller_data->additional_det[i].volume;
 			//printf("FR-flow %d of detector %d \n", controller_data->additional_det[i].volume,i);
 		}else{
-			if(i=0){
+			if( i == 0){
 			   flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
 			}else{
 			   flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
@@ -241,7 +251,10 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 			//	i
 			//);
 		}
+	    }
 	}
+	else
+		return FLOAT_ERROR;
 
 	mean_flow = mean_array(flow_temp, num_lane);
     var_flow = var_array(flow_temp, num_lane);
@@ -265,7 +278,8 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	int i;
 	float occupancy = 0;
 
-	for(i=0 ; i < controller_data->num_main; i++) {
+	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
+	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
 			occupancy += (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb);
 			printf("Occ %f of detector %d \n", 
@@ -278,7 +292,10 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 				i
 			);
 		}
+	    }
 	}
+	else
+		return FLOAT_ERROR;
 
 	occupancy /= controller_data->num_main;
     // check Nan 
@@ -295,22 +312,26 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	int j;
 	float occupancy = 0;
 
-	for(i=0 ; i < controller_data->num_meter; i++) {
-	   for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
-		if(controller_data2->queue_stat[i][j].stat == 2){
-			occupancy += (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb);
-			printf("Occ %f of detector %d \n", 
-				   (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb),
-				   i
-		    );
-		}else{
-			printf("occupancy_aggregation_onramp: Error %d detector %d\n",
-				controller_data2->queue_stat[i][j].stat,
-				i
-			);
-		}
-	    }
+	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
+	    for(i=0 ; i < controller_data->num_meter; i++) {
+	   	for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
+			if(controller_data2->queue_stat[i][j].stat == 2){
+				occupancy += (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb);
+				printf("Occ %f of detector %d \n", 
+					   (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb),
+					   i
+			    );
+			}else{
+				printf("occupancy_aggregation_onramp: Error %d detector %d\n",
+					controller_data2->queue_stat[i][j].stat,
+					i
+				);
+			}
+	        }
+	   }
 	}
+	else
+		return FLOAT_ERROR;
 
 	occupancy /= controller_data->num_meter; // this is average onramp occupancy
     // check Nan 
@@ -326,7 +347,8 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data){
 	int i;
 	float occupancy = 0;
 
-	for(i=0 ; i < controller_data->num_addl_det; i++) {
+	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
+	    for(i=0 ; i < controller_data->num_addl_det; i++) {
 		if(controller_data->additional_det[i].stat == 2){
 			occupancy += (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
 			printf("Occ %f of detector %d \n", 
@@ -339,7 +361,10 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data){
 				i
 			);
 		}
+	    }
 	}
+	else
+		return FLOAT_ERROR;
 
 	occupancy /= controller_data->num_addl_det; // this is average offramp occupancy
     // check Nan 
@@ -357,13 +382,12 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	float tmp = 0.0;
 	float speed = 0.0;
 	int i; //  lane number index
-	float mean_speed = 0.0;
-	float var_speed = 0.0;
 	int num_lane = 1;
 	num_lane = controller_data->num_main;
 	float speed_temp [num_lane];
 
-	for(i=0 ; i < controller_data->num_main; i++) {
+	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
+	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
 			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed < 150){ // if flow is in the range
 			    speed_temp[i]=(float)controller_data->mainline_stat[i].speed;  
@@ -373,7 +397,7 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 			//tmp += (1.0/((float)controller_data->mainline_stat[i].speed));
 			//printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed, i);
 		}else{
-			if(i=0){
+			if(i == 0){
 			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
 			}else{
 			   speed_temp[i] = speed_temp[i-1];
@@ -383,7 +407,10 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 			//	i
 			//);
 		}
+	    }
 	}
+	else
+		return FLOAT_ERROR;
     
     // compute harmonic mean
 	for(i=0 ; i < controller_data->num_main; i++) {
@@ -410,7 +437,8 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 	num_lane = controller_data->num_main;
 	float speed_temp [num_lane];
 	
-	for(i=0 ; i < controller_data->num_main; i++) {
+	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
+	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
 			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed < 150){ // if flow is in the range
 			    speed_temp[i]=(float)controller_data->mainline_stat[i].speed;  
@@ -420,7 +448,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 			//speed += (float)controller_data->mainline_stat[i].speed;
 			//printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed,i);
 		}else{
-			if(i=0){
+			if(i == 0){
 			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
 			}else{
 			   speed_temp[i] = speed_temp[i-1];
@@ -430,7 +458,10 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 			//	i
 			//);
 		}
+	    }
 	}
+	else
+		return FLOAT_ERROR;
     
 	mean_speed = mean_array(speed_temp, num_lane);
     var_speed = var_array(speed_temp, num_lane);
@@ -461,6 +492,7 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 	int i; //  lane number index
 	int j; //  queue loop number index
 
+	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	for(i=0 ;i < controller_data->num_meter; i++) {
 	    for(j=0 ;j < MAX_QUEUE_LOOPS; j++) {
 		if(controller_data2->queue_stat[i][j].stat == 2){
@@ -484,6 +516,7 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 			);
 		}
 	    }
+	    }
 	}
 	// check Nan 
 	if(isnan(queue)){
@@ -497,30 +530,9 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
 	float density = 0.0;
 	float flow = 0.0;
 	float speed = 0.0;
-	float temp_flow = 0.0;
-    float temp_speed = 0.0;
 	
-	speed = mean_speed_aggregation_mainline(&controller_data);
-	flow = flow_aggregation_mainline(&controller_data);
-	//int i;
-	//for(i=0 ; i< controller_data->num_main; i++) {
-	//	if(controller_data->mainline_stat[i].lead_stat == 2){
- //               temp_flow += (float)controller_data->mainline_stat[i].lead_vol;     // total flow
-	//		    temp_speed += (1./(float)controller_data->mainline_stat[i].speed); // harmonic mean speed
-	//			
-	//			printf("flow %4.2f speed %4.2f of detector %d \n",
-	//				(float)controller_data->mainline_stat[i].lead_vol, 
-	//				(float)controller_data->mainline_stat[i].speed, 
-	//				 i );
-	//	}else
-	//	{       printf("density_aggregation_mainline: Error %d detector %d\n",
- //                   controller_data->mainline_stat[i].lead_stat,
- //                   i
-	//				);
-	//	}
-	//}
-	
-	//speed = mind(200,maxd(controller_data->num_main/temp_speed,0));
+	speed = mean_speed_aggregation_mainline(controller_data);
+	flow = flow_aggregation_mainline(controller_data);
 	speed =  mind(200,maxd(speed * 1.6,0));
 	//flow = mind(10000, maxd(temp_flow,0));
 	flow = mind(10000, maxd(flow * 120,0));
@@ -546,190 +558,3 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
            );
 	return mind(1200.0, maxd(density,0));
 }
-
-//float data[3] = {0}; // add data bound here
-
-//float add_cyclic_buffer_contents(float *data[]) {
-//    // static 
-//	float output = 0;
-//	int i;
-//
-//	for( i = 1; i >= 0; i--)
-//		data[i + 1] = data[i];
-//
-//	data[0] = datum;
-//
-//	for i = 0; i < 3; i++)
-//		output += data[i];
-//	
-//	return output;
-//}
-	
-/*
-float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3)
-{
-    float flow_agg = 0;
-	int flow_upper_bound = 50; //the unit is per lane per 30 second
-	flow_lane_1 = mind(maxd(flow_lane_1,0),flow_upper_bound);
-    flow_lane_2 = mind(maxd(flow_lane_2,0),flow_upper_bound);
-	flow_lane_3 = mind(maxd(flow_lane_3,0),flow_upper_bound);
-	flow_agg = (flow_lane_1+flow_lane_2+flow_lane_3)/3;
-	return flow_agg;
-}
-
-float flow_aggregation_4_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4)
-{
-    float flow_agg = 0;
-	int flow_upper_bound = 50; //the unit is per lane per 30 second
-	flow_lane_1 = mind(maxd(flow_lane_1,0),flow_upper_bound);
-    flow_lane_2 = mind(maxd(flow_lane_2,0),flow_upper_bound);
-	flow_lane_3 = mind(maxd(flow_lane_3,0),flow_upper_bound);
-	flow_lane_4 = mind(maxd(flow_lane_4,0),flow_upper_bound);
-	flow_agg = (flow_lane_1+flow_lane_2+flow_lane_3+flow_lane_4)/4;
-	return flow_agg;
-}
-
-float flow_aggregation_5_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4, float flow_lane_5)
-{
-    float flow_agg = 0;
-	int flow_upper_bound = 50; //the unit is per lane per 30 second
-	flow_lane_1 = mind(maxd(flow_lane_1,0),flow_upper_bound);
-    flow_lane_2 = mind(maxd(flow_lane_2,0),flow_upper_bound);
-	flow_lane_3 = mind(maxd(flow_lane_3,0),flow_upper_bound);
-	flow_lane_4 = mind(maxd(flow_lane_4,0),flow_upper_bound);
-	flow_lane_5 = mind(maxd(flow_lane_5,0),flow_upper_bound);
-	flow_agg = (flow_lane_1+flow_lane_2+flow_lane_3+flow_lane_4+flow_lane_5)/5;
-	return flow_agg;
-}
-
-float occ_aggregation_3_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3)
-{
-    float occ_agg = 0;
-    occ_lane_1 = mind(maxd(occ_lane_1,0),1);
-    occ_lane_2 = mind(maxd(occ_lane_2,0),1);
-	occ_lane_3 = mind(maxd(occ_lane_3,0),1);
-	occ_agg = (occ_lane_1+occ_lane_2+occ_lane_3)/3;
-	return occ_agg;
-}
-
-float occ_aggregation_4_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4)
-{
-    float occ_agg = 0;
-    occ_lane_1 = mind(maxd(occ_lane_1,0),1);
-    occ_lane_2 = mind(maxd(occ_lane_2,0),1);
-	occ_lane_3 = mind(maxd(occ_lane_3,0),1);
-	occ_lane_4 = mind(maxd(occ_lane_4,0),1);
-	occ_agg = (occ_lane_1+occ_lane_2+occ_lane_3+occ_lane_4)/4;
-	return occ_agg;
-}
-
-float occ_aggregation_5_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4, float occ_lane_5)
-{
-    float occ_agg = 0;
-    occ_lane_1 = mind(maxd(occ_lane_1,0),1);
-    occ_lane_2 = mind(maxd(occ_lane_2,0),1);
-	occ_lane_3 = mind(maxd(occ_lane_3,0),1);
-	occ_lane_4 = mind(maxd(occ_lane_4,0),1);
-	occ_lane_5 = mind(maxd(occ_lane_5,0),1);
-	occ_agg = (occ_lane_1+occ_lane_2+occ_lane_3+occ_lane_4+occ_lane_5)/5;
-	return occ_agg;
-}
-
-float speed_aggregation_3_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3)
-{
-    float speed_agg,speed_lane_1_t,speed_lane_2_t,speed_lane_3_t;
-	int speed_upper_bound = 200; // the unit is mile per hour 
-    speed_lane_1_t = mind(maxd(speed_lane_1,1.0), speed_upper_bound);
-    speed_lane_2_t = mind(maxd(speed_lane_2,1.0), speed_upper_bound);
-    speed_lane_3_t = mind(maxd(speed_lane_3,1.0), speed_upper_bound);
-    speed_lane_1_t = 1/speed_lane_1;
-    speed_lane_2_t = 1/speed_lane_2;
-    speed_lane_3_t = 1/speed_lane_3;
-	speed_agg = 3/(speed_lane_1_t+speed_lane_2_t+speed_lane_3_t);
-	
-	return speed_agg;
-}
-
-float speed_aggregation_4_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4)
-{
-    float speed_agg,speed_lane_1_t,speed_lane_2_t,speed_lane_3_t,speed_lane_4_t;
-	int speed_upper_bound = 200; // the unit is mile per hour 
-    speed_lane_1_t = mind(maxd(speed_lane_1,1.0), speed_upper_bound);
-    speed_lane_2_t = mind(maxd(speed_lane_2,1.0), speed_upper_bound);
-    speed_lane_3_t = mind(maxd(speed_lane_3,1.0), speed_upper_bound);
-    speed_lane_4_t = mind(maxd(speed_lane_4,1.0), speed_upper_bound);
-    speed_lane_1_t = 1/speed_lane_1;
-    speed_lane_2_t = 1/speed_lane_2;
-    speed_lane_3_t = 1/speed_lane_3;
-    speed_lane_4_t = 1/speed_lane_4;
-	speed_agg = 4/(speed_lane_1_t+speed_lane_2_t+speed_lane_3_t+speed_lane_4_t);
-	
-	return speed_agg;
-}
-
-float speed_aggregation_5_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4, float speed_lane_5)
-{
-    float speed_agg,speed_lane_1_t,speed_lane_2_t,speed_lane_3_t,speed_lane_4_t,speed_lane_5_t;
-	int speed_upper_bound = 200; // the unit is mile per hour 
-    speed_lane_1_t = mind(maxd(speed_lane_1,1.0), speed_upper_bound);
-    speed_lane_2_t = mind(maxd(speed_lane_2,1.0), speed_upper_bound);
-    speed_lane_3_t = mind(maxd(speed_lane_3,1.0), speed_upper_bound);
-    speed_lane_4_t = mind(maxd(speed_lane_4,1.0), speed_upper_bound);
-    speed_lane_5_t = mind(maxd(speed_lane_5,1.0), speed_upper_bound);
-	speed_lane_1_t = 1/speed_lane_1;
-    speed_lane_2_t = 1/speed_lane_2;
-    speed_lane_3_t = 1/speed_lane_3;
-    speed_lane_4_t = 1/speed_lane_4;
-	speed_lane_5_t = 1/speed_lane_5;
-	speed_agg = 5/(speed_lane_1_t+speed_lane_2_t+speed_lane_3_t+speed_lane_4_t+speed_lane_5_t);
-	
-	return speed_agg;
-}
-*/
-
-/*
-float get_split_ratio(float upstream_total_flow, float off_ramp_flow)
-{   
-	float split_ratio;
-	split_ratio = off_ramp_flow/upstream_total_flow;    
-	return split_ratio;
-}
-
-float get_queue_estimation(float in_flow, float out_flow, float previous_queue)
-{
-	float sampling_time = 30;
-	float current_queue;
-	float queue_upper_bound=50;
-	current_queue = previous_queue + sampling_time*(in_flow-out_flow);
-	current_queue = mind(maxd(current_queue,0),queue_upper_bound);
-	return current_queue;
-}
-
-float get_density_estimation(float in_flow, float out_flow, float section_length, float previous_density, float speed)
-{
-    float sampling_time = 30;
-	float current_density;
-	float density_upper_bound=200;
-	current_density = previous_density + (sampling_time/section_length)*(in_flow-out_flow);
-	current_density = mind(maxd(current_density,0),density_upper_bound);
-	return current_density;
-}
-
-float get_off_ramp_flow_by_flow_balance(float upstream_total_flow, float on_ramp_flow, float downstream_total_flow)
-{
-	float off_ramp_flow;
-	float off_ramp_flow_upper_bound = 500;
-    off_ramp_flow = upstream_total_flow+on_ramp_flow-downstream_total_flow;
-	off_ramp_flow = mind(maxd(off_ramp_flow,0),off_ramp_flow_upper_bound);
-	return off_ramp_flow; 
-}
-
-float get_on_ramp_flow_by_flow_balance(float upstream_total_flow, float downstream_total_flow, float off_ramp_flow)
-{
-    float on_ramp_flow;
-    float on_ramp_flow_upper_bound = 500;
-    on_ramp_flow = off_ramp_flow+downstream_total_flow-upstream_total_flow;
-	on_ramp_flow = mind(maxd(off_ramp_flow,0),on_ramp_flow_upper_bound);
-	return on_ramp_flow; 
-}
-*/
