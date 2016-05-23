@@ -281,9 +281,9 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			occupancy += (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb);
+			occupancy += 0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) );
 			printf("Occ %f of detector %d \n", 
-				   (float)((controller_data->mainline_stat[i].lead_occ_msb << 8) + controller_data->mainline_stat[i].lead_occ_lsb),
+				0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) ),
 				   i
 		    );
 		}else{
@@ -316,9 +316,9 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	    for(i=0 ; i < controller_data->num_meter; i++) {
 	   	for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
 			if(controller_data2->queue_stat[i][j].stat == 2){
-				occupancy += (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb);
-				printf("Occ %f of detector %d \n", 
-					   (float)((controller_data2->queue_stat[i][j].occ_msb << 8) + controller_data2->queue_stat[i][j].occ_lsb),
+			occupancy += 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
+				printf("occupancy_aggregation_onramp: Occ %f of detector %d \n", 
+					0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) ),
 					   i
 			    );
 			}else{
@@ -351,8 +351,9 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data){
 	    for(i=0 ; i < controller_data->num_addl_det; i++) {
 		if(controller_data->additional_det[i].stat == 2){
 			occupancy += (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
-			printf("Occ %f of detector %d \n", 
-				   (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb),
+			occupancy += 0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) );
+			printf("occupancy_aggregation_offramp: Occ %f of detector %d \n", 
+				   0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) ),
 				   i
 		    );
 		}else{
