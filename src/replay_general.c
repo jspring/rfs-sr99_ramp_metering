@@ -39,7 +39,7 @@ unsigned int num_trig_variables = sizeof(db_trig_list)/sizeof(int);
 const char *usage = "-d <Database number (Modulo 4!)> -f <filename> -i (loop interval) -v (verbose)\n"; 
 
 int main(int argc, char *argv[]) {
-	char strbuf[500];
+	char strbuf[1000];
 	FILE *filestream; 
 	char *filename; 
 	int use_db = 1;
@@ -104,28 +104,30 @@ int main(int argc, char *argv[]) {
 	} else
 		sig_ign(sig_list, sig_hand);
 
-	memset(strbuf, 0, 500);
+	memset(strbuf, 0, 1000);
 	filestream = fopen(filename, "r");
-	while(fgets(strbuf, 500, filestream) != NULL) {
+	while(fgets(strbuf, 1000, filestream) != NULL) {
 		get_data_log_line(strbuf, file_spec, num_file_columns);
-		if(verbose) {
-			printf("%hhx %.3f num_file_columns %d\n", 
-				db_urms_status.mainline_stat[0].lead_stat,
-				urms_datafile.mainline_lead_occ[0],
-				num_file_columns
-			);
-			printf("strbuf %s\n", strbuf);
-		}
 		if(use_db) {
-#define NUM_MAINLINES           3
+#define NUM_MAINLINES           6
 #define NUM_ONRAMP_LANES        3
 #define NUM_OFFRAMP_LANES       2
                         for(i=0; i<NUM_MAINLINES; i++) {
                                 temp_ushort = (unsigned short)(urms_datafile.mainline_lead_occ[i] * 10);
                                 db_urms_status.mainline_stat[i].lead_occ_msb = (unsigned char)( (temp_ushort >> 8) & 0xFF);
                                 db_urms_status.mainline_stat[i].lead_occ_lsb = (unsigned char)(temp_ushort & 0xFF);
+		if(verbose) {
+			printf("%hhx lead_occ %.3f msb %#hhx lsb %#hhx num_file_columns %d\n", 
+				db_urms_status.mainline_stat[i].lead_stat,
+				urms_datafile.mainline_lead_occ[i],
+				db_urms_status.mainline_stat[i].lead_occ_msb, 
+				db_urms_status.mainline_stat[i].lead_occ_lsb, 
+				num_file_columns
+			);
                         }
 			db_clt_write(pclt, db_urms_status_var, sizeof(db_urms_status_t), &db_urms_status);
+			printf("strbuf %s\n", strbuf);
+		}
 		}
 		TIMER_WAIT(ptimer);
 	}
