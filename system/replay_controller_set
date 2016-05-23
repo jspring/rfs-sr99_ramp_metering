@@ -37,6 +37,9 @@ do
 done
 
 cd /home/sr99_ramp_metering/src
+
+rm Out_Data
+
 if [[ ! -d Out_Data_$TIMESTAMP ]] 
 then
 	mkdir Out_Data_$TIMESTAMP
