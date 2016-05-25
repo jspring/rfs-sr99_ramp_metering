@@ -197,7 +197,8 @@ const char *controller_ip_strings[] = {
 }; //FR6, FR7, FR8, and FR11 are missing
 //** This part aggregate data for each URMS2070 controller in the field   
 	int OnRampIndex [NUM_CONTROLLER_VARS/6] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
-	int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
+	int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
+	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
 //	float float_temp = 0;
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
 		printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
@@ -285,12 +286,17 @@ int j; //
 	    onramp_out[i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0));
 	}
 
-//This part aggregate onramp data for each section
-	int offrampCTidx[5] = {10, 16, 21, 23, 27}; // 4 off-ramp is missing, total number of off-ramps is 9 		 
-	for(i=0;i<5;i++){
-		offramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
-		offramp_out[i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
-	}
+//This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
+	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23,25}; // 4 off-ramp is missing, total number of off-ramps is 9 
+	for(i=0;i<NumOnRamp;i++){ 
+		if (offrampCTidx[i] != -1){//<-- impute data here
+			offramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
+			offramp_out[i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
+		}else{
+			offramp_out[i].agg_vol = 0;
+			offramp_out[i].agg_occ = 0;
+		}
+	} 
 
 
 /*###################################################################################################################

@@ -115,7 +115,7 @@ long int nCr(int n, int r)
     ncr = npr / factorial(r);
 	return ncr;
 }
-
+// Def minumum lane flow 
 float flow_aggregation_mainline(db_urms_status_t *controller_data){
         int i;
         float flow = 0.0;
@@ -131,15 +131,18 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
 			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
 			}else{  // replce the flow measurement if it is not in the range
-                flow_temp[i]= 200; // if the lane i has no valid data, then assign it a flow value.
+                flow_temp[i]= 1000; // if the lane i has no valid data, then assign it a flow value.
 			}
 			//flow += (float)controller_data->mainline_stat[i].lead_vol;
 			//printf("ML-flow %d of detector %d \n",controller_data->mainline_stat[i].lead_vol,i);
 		}else{
             if(i == 0){
-			   flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
+			   flow_temp[i] = 1000; // if the first lane has no valid data, then assign it a flow value.
 			}else{
-			   flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+				// check data range, then replace
+				if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
+			        flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+				}
 			}
 			//printf("flow_aggregation_mainline: Error %d detector %d\n",
 			//	controller_data->mainline_stat[i].lead_stat, 
@@ -149,7 +152,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return FLOAT_ERROR; // <--handel the float error here
 
 	mean_flow = mean_array(flow_temp, num_lane);
     var_flow = var_array(flow_temp, num_lane);
@@ -193,8 +196,10 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 				 if(i== 0){
 			        flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
 			     }else{
-			        flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
-			     }
+                    if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
+						flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+					}
+				 }
 			//   printf("flow_aggregation_onramp: Error %d detector %d\n",
 			//		controller_data->metered_lane_stat[i].demand_stat,
 			//		i
@@ -244,7 +249,9 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 			if( i == 0){
 			   flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
 			}else{
-			   flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+				if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
+					flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+				}
 			}
 			//printf("flow_aggregation_offramp: Error %d detector %d\n",
 			//	controller_data->additional_det[i].stat,
@@ -401,7 +408,9 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 			if(i == 0){
 			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
 			}else{
-			   speed_temp[i] = speed_temp[i-1];
+				if(!(speed_temp[i]>0 && speed_temp[i]<150)){
+					speed_temp[i] = speed_temp[i-1];
+				}
 			}
 			//printf("speed_aggregation_mainline: Error %d detector %d\n",
 			//	controller_data->mainline_stat[i].lead_stat,
@@ -452,7 +461,9 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 			if(i == 0){
 			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
 			}else{
-			   speed_temp[i] = speed_temp[i-1];
+				 if(!(speed_temp[i]>0 && speed_temp[i]<150)){
+					speed_temp[i] = speed_temp[i-1];
+				 }
 			}
 			//printf("mean_speed_aggregation_mainline: Error %d detector %d\n",
 			//	controller_data->mainline_stat[i].lead_stat,
