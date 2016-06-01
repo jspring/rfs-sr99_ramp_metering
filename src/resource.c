@@ -209,6 +209,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	}
 	else
 		return FLOAT_ERROR;
+
 	mean_flow = mean_array(flow_temp, num_lane);
     var_flow = var_array(flow_temp, num_lane);
 

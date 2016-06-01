@@ -289,7 +289,7 @@ int j; //
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
 	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23,25}; // 4 off-ramp is missing, total number of off-ramps is 9 
 	for(i=0;i<NumOnRamp;i++){ 
-		if (offrampCTidx[i] != -1){//<-- impute data here
+		if (offrampCTidx[i] != -1.0){//<-- impute data here
 			offramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
 			offramp_out[i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
 		}else{
@@ -297,6 +297,22 @@ int j; //
 			offramp_out[i].agg_occ = 0;
 		}
 	} 
+
+// replace bad flow data by upstream data
+   for(i=0;i<SecSize;i++){
+	   if( (i==0) && (mainline_out[i].agg_vol==-1.0)){
+	       mainline_out[i].agg_vol = 1000;
+	   }else if( (i!=0) && (mainline_out[i].agg_vol==-1.0) &&  (mainline_out[i-1].agg_vol!=-1.0) && (mainline_out[i+1].agg_vol=-1.0))
+	   {
+	       mainline_out[i].agg_vol = mainline_out[i-1].agg_vol;
+	   }else if ( (i!=0) && (mainline_out[i].agg_vol==-1.0) &&  (mainline_out[i].agg_vol!=-1.0) &&  (mainline_out[i+1].agg_vol!=-1.0) && (i!=(SecSize-1)))
+	   {
+           mainline_out[i].agg_vol = 0.5*(mainline_out[i-1].agg_vol+mainline_out[i+1].agg_vol);
+	   }else if ( (i==(SecSize-1)) &&  (mainline_out[SecSize-1].agg_vol==-1.0))
+	   {
+           mainline_out[SecSize-1].agg_vol = 1000; 
+	   }
+   }
 
 
 /*###################################################################################################################
