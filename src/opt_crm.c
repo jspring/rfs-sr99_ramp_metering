@@ -72,6 +72,7 @@ const char *usage = "-d (debug mode, i.e. use the two controllers in my office)"
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
+#define NUM_CYCLE_BUFFS       5
 
 int main(int argc, char *argv[])
 {
@@ -90,12 +91,14 @@ int main(int argc, char *argv[])
 	char hostname[MAXHOSTNAMELEN+1];
 	int interval = 1000;      /// Number of milliseconds between saves
 	posix_timer_typ *ptimer;       /* Timing proxy */
+	int cycle_index = 0;
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
 //	int verbose = 0;
-	agg_data_t mainline_out[SecSize] = {{0}};      // data aggregated section by section
-	agg_data_t onramp_out[NumOnRamp] = {{0}};      // data aggregated section by section
-	agg_data_t offramp_out[NUM_OFFRAMPS] = {{0}};  // data aggregated section by section
+	agg_data_t mainline_out[NUM_CYCLE_BUFFS][SecSize] =  {{{0}},{{0}}};      // data aggregated section by section
+	agg_data_t onramp_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section
+	agg_data_t offramp_out[NUM_CYCLE_BUFFS][NUM_OFFRAMPS] = {{{0}},{{0}}};  // data aggregated section by section
+
 	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
 	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};               // data aggregated controller by controller
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};             // data aggregated controller by controller
@@ -263,12 +266,12 @@ int j; //
 				temp_num_ct ++;
 			}
 		}
-		mainline_out[i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
-		mainline_out[i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,0));
-	    mainline_out[i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
-		mainline_out[i].agg_density = Mind(1200.0, Maxd(temp_density/temp_num_ct,0));
-		mainline_out[i].agg_mean_speed =  Mind(150.0, Maxd(temp_mean_speed/temp_num_ct,0));
-		
+		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
+		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,0));
+		mainline_out[cycle_index][i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
+		mainline_out[cycle_index][i].agg_density = Mind(1200.0, Maxd(temp_density/temp_num_ct,0));
+		mainline_out[cycle_index][i].agg_mean_speed =  Mind(150.0, Maxd(temp_mean_speed/temp_num_ct,0));
+
 		// Initialize all temp variables
 		temp_num_ct = 0.0; 
 		temp_vol = 0.0;
@@ -282,35 +285,36 @@ int j; //
 //This part aggregate onramp data for each section
 	int onrampCTidx[NumOnRamp] = {8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 
 	for(i=0;i<NumOnRamp;i++){
-		onramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
-	    onramp_out[i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0));
+		onramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
+		onramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0));
+
 	}
 
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
 	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23,25}; // 4 off-ramp is missing, total number of off-ramps is 9 
 	for(i=0;i<NumOnRamp;i++){ 
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
-			offramp_out[i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
-			offramp_out[i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
+			offramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
+			offramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
 		}else{
-			offramp_out[i].agg_vol = 0;
-			offramp_out[i].agg_occ = 0;
+			offramp_out[cycle_index][i].agg_vol = 0;
+			offramp_out[cycle_index][i].agg_occ = 0;
 		}
 	} 
 
 // replace bad flow data by upstream data
    for(i=0;i<SecSize;i++){
-	   if( (i==0) && (mainline_out[i].agg_vol==-1.0)){
-	       mainline_out[i].agg_vol = 1000;
-	   }else if( (i!=0) && (mainline_out[i].agg_vol==-1.0) &&  (mainline_out[i-1].agg_vol!=-1.0) && (mainline_out[i+1].agg_vol=-1.0))
+	   if( (i==0) && (mainline_out[cycle_index][i].agg_vol==-1.0)){
+	       mainline_out[cycle_index][i].agg_vol = 1000;
+	   }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i-1].agg_vol!=-1.0) && (mainline_out[cycle_index][i+1].agg_vol=-1.0))
 	   {
-	       mainline_out[i].agg_vol = mainline_out[i-1].agg_vol;
-	   }else if ( (i!=0) && (mainline_out[i].agg_vol==-1.0) &&  (mainline_out[i].agg_vol!=-1.0) &&  (mainline_out[i+1].agg_vol!=-1.0) && (i!=(SecSize-1)))
+	       mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
+	   }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i].agg_vol!=-1.0) &&  (mainline_out[cycle_index][i+1].agg_vol!=-1.0) && (i!=(SecSize-1)))
 	   {
-           mainline_out[i].agg_vol = 0.5*(mainline_out[i-1].agg_vol+mainline_out[i+1].agg_vol);
-	   }else if ( (i==(SecSize-1)) &&  (mainline_out[SecSize-1].agg_vol==-1.0))
+           mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
+	   }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol==-1.0))
 	   {
-           mainline_out[SecSize-1].agg_vol = 1000; 
+           mainline_out[cycle_index][SecSize-1].agg_vol = 1000; 
 	   }
    }
 
@@ -322,14 +326,14 @@ int j; //
 		print_timestamp(st_file_out, &ts);
 		for(i=0;i<SecSize;i++)
 		{
-			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
-			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out[i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
-			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
-			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
-			    fprintf(st_file_out,"sec %d %.6f ",i,mainline_out[i].agg_vol); 
-			    fprintf(st_file_out,"%.6f ", mainline_out[i].agg_speed); 
-				fprintf(st_file_out,"%.6f ", mainline_out[i].agg_occ); 
-				fprintf(st_file_out,"%.6f ", mainline_out[i].agg_density); 
+			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out[cycle_index][i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out[cycle_index][i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out[cycle_index][i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[cycle_index][i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
+			    fprintf(st_file_out,"sec %d %.6f ",i,mainline_out[cycle_index][i].agg_vol); 
+			    fprintf(st_file_out,"%.6f ", mainline_out[cycle_index][i].agg_speed); 
+				fprintf(st_file_out,"%.6f ", mainline_out[cycle_index][i].agg_occ); 
+				fprintf(st_file_out,"%.6f ", mainline_out[cycle_index][i].agg_density); 
 
 
 		}			                               
@@ -337,14 +341,14 @@ int j; //
 		
 		for(i=0;i<NumOnRamp;i++)
 		{	
-				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
-				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
-				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
-				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
-				fprintf(st_file_out,"ramp %d %f ", i, onramp_out[i].agg_vol);  			
-				fprintf(st_file_out,"%f ", onramp_out[i].agg_occ);  			
-				fprintf(st_file_out,"%f ", offramp_out[i].agg_vol);
-				fprintf(st_file_out,"%f ", offramp_out[i].agg_occ);
+				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out[cycle_index][i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out[cycle_index][i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
+				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out[cycle_index][i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out[cycle_index][i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
+				fprintf(st_file_out,"ramp %d %f ", i, onramp_out[cycle_index][i].agg_vol);  			
+				fprintf(st_file_out,"%f ", onramp_out[cycle_index][i].agg_occ);  			
+				fprintf(st_file_out,"%f ", offramp_out[cycle_index][i].agg_vol);
+				fprintf(st_file_out,"%f ", offramp_out[cycle_index][i].agg_occ);
 		}
 		fprintf(st_file_out,"\n");
 		
@@ -374,6 +378,9 @@ int j; //
 		else if (use_CRM == 4)
 			Set_Hybrid_Meter(time,time2,timeSta);  // upstream use default; downstream 11 onramps use CRM
 		else;
+
+		cycle_index++;
+		cycle_index %= NUM_CYCLE_BUFFS;
 	
 		TIMER_WAIT(ptimer);	
 
