@@ -98,6 +98,10 @@ int main(int argc, char *argv[])
 	agg_data_t mainline_out[NUM_CYCLE_BUFFS][SecSize] =  {{{0}},{{0}}};      // data aggregated section by section
 	agg_data_t onramp_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section
 	agg_data_t offramp_out[NUM_CYCLE_BUFFS][NUM_OFFRAMPS] = {{{0}},{{0}}};  // data aggregated section by section
+    
+	agg_data_t mainline_out_f[SecSize] = {{0}};        // save filtered data to this array
+	agg_data_t onramp_out_f[NumOnRamp] = {{0}};        // save filtered data to this array
+	agg_data_t offramp_out_f[NUM_OFFRAMPS] = {{0}};    // save filtered data to this array
 
 	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
 	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};               // data aggregated controller by controller
@@ -318,6 +322,51 @@ int j; //
 	   }
    }
 
+// average the historical data from data buffer
+
+   for(i=0;i<SecSize;i++){
+        float temp_num_ct = 0.0; // number of controllers per section
+		float temp_vol = 0.0;
+		float temp_speed = 0.0;
+		float temp_occ = 0.0;
+		float temp_density = 0.0;
+		float temp_mean_speed = 0.0;	
+
+
+	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
+	  {
+        temp_vol += mainline_out[j][i].agg_vol;
+		temp_speed += mainline_out[j][i].agg_speed;
+		temp_occ += mainline_out[j][i].agg_occ;
+		temp_density += mainline_out[j][i].agg_density;
+		temp_mean_speed += mainline_out[j][i].agg_mean_speed;
+
+	  }
+	  mainline_out_f[i].agg_vol = temp_vol/NUM_CYCLE_BUFFS;
+	  mainline_out_f[i].agg_speed = temp_speed /NUM_CYCLE_BUFFS;
+      mainline_out_f[i].agg_occ = temp_occ/NUM_CYCLE_BUFFS;
+	  mainline_out_f[i].agg_density = temp_density/NUM_CYCLE_BUFFS;
+   }
+
+   for(i=0;i<NumOnRamp;i++){
+		float temp_OR_vol = 0.0;
+		float temp_OR_occ = 0.0;
+		float temp_FR_vol = 0.0;
+		float temp_FR_occ = 0.0;
+	
+
+	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
+	  {
+	    temp_OR_vol += onramp_out[j][i].agg_vol;
+		temp_OR_occ += onramp_out[j][i].agg_occ;
+		temp_FR_vol += offramp_out[j][i].agg_vol;
+		temp_FR_occ += offramp_out[j][i].agg_occ;
+	  }
+	  onramp_out_f[i].agg_vol = temp_OR_vol/NUM_CYCLE_BUFFS;
+	  onramp_out_f[i].agg_occ= temp_OR_occ /NUM_CYCLE_BUFFS;
+      offramp_out_f[i].agg_vol = temp_FR_vol/NUM_CYCLE_BUFFS;
+	  offramp_out_f[i].agg_occ = temp_FR_occ/NUM_CYCLE_BUFFS;
+   }
 
 /*###################################################################################################################
 ###################################################################################################################*/
@@ -326,14 +375,14 @@ int j; //
 		print_timestamp(st_file_out, &ts);
 		for(i=0;i<SecSize;i++)
 		{
-			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out[cycle_index][i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
-			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out[cycle_index][i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
-			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out[cycle_index][i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
-			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out[cycle_index][i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
-			    fprintf(st_file_out,"sec %d %.6f ",i,mainline_out[cycle_index][i].agg_vol); 
-			    fprintf(st_file_out,"%.6f ", mainline_out[cycle_index][i].agg_speed); 
-				fprintf(st_file_out,"%.6f ", mainline_out[cycle_index][i].agg_occ); 
-				fprintf(st_file_out,"%.6f ", mainline_out[cycle_index][i].agg_density); 
+			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out_f[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out_f[i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
+			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
+			    fprintf(st_file_out,"sec %d %.6f ",i,mainline_out_f[i].agg_vol); 
+			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 
+				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); 
+				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); 
 
 
 		}			                               
@@ -341,14 +390,14 @@ int j; //
 		
 		for(i=0;i<NumOnRamp;i++)
 		{	
-				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out[cycle_index][i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
-				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out[cycle_index][i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
-				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out[cycle_index][i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
-				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out[cycle_index][i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
-				fprintf(st_file_out,"ramp %d %f ", i, onramp_out[cycle_index][i].agg_vol);  			
-				fprintf(st_file_out,"%f ", onramp_out[cycle_index][i].agg_occ);  			
-				fprintf(st_file_out,"%f ", offramp_out[cycle_index][i].agg_vol);
-				fprintf(st_file_out,"%f ", offramp_out[cycle_index][i].agg_occ);
+				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
+				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
+				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
+				fprintf(st_file_out,"ramp %d %f ", i, onramp_out_f[i].agg_vol);  			
+				fprintf(st_file_out,"%f ", onramp_out_f[i].agg_occ);  			
+				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_vol);
+				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_occ);
 		}
 		fprintf(st_file_out,"\n");
 		
