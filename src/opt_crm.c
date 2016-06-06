@@ -270,7 +270,7 @@ int j; //
 				temp_num_ct ++;
 			}
 		}
-		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
+		mainline_out[cycle_index][i].agg_vol = 668;//Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
 		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,0));
 		mainline_out[cycle_index][i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
 		mainline_out[cycle_index][i].agg_density = Mind(1200.0, Maxd(temp_density/temp_num_ct,0));
@@ -325,7 +325,7 @@ int j; //
 // average the historical data from data buffer
 
    for(i=0;i<SecSize;i++){
-        float temp_num_ct = 0.0; // number of controllers per section
+        //float temp_num_ct = 0.0; // number of controllers per section
 		float temp_vol = 0.0;
 		float temp_speed = 0.0;
 		float temp_occ = 0.0;
@@ -343,9 +343,16 @@ int j; //
 
 	  }
 	  mainline_out_f[i].agg_vol = temp_vol/NUM_CYCLE_BUFFS;
-	  mainline_out_f[i].agg_speed = temp_speed /NUM_CYCLE_BUFFS;
+	  mainline_out_f[i].agg_speed = temp_speed/NUM_CYCLE_BUFFS;
       mainline_out_f[i].agg_occ = temp_occ/NUM_CYCLE_BUFFS;
 	  mainline_out_f[i].agg_density = temp_density/NUM_CYCLE_BUFFS;
+
+	  temp_vol = 0.0;
+	  temp_speed = 0.0;
+	  temp_occ = 0.0;
+      temp_density = 0.0;
+	  temp_mean_speed = 0.0;
+
    }
 
    for(i=0;i<NumOnRamp;i++){
