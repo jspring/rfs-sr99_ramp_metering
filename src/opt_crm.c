@@ -307,20 +307,20 @@ int j; //
 	} 
 
 // replace bad flow data by upstream data
-   for(i=0;i<SecSize;i++){
-	   if( (i==0) && (mainline_out[cycle_index][i].agg_vol==-1.0)){
-	       mainline_out[cycle_index][i].agg_vol = 1000;
-	   }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i-1].agg_vol!=-1.0) && (mainline_out[cycle_index][i+1].agg_vol=-1.0))
-	   {
-	       mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
-	   }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i].agg_vol!=-1.0) &&  (mainline_out[cycle_index][i+1].agg_vol!=-1.0) && (i!=(SecSize-1)))
-	   {
-           mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
-	   }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol==-1.0))
-	   {
-           mainline_out[cycle_index][SecSize-1].agg_vol = 1000; 
-	   }
-   }
+   //for(i=0;i<SecSize;i++){
+	  // if( (i==0) && (mainline_out[cycle_index][i].agg_vol==-1.0)){
+	  //     mainline_out[cycle_index][i].agg_vol = 1000;
+	  // }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i-1].agg_vol!=-1.0) && (mainline_out[cycle_index][i+1].agg_vol=-1.0))
+	  // {
+	  //     mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
+	  // }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i].agg_vol!=-1.0) &&  (mainline_out[cycle_index][i+1].agg_vol!=-1.0) && (i!=(SecSize-1)))
+	  // {
+   //        mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
+	  // }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol==-1.0))
+	  // {
+   //        mainline_out[cycle_index][SecSize-1].agg_vol = 1000; 
+	  // }
+   //}
 
 // average the historical data from data buffer
 
