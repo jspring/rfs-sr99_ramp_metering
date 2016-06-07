@@ -347,23 +347,22 @@ int j; //
    }
 
    for(i=0;i<NumOnRamp;i++){
-		float temp_OR_vol = 0.0;
-		float temp_OR_occ = 0.0;
-		float temp_FR_vol = 0.0;
-		float temp_FR_occ = 0.0;
-	
+		float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {{0}};
 
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
-	    temp_OR_vol += onramp_out[j][i].agg_vol;
-		temp_OR_occ += onramp_out[j][i].agg_occ;
-		temp_FR_vol += offramp_out[j][i].agg_vol;
-		temp_FR_occ += offramp_out[j][i].agg_occ;
+	     temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
+		 temp_ary_OR_occ[j] = onramp_out[j][i].agg_occ;   
+		 temp_ary_FR_vol[j] = offramp_out[j][i].agg_vol;   
+		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;   
 	  }
-	  onramp_out_f[i].agg_vol = temp_OR_vol/NUM_CYCLE_BUFFS;
-	  onramp_out_f[i].agg_occ= temp_OR_occ /NUM_CYCLE_BUFFS;
-      offramp_out_f[i].agg_vol = temp_FR_vol/NUM_CYCLE_BUFFS;
-	  offramp_out_f[i].agg_occ = temp_FR_occ/NUM_CYCLE_BUFFS;
+	  onramp_out_f[i].agg_vol =  mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS);
+	  onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
+      offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
+	  offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
    }
 
 /*###################################################################################################################
