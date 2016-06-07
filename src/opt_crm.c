@@ -377,9 +377,8 @@ int j; //
 			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out_f[i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
-			    //fprintf(st_file_out,"sec %d %.6f ",i,mainline_out_f[i].agg_vol); 
-                fprintf(st_file_out,"sec %d %.6f ",i,controller_mainline_data[secCTidx[i][0]].agg_vol); 
-				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 
+			    fprintf(st_file_out,"sec %d %.6f ",i,mainline_out_f[i].agg_vol); 
+                fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 
 				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); 
 				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); 
 
