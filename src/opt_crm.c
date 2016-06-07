@@ -344,35 +344,6 @@ int j; //
 	   mainline_out_f[i].agg_speed = mean_array(temp_ary_speed,NUM_CYCLE_BUFFS);
        mainline_out_f[i].agg_occ = mean_array(temp_ary_occ,NUM_CYCLE_BUFFS);
 	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
-
-        //float temp_num_ct = 0.0; // number of controllers per section
-		//float temp_vol = 0.0;
-		//float temp_speed = 0.0;
-		//float temp_occ = 0.0;
-		//float temp_density = 0.0;
-		//float temp_mean_speed = 0.0;	
-
-
-	 // for(j=0; j<NUM_CYCLE_BUFFS; j++)
-	 // {
-  //      temp_vol += mainline_out[j][i].agg_vol;
-		//temp_speed += mainline_out[j][i].agg_speed;
-		//temp_occ += mainline_out[j][i].agg_occ;
-		//temp_density += mainline_out[j][i].agg_density;
-		//temp_mean_speed += mainline_out[j][i].agg_mean_speed;
-
-	 // }
-	 // mainline_out_f[i].agg_vol = temp_vol/NUM_CYCLE_BUFFS;
-	 // mainline_out_f[i].agg_speed = temp_speed/NUM_CYCLE_BUFFS;
-  //    mainline_out_f[i].agg_occ = temp_occ/NUM_CYCLE_BUFFS;
-	 // mainline_out_f[i].agg_density = temp_density/NUM_CYCLE_BUFFS;
-
-	  //temp_vol = 0.0;
-	  //temp_speed = 0.0;
-	  //temp_occ = 0.0;
-   //   temp_density = 0.0;
-	  //temp_mean_speed = 0.0;
-
    }
 
    for(i=0;i<NumOnRamp;i++){
@@ -406,8 +377,9 @@ int j; //
 			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out_f[i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
-			    fprintf(st_file_out,"sec %d %.6f ",i,mainline_out_f[i].agg_vol); 
-			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 
+			    //fprintf(st_file_out,"sec %d %.6f ",i,mainline_out_f[i].agg_vol); 
+                fprintf(st_file_out,"sec %d %.6f ",i,controller_mainline_data[secCTidx[i][0]].agg_vol); 
+				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 
 				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); 
 				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); 
 
