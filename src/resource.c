@@ -158,10 +158,10 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
     var_flow = var_array(flow_temp, num_lane);
 
 	// this loop replace data with large variance
-    for(i=0 ; i < controller_data->num_main; i++) {
-	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
-            flow_temp[i] = mean_flow;
-	}
+    //for(i=0 ; i < controller_data->num_main; i++) {
+	//    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
+    //        flow_temp[i] = mean_flow;
+	//}
 	 
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
