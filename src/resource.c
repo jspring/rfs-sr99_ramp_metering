@@ -158,11 +158,14 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
     var_flow = var_array(flow_temp, num_lane);
 
 	// this loop replace data with large variance
-    //for(i=0 ; i < controller_data->num_main; i++) {
-	//    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
-    //        flow_temp[i] = mean_flow;
-	//}
-	 
+    for(i=0 ; i < controller_data->num_main; i++) {
+	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
+            flow_temp[i] = mean_flow;
+	}
+	
+	// average the cleaned data
+	flow = mean_array(flow_temp, num_lane);
+    
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
@@ -218,6 +221,10 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
             flow_temp[i] = mean_flow;
 	}
+    
+	// average the cleaned data
+	flow = mean_array(flow_temp, num_lane);
+
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
@@ -273,6 +280,9 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
             flow_temp[i] = mean_flow;
 	}
 
+	// average the cleaned data
+	flow = mean_array(flow_temp, num_lane);
+    
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
@@ -485,6 +495,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
             speed_temp[i] = mean_speed;
 	}
 
+    speed = mean_array(speed_temp, num_lane);
 	speed /= controller_data->num_main;
 	// check Nan 
 	if(isnan(speed)){
