@@ -232,6 +232,9 @@ const char *controller_ip_strings[] = {
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
 		    fprintf(dbg_st_file_out,"FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio); 
 		}
+        
+		fprintf(dbg_st_file_out,"\n");
+
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i]) ) );
 		    fprintf(dbg_st_file_out,"OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol);  
