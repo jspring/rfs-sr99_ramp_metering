@@ -23,7 +23,7 @@
 
 char str[len_str];
 
-FILE *dbg_f, *dmd_f, *vsl_crm_f, *cal_opt_f, *pp, *st_file, *st_file_out;
+FILE *dbg_f, *dmd_f, *vsl_crm_f, *cal_opt_f, *pp, *st_file, *st_file_out *dbg_st_file_out;
 //static float delta_t=0.0;
 
 //int optControl(float,float,float);
@@ -226,17 +226,17 @@ const char *controller_ip_strings[] = {
         
         if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data3[i]) ) );
-		printf("FR_%d_vol_%f ", i, controller_offramp_data[i].agg_vol);  
+		    fprintf(dbg_st_file_out,"FR_%d_vol_%f ", i, controller_offramp_data[i].agg_vol);  
         controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data3[i]) ) );
-        printf("FR_%d_occ_%f ", i, controller_offramp_data[i].agg_occ); 
+            fprintf(dbg_st_file_out,"FR_%d_occ_%f ", i, controller_offramp_data[i].agg_occ); 
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
-		 printf("FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio); 
+		    fprintf(dbg_st_file_out,"FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio); 
 		}
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i]) ) );
-		printf("OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol);  
+		    fprintf(dbg_st_file_out,"OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol);  
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0,occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i]) ) );
-		printf("OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
+		    fprintf(dbg_st_file_out,"OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
 		}
 	}
 
@@ -454,12 +454,19 @@ int Init_sim_data_io()
     
     cal_opt_f=fopen("Out_Data/cal_opt_RT_rt.txt","w");
     
-    st_file_out=fopen("Out_Data/state_var_out.txt","w");	
+    st_file_out=fopen("Out_Data/state_var_out.txt","w");
+
+    dbg_st_file_out=fopen("Out_Data/dbg_state_var_out.txt","w");
+
     if(st_file_out == NULL) {
 	perror("st_file_out fopen");
 	exit(1);
     }
     
+    if(dbg_st_file_out == NULL) {
+	perror("dbg_st_file_out fopen");
+	exit(1);
+    }
 
 	//sec_outfile=fopen("Out_Data/section.txt","w");
 	
@@ -1585,7 +1592,9 @@ int Finish_sim_data_io()
 	//fclose(st_file);
 	fflush(st_file_out);
 	fclose(st_file_out);
-
+    
+	fflush(dbg_st_file_out);
+	fclose(dbg_st_file_out);
 
 	return 1;
 }
