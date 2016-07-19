@@ -226,13 +226,17 @@ const char *controller_ip_strings[] = {
         
         if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data3[i]) ) );
+		printf("FR_%d_vol_%f ", i, controller_offramp_data[i].agg_vol);  
         controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data3[i]) ) );
+        printf("FR_%d_occ_%f ", i, controller_offramp_data[i].agg_occ); 
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
-		
+		 printf("FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio); 
 		}
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i]) ) );
+		printf("OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol);  
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0,occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i]) ) );
+		printf("OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
 		}
 	}
 
