@@ -23,7 +23,7 @@
 
 char str[len_str];
 
-FILE *dbg_f, *dmd_f, *vsl_crm_f, *cal_opt_f, *pp, *st_file, *st_file_out *dbg_st_file_out;
+FILE *dbg_f, *dmd_f, *vsl_crm_f, *cal_opt_f, *pp, *st_file, *st_file_out, *dbg_st_file_out;
 //static float delta_t=0.0;
 
 //int optControl(float,float,float);
@@ -386,9 +386,9 @@ int j; //
 				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); 
 
 
-		}			                               
-	
-		fprintf("|");
+		} 
+
+		fprintf(st_file_out,"\n");
 
 		for(i=0;i<NumOnRamp;i++)
 		{	
