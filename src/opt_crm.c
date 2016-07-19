@@ -384,7 +384,8 @@ int j; //
 
 		}			                               
 	
-		
+		fprintf("|");
+
 		for(i=0;i<NumOnRamp;i++)
 		{	
 				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
