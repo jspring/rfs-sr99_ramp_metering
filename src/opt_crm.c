@@ -227,13 +227,13 @@ const char *controller_ip_strings[] = {
 		controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(&controller_data[i]) ) );
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i]) ) );
 
-		fprintf(dbg_st_file_out,"ML_%d_vol_%f ", i,controller_mainline_data[i].agg_vol); 
-		fprintf(dbg_st_file_out,"ML_%d_occ_%f ", i,controller_mainline_data[i].agg_occ); 
-		fprintf(dbg_st_file_out,"ML_%d_spd_%f ", i,controller_mainline_data[i].agg_speed); 
-		fprintf(dbg_st_file_out,"ML_%d_dty_%f ", i,controller_mainline_data[i].agg_density); 
-		fprintf(dbg_st_file_out,"ML_%d_msp_%f ", i,controller_mainline_data[i].agg_mean_speed);
+		//fprintf(dbg_st_file_out,"ML_%d_vol_%f ", i,controller_mainline_data[i].agg_vol); 
+		//fprintf(dbg_st_file_out,"ML_%d_occ_%f ", i,controller_mainline_data[i].agg_occ); 
+		//fprintf(dbg_st_file_out,"ML_%d_spd_%f ", i,controller_mainline_data[i].agg_speed); 
+		//fprintf(dbg_st_file_out,"ML_%d_dty_%f ", i,controller_mainline_data[i].agg_density); 
+		//fprintf(dbg_st_file_out,"ML_%d_msp_%f ", i,controller_mainline_data[i].agg_mean_speed);
 
-		fprintf(dbg_st_file_out,"\n");
+		//fprintf(dbg_st_file_out,"\n");
         
         if(i==OffRampIndex[i]){
 		//controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data3[i]) ) );
