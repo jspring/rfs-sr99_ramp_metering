@@ -191,13 +191,13 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
 			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
 			}else{  // replce the flow measurement if it is not in the range
-                flow_temp[i]=200; // if the lane i has no valid data, then assign it a flow value.
+                flow_temp[i]=10; // if the lane i has no valid data, then assign it a flow value.
 			}
 			//flow += (float)controller_data->metered_lane_stat[i].demand_vol;
 			//printf("OR-flow %d of detector %d \n", controller_data->metered_lane_stat[i].demand_vol, i);
 			}else{
 				 if(i== 0){
-			        flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
+			        flow_temp[i] = 10; // if the first lane has no valid data, then assign it a flow value.
 			     }else{
                     if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
 						flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
@@ -231,7 +231,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
 	    flow = flow * 120;
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
-return  mind(5000.0, maxd(flow,0)); 
+return  mind(12000.0, maxd(flow,0)); 
 }
 
 float flow_aggregation_offramp(db_urms_status3_t *controller_data){
@@ -249,13 +249,13 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 			    if((float)controller_data->additional_det[i].volume> 0 && (float)controller_data->additional_det[i].volume < 2000){ // if flow is in the range
 			        flow_temp[i]=(float)controller_data->additional_det[i].volume;  
 				}else{  // replce the flow measurement if it is not in the range
-					flow_temp[i]=200; // if the lane i has no valid data, then assign it a flow value.
+					flow_temp[i]=10; // if the lane i has no valid data, then assign it a flow value.
 				}   
 			//flow += (float)controller_data->additional_det[i].volume;
 			//printf("FR-flow %d of detector %d \n", controller_data->additional_det[i].volume,i);
 		}else{
 			if( i == 0){
-			   flow_temp[i] = 200; // if the first lane has no valid data, then assign it a flow value.
+			   flow_temp[i] = 10; // if the first lane has no valid data, then assign it a flow value.
 			}else{
 				if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
 					flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
@@ -289,7 +289,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 		flow = flow *120; 
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
-	return mind(5000.0, maxd(flow,0));
+	return mind(12000.0, maxd(flow,0));
 }
 
 float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
