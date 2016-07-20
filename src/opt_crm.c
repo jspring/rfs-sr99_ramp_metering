@@ -207,6 +207,9 @@ const char *controller_ip_strings[] = {
 	int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
 //	float float_temp = 0;
+
+	get_current_timestamp(&ts);
+	print_timestamp(dbg_st_file_out, &ts);
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
 		printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
 		/*
