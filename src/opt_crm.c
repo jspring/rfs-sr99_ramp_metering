@@ -237,13 +237,8 @@ const char *controller_ip_strings[] = {
         
         if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data3[i]) ) );
-        //controller_offramp_data[i].agg_vol = flow_aggregation_offramp(&controller_data3[i]);
-		 
-        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data3[i]) ) );
-        //controller_offramp_data[i].agg_occ = occupancy_aggregation_offramp(&controller_data3[i]);
-            
+        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data3[i]) ) );            
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
-        //controller_offramp_data[i].turning_ratio = controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol;  		
 		
             fprintf(dbg_st_file_out,"FR_%d_vol_%f ", i,controller_offramp_data[i].agg_vol); 
 			fprintf(dbg_st_file_out,"FR_%d_occ_%f ", i, controller_offramp_data[i].agg_occ); 
@@ -254,11 +249,8 @@ const char *controller_ip_strings[] = {
 
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i]) ) );
-        //controller_onramp_data[i].agg_vol = flow_aggregation_onramp(&controller_data[i]); 		
-			 
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0,occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i]) ) );
-        //controller_onramp_data[i].agg_occ = occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i]) ; 		
-            
+
 		    fprintf(dbg_st_file_out,"OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol); 
         	fprintf(dbg_st_file_out,"OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
 		}
