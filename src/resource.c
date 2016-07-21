@@ -456,7 +456,7 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, struct co
 	    tmp += (1.0/speed_temp[i]);
 	}
 
-	speed = max((controller_data->num_main)/(confidence->num_good_vals),0);
+	speed = max(tmp/(confidence->num_good_vals),0);
 	
 	// check Nan 
 	if(isnan(speed)){
