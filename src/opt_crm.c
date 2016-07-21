@@ -229,13 +229,11 @@ const char *controller_ip_strings[] = {
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
         
         fprintf(dbg_st_file_out,"C%d ", i); //controller index 
-		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_vol); 
-		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_occ); 
-		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_speed); 
-		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_density); 
-		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_mean_speed);
-
-		fprintf(dbg_st_file_out,"\n");
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); 
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); 
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); 
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); 
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);
         
         if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
@@ -247,7 +245,7 @@ const char *controller_ip_strings[] = {
 			//fprintf(dbg_st_file_out,"FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio);
 	    }
 
-        fprintf(dbg_st_file_out,"\n");
+        //fprintf(dbg_st_file_out,"\n");
 
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
@@ -256,9 +254,10 @@ const char *controller_ip_strings[] = {
 		    //fprintf(dbg_st_file_out,"OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol); 
         	//fprintf(dbg_st_file_out,"OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
 		}
-		fprintf(dbg_st_file_out,"\n");
+		//fprintf(dbg_st_file_out,"\n");
 	}
-
+    
+		fprintf(dbg_st_file_out,"\n");
 //** This part aggregate data for each section
 // controller index for each mainline section
 int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1 
