@@ -4,6 +4,12 @@
 
 #pragma once
 #include <urms.h>
+
+struct confidence {
+        int num_good_vals;
+        int num_total_vals;
+};
+
 extern float maxd(float a,float b);
 extern float mind(float a,float b);
 extern float sum_array(float a[], int num_elements);
@@ -38,17 +44,19 @@ extern long int nCr(int n, int r);
 
 extern const char *controller_strings[];
 
-extern float flow_aggregation_mainline(db_urms_status_t *controller_data);
-extern float flow_aggregation_onramp(db_urms_status_t *controller_data);
-extern float flow_aggregation_offramp(db_urms_status3_t *controller_data);
+extern float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 
-extern float occupancy_aggregation_mainline(db_urms_status_t *controller_data);
-extern float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2);
-extern float occupancy_aggregation_offramp(db_urms_status3_t *controller_data);
+extern float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confidence *confidence);
+extern float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence);
+
+extern float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
+extern float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
+extern float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence);
 
 
-extern float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2);
-extern float speed_aggregation_mainline(db_urms_status_t *controller_data);     // harmonic mean speed 
-extern float mean_speed_aggregation_mainline(db_urms_status_t *controller_dat); // mean speed
-extern float density_aggregation_mainline(db_urms_status_t *controller_data);
+extern float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
+extern float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);   // harmonic mean speed 
+extern float mean_speed_aggregation_mainline(db_urms_status_t *controller_dat, struct confidence *confidence);  // mean speed
+extern float density_aggregation_mainline(float flow, float hm_speed);
+//extern float density_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 //extern float turning_ratio_offramp(db_urms_status_t *controller_data);
