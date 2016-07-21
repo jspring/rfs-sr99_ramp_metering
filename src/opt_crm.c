@@ -348,10 +348,10 @@ int j; //
 
    for(i=0;i<SecSize;i++){
 
-        float temp_ary_vol[NUM_CYCLE_BUFFS] = {0};
-		float temp_ary_speed[NUM_CYCLE_BUFFS] = {0};
-		float temp_ary_occ[NUM_CYCLE_BUFFS] = {0};
-		float temp_ary_density[NUM_CYCLE_BUFFS] = {0};	
+        float temp_ary_vol[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_speed[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_occ[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_density[NUM_CYCLE_BUFFS] = {{0}};	
        
 		for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
@@ -369,10 +369,10 @@ int j; //
    }
 
    for(i=0;i<NumOnRamp;i++){
-		float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {0};
-		float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {0};
-		float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
-		float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
+		float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {{0}};
 
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
