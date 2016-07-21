@@ -55,6 +55,8 @@ do
 	if [[ $? != 0 ]]
 	then
 		killall opt_crm
+		killall clt_vars
+		killall db_slv
 		exit 1
 	fi
 	sleep 1
