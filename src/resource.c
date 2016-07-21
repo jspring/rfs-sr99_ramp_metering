@@ -202,8 +202,8 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	else
 		return FLOAT_ERROR;
 
-	mean_flow = mean_array(flow_temp, num_lane);
-    var_flow = var_array(flow_temp, num_lane);
+	mean_flow = mean_array(flow_temp, confidence->num_good_vals);
+    var_flow = var_array(flow_temp, confidence->num_good_vals);
 
 	// this loop replace data with large variance
     for(i=0 ; i <confidence->num_good_vals; i++) {
@@ -250,8 +250,8 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	else
 		return FLOAT_ERROR;
 
-	mean_flow = mean_array(flow_temp, num_lane);
-    var_flow = var_array(flow_temp, num_lane);
+	mean_flow = mean_array(flow_temp, confidence->num_good_vals);
+    var_flow = var_array(flow_temp, confidence->num_good_vals);
 
 	// this loop replace data with large variance
     for(i=0 ; i < confidence->num_good_vals; i++) {
@@ -260,7 +260,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	}
 
 	// average the cleaned data
-	flow = mean_array(flow_temp, num_lane);
+	flow = mean_array(flow_temp, confidence->num_good_vals);
     
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
@@ -506,17 +506,17 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, struct 
 	else
 		return FLOAT_ERROR;
     
-	mean_speed = mean_array(speed_temp, num_lane);
-    var_speed = var_array(speed_temp, num_lane);
+	mean_speed = mean_array(speed_temp, confidence->num_good_vals);
+    var_speed = var_array(speed_temp, confidence->num_good_vals);
 
 	// this loop replace data with large variance
-    for(i=0 ; i < controller_data->num_main; i++) {
+    for(i=0 ; i < confidence->num_good_vals; i++) {
 	    if (abs(speed_temp[i]-mean_speed)>5*var_speed)
             speed_temp[i] = mean_speed;
 	}
 
-    speed = mean_array(speed_temp, num_lane);
-	speed /= controller_data->num_main;
+    speed = mean_array(speed_temp, confidence->num_good_vals);
+	
 	// check Nan 
 	if(isnan(speed)){
 		speed = FLOAT_ERROR;
