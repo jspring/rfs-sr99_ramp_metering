@@ -42,8 +42,7 @@ const char *controller_strings[] = {
 
 //float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3);
 
-float maxd(float a,float b)
-{
+float maxd(float a,float b){
 	if(a>=b){
 		return a;
 	}
@@ -52,8 +51,7 @@ float maxd(float a,float b)
 	}
 }
 
-float mind(float a,float b)
-{
+float mind(float a,float b){
 	if(a<=b){
 		return a;
 	}
@@ -62,8 +60,7 @@ float mind(float a,float b)
 	}
 }
 
-float sum_array(float a[], int num_elements)
-{
+float sum_array(float a[], int num_elements){
    int i;
    float sum=0.0;
    for (i=0; i<num_elements; i++)
@@ -73,8 +70,7 @@ float sum_array(float a[], int num_elements)
    return(sum);
 }
 
-float mean_array(float a[], int num_elements)
-{   
+float mean_array(float a[], int num_elements){   
 	float temp = 0.0;
 	float mean = 0.0;
     temp = sum_array(a , num_elements);
@@ -82,8 +78,7 @@ float mean_array(float a[], int num_elements)
     return mean = temp;
 }
 
-float var_array(float a[], int num_elements)
-{
+float var_array(float a[], int num_elements){
 	float sum=0.0;
 	float mean=0.0;
 	float var=0.0;
@@ -99,72 +94,70 @@ float var_array(float a[], int num_elements)
 	return var;
 }
 /* Function to calculate factorial */
-long int factorial(int x)
-{
+long int factorial(int x){
     int i,f=1;
     for (i=2 ; i<=x ; i++)
         f = f * i;
     return (f);
 }
 
-long int nCr(int n, int r)
-{   
+long int nCr(int n, int r){   
     int ncr=0;
 	int npr=0;
     npr = factorial(n)/factorial(n-r);
     ncr = npr / factorial(r);
 	return ncr;
 }
+
 // Def minumum lane flow 
-float flow_aggregation_mainline(db_urms_status_t *controller_data){
+float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
         int i;
+        int j = 0;
         float flow = 0.0;
-		float mean_flow = 0.0;
-		float var_flow = 0.0;
-		int num_lane = 1;
-        num_lane = controller_data->num_main;
-		float flow_temp [num_lane];
+	    float mean_flow = 0.0;
+	    float var_flow = 0.0;
+	    int num_lane = controller_data->num_main;
+	    float flow_temp [num_lane];
+
+	confidence->num_total_vals = num_lane;
+	confidence->num_good_vals = num_lane;
+
     // this loop get data from data base
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
-			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
-			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
+			if((float)controller_data->mainline_stat[i].lead_vol >= 0 && (float)controller_data->mainline_stat[i].lead_vol <= 2000){ // if flow is in the range
+			    flow_temp[j]=(float)controller_data->mainline_stat[i].lead_vol;  
+			    j++;
 			}else{  // replce the flow measurement if it is not in the range
-                flow_temp[i]= 1000; // if the lane i has no valid data, then assign it a flow value.
+				confidence->num_good_vals--;
 			}
-			//flow += (float)controller_data->mainline_stat[i].lead_vol;
-			//printf("ML-flow %d of detector %d \n",controller_data->mainline_stat[i].lead_vol,i);
-		}else{
-            if(i == 0){
-			   flow_temp[i] = 1000; // if the first lane has no valid data, then assign it a flow value.
+		}else if(controller_data->mainline_stat[i].trail_stat == 2){
+			if((float)controller_data->mainline_stat[i].trail_vol >= 0 && (float)controller_data->mainline_stat[i].trail_vol <= 2000){
+			     flow_temp[j]=(float)controller_data->mainline_stat[i].trail_vol;  
+			     j++;
 			}else{
-				// check data range, then replace
-				if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
-			        flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
-				}
+                 confidence->num_good_vals--;
 			}
-			//printf("flow_aggregation_mainline: Error %d detector %d\n",
-			//	controller_data->mainline_stat[i].lead_stat, 
-			//	i
-			//);
+		}else{
+			confidence->num_good_vals--;
 		}
 	    }
 	}
 	else
-		return FLOAT_ERROR; // <--handel the float error here
+		return FLOAT_ERROR; // <--handle the float error here
 
-	mean_flow = mean_array(flow_temp, num_lane);
-    var_flow = var_array(flow_temp, num_lane);
+	mean_flow = mean_array(flow_temp, confidence->num_good_vals);
+	var_flow = var_array(flow_temp, confidence->num_good_vals);
 
 	// this loop replace data with large variance
-    for(i=0 ; i < controller_data->num_main; i++) {
+	for(i=0 ; i < confidence->num_good_vals; i++) {
 	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
             flow_temp[i] = mean_flow;
 	}
 	
 	// average the cleaned data
-	flow = mean_array(flow_temp, num_lane);
+	flow = mean_array(flow_temp, confidence->num_good_vals);
     
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
@@ -172,42 +165,38 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data){
 	    flow = flow * 120; // convert 30 second data into hour data
 	}
 	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
-	return mind(12000.0, maxd(flow,0));
+	return mind(12000.0, flow);
 }
 
-float flow_aggregation_onramp(db_urms_status_t *controller_data){
+float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confidence *confidence){
         int i;
+		int j = 0;
         float flow = 0;
 		float mean_flow = 0.0;
 		float var_flow = 0.0;
-		int num_lane = 1;
-        num_lane = controller_data->num_meter;
+        int num_lane = controller_data->num_meter;
 		float flow_temp [num_lane];
     // this loop get data from data base
 
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i< controller_data->num_meter;i++) {
-		if(controller_data->metered_lane_stat[i].demand_stat == 2){
-			if((float)controller_data->mainline_stat[i].lead_vol > 0 && (float)controller_data->mainline_stat[i].lead_vol < 2000){ // if flow is in the range
-			    flow_temp[i]=(float)controller_data->mainline_stat[i].lead_vol;  
+		if(controller_data->metered_lane_stat[i].passage_stat == 2){ 
+			if((float)controller_data->metered_lane_stat[i].passage_vol>= 0 && (float)controller_data->metered_lane_stat[i].passage_vol <= 2000){ // if flow is in the range
+			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].passage_vol;
+				j++;
 			}else{  // replce the flow measurement if it is not in the range
-                flow_temp[i]=10; // if the lane i has no valid data, then assign it a flow value.
+                confidence->num_good_vals--;
 			}
-			//flow += (float)controller_data->metered_lane_stat[i].demand_vol;
-			//printf("OR-flow %d of detector %d \n", controller_data->metered_lane_stat[i].demand_vol, i);
-			}else{
-				 if(i== 0){
-			        flow_temp[i] = 10; // if the first lane has no valid data, then assign it a flow value.
-			     }else{
-                    if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
-						flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
-					}
-				 }
-			//   printf("flow_aggregation_onramp: Error %d detector %d\n",
-			//		controller_data->metered_lane_stat[i].demand_stat,
-			//		i
-			//	);
+		}else if(controller_data->metered_lane_stat[i].demand_stat == 2){
+			if((float)controller_data->metered_lane_stat[i].demand_vol>= 0 && (float)controller_data->metered_lane_stat[i].demand_vol <= 2000){ 
+			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].demand_vol;
+				j++;
+			}else{  // replce the flow measurement if it is not in the range
+                confidence->num_good_vals--;
 			}
+		}else{
+			confidence->num_good_vals--;
+		}
 	    }
 	}
 	else
@@ -217,25 +206,26 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data){
     var_flow = var_array(flow_temp, num_lane);
 
 	// this loop replace data with large variance
-    for(i=0 ; i < controller_data->num_meter; i++) {
+    for(i=0 ; i <confidence->num_good_vals; i++) {
 	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
             flow_temp[i] = mean_flow;
 	}
     
 	// average the cleaned data
-	flow = mean_array(flow_temp, num_lane);
+	flow = mean_array(flow_temp, confidence->num_good_vals);
 
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
-	    flow = flow;
+	    flow = flow*120;
 	}
 	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
-return  mind(12000.0, maxd(flow,0)); 
+return  mind(12000.0, flow); 
 }
 
-float flow_aggregation_offramp(db_urms_status3_t *controller_data){
+float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence){
         int i;
+		int j = 0;
         float flow = 0.0;
 		float mean_flow = 0.0;
 		float var_flow = 0.0;
@@ -244,28 +234,17 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 		float flow_temp [num_lane];
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
-	for(i=0 ; i< controller_data->num_addl_det; i++){  
+	    for(i=0 ; i< controller_data->num_addl_det; i++){  
             if(controller_data->additional_det[i].stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
-			    if((float)controller_data->additional_det[i].volume> 0 && (float)controller_data->additional_det[i].volume < 2000){ // if flow is in the range
-			        flow_temp[i]=(float)controller_data->additional_det[i].volume;  
+			    if((float)controller_data->additional_det[i].volume>= 0 && (float)controller_data->additional_det[i].volume <= 2000){ // if flow is in the range
+			        flow_temp[j]=(float)controller_data->additional_det[i].volume;
+					j++;
 				}else{  // replce the flow measurement if it is not in the range
-					flow_temp[i]=10; // if the lane i has no valid data, then assign it a flow value.
-				}   
-			//flow += (float)controller_data->additional_det[i].volume;
-			//printf("FR-flow %d of detector %d \n", controller_data->additional_det[i].volume,i);
-		}else{
-			if( i == 0){
-			   flow_temp[i] = 10; // if the first lane has no valid data, then assign it a flow value.
-			}else{
-				if(!(flow_temp[i]>0 && flow_temp[i]<2000)){
-					flow_temp[i] = flow_temp[i-1]; //use valid data from adjacent lane
+					confidence->num_good_vals--;
 				}
-			}
-			//printf("flow_aggregation_offramp: Error %d detector %d\n",
-			//	controller_data->additional_det[i].stat,
-			//	i
-			//);
-		}
+			}else{
+				confidence->num_good_vals--;
+		    }
 	    }
 	}
 	else
@@ -275,7 +254,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
     var_flow = var_array(flow_temp, num_lane);
 
 	// this loop replace data with large variance
-    for(i=0 ; i < controller_data->num_addl_det; i++) {
+    for(i=0 ; i < confidence->num_good_vals; i++) {
 	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
             flow_temp[i] = mean_flow;
 	}
@@ -286,46 +265,74 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data){
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
-		flow = flow; 
+		flow = flow*120; 
 	}
 	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
-	return mind(12000.0, maxd(flow,0));
+	return mind(12000.0, flow);
 }
 
-float occupancy_aggregation_mainline(db_urms_status_t *controller_data){
+float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
 	int i;
-	float occupancy = 0;
+    int j = 0;
+	float lead_occ = 0.0;
+    float trail_occ = 0.0;
+	float occupancy = 0.0;
+	float mean_occ = 0.0;
+	float var_occ = 0.0;
+    int num_lane = controller_data->num_main;
+    float occ_temp [num_lane];
+
+	confidence->num_total_vals = num_lane;
+	confidence->num_good_vals = num_lane;
 
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
+			lead_occ = 0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) );
+            trail_occ = 0.1 * ( ((controller_data->mainline_stat[i].trail_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].trail_occ_lsb) & 0xFF) );
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			occupancy += 0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) );
-			printf("Occ %f of detector %d \n", 
-				0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) ),
-				   i
-		    );
+			if(lead_occ>=0 && lead_occ <=100){
+			    occ_temp[j] = lead_occ;
+			    j++;
+			}else {
+				confidence->num_good_vals--;
+			}
+		}else if(controller_data->mainline_stat[i].trail_stat == 2){
+		    if(trail_occ>=0 && trail_occ <=100){
+			    occ_temp[j] = trail_occ;
+			    j++;
+			}else {
+				confidence->num_good_vals--;
+			}
 		}else{
-			printf("occupancy_aggregation_mainline: Error %d detector %d\n",
-				controller_data->mainline_stat[i].lead_stat,
-				i
-			);
+		    confidence->num_good_vals--;
 		}
 	    }
 	}
 	else
 		return FLOAT_ERROR;
 
-	occupancy /= controller_data->num_main;
+	mean_occ = mean_array(occ_temp, confidence->num_good_vals);
+	var_occ = var_array(occ_temp, confidence->num_good_vals);
+
+	// this loop replace data with large variance
+	for(i=0 ; i < confidence->num_good_vals; i++) {
+	    if (abs(occ_temp[i]-mean_occ)>5*var_occ)
+            occ_temp[i] = mean_occ;
+	}
+	
+	// average the cleaned data
+	occupancy = mean_array(occ_temp, confidence->num_good_vals);
+    
     // check Nan 
 	if(isnan(occupancy)){
 		occupancy = FLOAT_ERROR;
 	}
 
 	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
-	return  mind(100.0, maxd(occupancy,0));
+	return  mind(100.0, occupancy);
 }
 
-float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2){ 
+float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){ 
 	int i;
 	int j;
 	float occupancy = 0;
@@ -361,7 +368,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	return  mind(100.0, maxd(occupancy,0));
 }
 
-float occupancy_aggregation_offramp(db_urms_status3_t *controller_data){
+float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence){
 	int i;
 	float occupancy = 0;
 
@@ -396,48 +403,61 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data){
 }
 
 
-float speed_aggregation_mainline(db_urms_status_t *controller_data){
+float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
 	// compute harmonic mean of speed
+	int i; //  lane number index
+	int j = 0; 
 	float tmp = 0.0;
 	float speed = 0.0;
-	int i; //  lane number index
-	int num_lane = 1;
-	num_lane = controller_data->num_main;
+	float mean_speed = 0.0;
+	float var_speed = 0.0;
+	int num_lane = controller_data->num_main;
 	float speed_temp [num_lane];
+
+    confidence->num_total_vals = num_lane;
+	confidence->num_good_vals = num_lane;
 
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed < 150){ // if flow is in the range
-			    speed_temp[i]=(float)controller_data->mainline_stat[i].speed;  
+			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
+			    speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
+				j++;
 			}else{  // replce the flow measurement if it is not in the range
-                speed_temp[i]=50; // if lane i has no valid data, then assign it to be free flow speed.
+                confidence->num_good_vals--; 
 			}
-			//tmp += (1.0/((float)controller_data->mainline_stat[i].speed));
-			//printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed, i);
-		}else{
-			if(i == 0){
-			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
+		}else if(controller_data->mainline_stat[i].trail_stat == 2){
+			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){
+			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;  
+			     j++;
 			}else{
-				if(!(speed_temp[i]>0 && speed_temp[i]<150)){
-					speed_temp[i] = speed_temp[i-1];
-				}
+                 confidence->num_good_vals--;
 			}
-			//printf("speed_aggregation_mainline: Error %d detector %d\n",
-			//	controller_data->mainline_stat[i].lead_stat,
-			//	i
-			//);
+		}else{
+			confidence->num_good_vals--;
+			
 		}
 	    }
 	}
 	else
 		return FLOAT_ERROR;
+
+	mean_speed = mean_array(speed_temp, confidence->num_good_vals);
+	var_speed = var_array(speed_temp, confidence->num_good_vals);
     
+    // this loop replace data with large variance
+	for(i=0 ; i < confidence->num_good_vals; i++) {
+	    if (abs(speed_temp[i]-mean_speed)>5*var_speed)
+            speed_temp[i] = mean_speed;
+	}
+
     // compute harmonic mean
-	for(i=0 ; i < controller_data->num_main; i++) {
+	for(i=0 ; i < confidence->num_good_vals; i++) {
 	    tmp += (1.0/speed_temp[i]);
 	}
-	speed = max((controller_data->num_main)/tmp,0);
+
+	speed = max((controller_data->num_main)/(confidence->num_good_vals),0);
+	
 	// check Nan 
 	if(isnan(speed)){
 		speed = FLOAT_ERROR;
@@ -445,41 +465,41 @@ float speed_aggregation_mainline(db_urms_status_t *controller_data){
 	    speed = speed*1.6;
 	}
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
-	return mind(150.0, maxd(speed,0));
+	return mind(150.0, speed);
 }
 
-float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
+float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
 	// compute mean of speed
-	float speed = 0.0;
 	int i; //  lane number index
+	int j = 0;
+	float speed = 0.0;
     float mean_speed = 0.0;
 	float var_speed = 0.0;
-	int num_lane = 1;
-	num_lane = controller_data->num_main;
+	int num_lane = controller_data->num_main;
 	float speed_temp [num_lane];
+
+	confidence->num_total_vals = num_lane;
+	confidence->num_good_vals = num_lane;
 	
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed < 150){ // if flow is in the range
-			    speed_temp[i]=(float)controller_data->mainline_stat[i].speed;  
+			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
+			    speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
+				j++;
 			}else{  // replce the flow measurement if it is not in the range
-                speed_temp[i]=50; // if lane i has no valid data, then assign it to be free flow speed.
+                confidence->num_good_vals--; 
 			}
-			//speed += (float)controller_data->mainline_stat[i].speed;
-			//printf("speed %d of detector %d \n", controller_data->mainline_stat[i].speed,i);
-		}else{
-			if(i == 0){
-			   speed_temp[i] = 50; // if the first lane has no valid data, then assign it to be free flow speed.
+		}else if(controller_data->mainline_stat[i].trail_stat == 2){
+			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){
+			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;  
+			     j++;
 			}else{
-				 if(!(speed_temp[i]>0 && speed_temp[i]<150)){
-					speed_temp[i] = speed_temp[i-1];
-				 }
+                 confidence->num_good_vals--;
 			}
-			//printf("mean_speed_aggregation_mainline: Error %d detector %d\n",
-			//	controller_data->mainline_stat[i].lead_stat,
-			//	i
-			//);
+		}else{
+			confidence->num_good_vals--;
+			
 		}
 	    }
 	}
@@ -504,11 +524,11 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data){
 		speed = speed * 1.6;
 	}
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
-	return mind(150.0, maxd(speed,0));
+	return mind(150.0, speed);
 }
 
 
-float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2){
+float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
 	float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
 	float queue = 0;
 	float sum_inflow = 0;
@@ -550,6 +570,36 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 	return mind(500.0, maxd(queue,0));
 }
 
+float density_aggregation_mainline(float flow, float hm_speed ){
+	float density = 0.0;
+	
+	hm_speed =  mind(200,maxd(hm_speed * 1.6,0));
+	flow = mind(10000, maxd(flow * 120,0));
+	density = mind(2000,maxd(flow/hm_speed,0));
+    
+	// check Nan 
+	if(isnan(density)){
+		density = FLOAT_ERROR;
+	}
+
+	if(isnan(flow)){
+		flow = FLOAT_ERROR;
+	}
+
+	if(isnan(hm_speed)){
+	    hm_speed = FLOAT_ERROR;
+	}
+
+	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
+			mind(10000, maxd(flow,0)),
+			mind(150, maxd(hm_speed,0)),
+			mind(1200.0, maxd(density,0)) 
+           );
+	return mind(1200.0, density);
+}
+
+
+/*
 float density_aggregation_mainline(db_urms_status_t *controller_data){
 	float density = 0.0;
 	float flow = 0.0;
@@ -582,3 +632,4 @@ float density_aggregation_mainline(db_urms_status_t *controller_data){
            );
 	return mind(1200.0, maxd(density,0));
 }
+*/
