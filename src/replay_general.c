@@ -23,14 +23,6 @@ static void sig_hand(int code)
                 longjmp(exit_env, code);
 }
 
-db_id_t db_vars_list[] =  {
-        {0, sizeof(db_urms_status_t)},
-        {0, sizeof(urms_datafile_t)},
-        {0, sizeof(db_urms_t)},
-};
-int num_db_vars = sizeof(db_vars_list)/sizeof(db_id_t);
-
-
 int db_trig_list[] =  {
         DB_URMS_VAR
 };
@@ -53,8 +45,18 @@ int main(int argc, char *argv[]) {
         int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
         int verbose = 0;
         int db_urms_status_var = 0;
+        int db_urms_datafile_var = 0;
+        int db_urms_var = 0;
+        int db_urms_status2_var = 0;
+        int db_urms_status3_var = 0;
+        int db_ramp_var = 0;
         extern db_urms_status_t db_urms_status;
+        extern db_urms_status2_t db_urms_status2;
+        extern db_urms_status3_t db_urms_status3;
         extern urms_datafile_t urms_datafile;
+	extern db_ramp_data_t db_ramp_data;
+	extern db_urms_t db_urms;
+
 	unsigned short temp_ushort = 0;
 	int i;
 
@@ -62,7 +64,11 @@ int main(int argc, char *argv[]) {
                 switch(option) {
                 case 'd':
                         db_urms_status_var = atoi(optarg);
-			use_db = 1;
+                        db_urms_datafile_var = db_urms_status_var + 1;
+                        db_urms_var = db_urms_status_var + 2;
+                        db_urms_status2_var = db_urms_status_var + 3;
+                        db_urms_status3_var = db_urms_status_var + 4;
+                        db_ramp_var = db_urms_status_var + 5;
                         break;
                 case 'i':
                         interval= atoi(optarg);
@@ -79,11 +85,6 @@ int main(int argc, char *argv[]) {
                         break;
                 }
         }
-
-        db_vars_list[0].id = db_urms_status_var;
-        db_vars_list[1].id = db_urms_status_var + 1;
-        db_vars_list[2].id = db_urms_status_var + 2;
-        db_trig_list[0] = db_urms_status_var + 2;
 
 	if(use_db) {
 		get_local_name(hostname, MAXHOSTNAMELEN);
@@ -126,6 +127,11 @@ int main(int argc, char *argv[]) {
 			);
                         }
 			db_clt_write(pclt, db_urms_status_var, sizeof(db_urms_status_t), &db_urms_status);
+			db_clt_write(pclt, db_urms_status2_var, sizeof(db_urms_status2_t), &db_urms_status2);
+			db_clt_write(pclt, db_urms_status3_var, sizeof(db_urms_status3_t), &db_urms_status3);
+			db_clt_write(pclt, db_urms_var, sizeof(db_urms_t), &db_urms);
+			db_clt_write(pclt, db_ramp_var, sizeof(db_ramp_data_t), &db_ramp_data);
+			db_clt_write(pclt, db_urms_datafile_var, sizeof(urms_datafile_t), &urms_datafile);
 			printf("strbuf %s\n", strbuf);
 		}
 		}
