@@ -227,34 +227,35 @@ const char *controller_ip_strings[] = {
 		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, hm_speed_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol,controller_mainline_data[i].agg_speed) ) );
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
-
-		//fprintf(dbg_st_file_out,"ML_%d_vol_%f ", i,controller_mainline_data[i].agg_vol); 
-		//fprintf(dbg_st_file_out,"ML_%d_occ_%f ", i,controller_mainline_data[i].agg_occ); 
-		//fprintf(dbg_st_file_out,"ML_%d_spd_%f ", i,controller_mainline_data[i].agg_speed); 
-		//fprintf(dbg_st_file_out,"ML_%d_dty_%f ", i,controller_mainline_data[i].agg_density); 
-		//fprintf(dbg_st_file_out,"ML_%d_msp_%f ", i,controller_mainline_data[i].agg_mean_speed);
-
-		//fprintf(dbg_st_file_out,"\n");
         
-        //if(i==OffRampIndex[i]){
+        fprintf(dbg_st_file_out,"C%d ", i); //controller index 
+		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_vol); 
+		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_occ); 
+		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_speed); 
+		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_density); 
+		fprintf(dbg_st_file_out,"%.6f ", controller_mainline_data[i].agg_mean_speed);
+
+		fprintf(dbg_st_file_out,"\n");
+        
+        if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0,flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
         controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
 		
-            fprintf(dbg_st_file_out,"FR_%d_vol_%f ", i,controller_offramp_data[i].agg_vol); 
-			fprintf(dbg_st_file_out,"FR_%d_occ_%f ", i, controller_offramp_data[i].agg_occ); 
-			fprintf(dbg_st_file_out,"FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio);
-		//}
+            //fprintf(dbg_st_file_out,"FR_%d_vol_%f ", i,controller_offramp_data[i].agg_vol); 
+			//fprintf(dbg_st_file_out,"FR_%d_occ_%f ", i, controller_offramp_data[i].agg_occ); 
+			//fprintf(dbg_st_file_out,"FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio);
+	    }
 
         fprintf(dbg_st_file_out,"\n");
 
-		//if(i==OnRampIndex[i]){
+		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0,occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
 
-		    fprintf(dbg_st_file_out,"OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol); 
-        	fprintf(dbg_st_file_out,"OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
-		//}
+		    //fprintf(dbg_st_file_out,"OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol); 
+        	//fprintf(dbg_st_file_out,"OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
+		}
 		fprintf(dbg_st_file_out,"\n");
 	}
 
