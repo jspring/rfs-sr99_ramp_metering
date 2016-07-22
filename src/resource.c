@@ -235,7 +235,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i< controller_data->num_addl_det; i++){  
-            if(controller_data->additional_det[i].stat == 1){ // if the controller report the flow data is correct, then check the data is in the range or not
+            if(controller_data->additional_det[i].stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
 			    if((float)controller_data->additional_det[i].volume>= 0 && (float)controller_data->additional_det[i].volume <= 2000){ // if flow is in the range
 			        flow_temp[j]=(float)controller_data->additional_det[i].volume;
 					j++;
@@ -374,7 +374,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i < controller_data->num_addl_det; i++) {
-		if(controller_data->additional_det[i].stat == 1){
+		if(controller_data->additional_det[i].stat == 2){
 			occupancy += (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
 			occupancy += 0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) );
 			printf("occupancy_aggregation_offramp: Occ %f of detector %d \n", 
@@ -403,7 +403,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 }
 
 
-float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
+float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_speed_prev, struct confidence *confidence){
 	// compute harmonic mean of speed
 	int i; //  lane number index
 	int j = 0; 
@@ -464,11 +464,21 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, struct co
 	}else{
 	    speed = speed*1.6;
 	}
+
+	// speed change rate limiter 
+	if (speed - hm_speed_prev  >= 45){
+	   speed = hm_speed_prev;
+	}else if (speed - hm_speed_prev  <= -30){
+	   speed = hm_speed_prev;
+	}else{
+	   speed = speed;
+	}
+	
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
 	return mind(150.0, speed);
 }
 
-float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
+float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float mean_speed_prev, struct confidence *confidence){
 	// compute mean of speed
 	int i; //  lane number index
 	int j = 0;
@@ -523,6 +533,16 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, struct 
 	}else{
 		speed = speed * 1.6;
 	}
+
+	// speed change rate limiter 
+	if (speed - mean_speed_prev  >= 45){
+	   speed = mean_speed_prev;
+	}else if (speed - mean_speed_prev  <= -30){
+	   speed = mean_speed_prev;
+	}else{
+	   speed = speed;
+	}
+	
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
 	return mind(150.0, speed);
 }

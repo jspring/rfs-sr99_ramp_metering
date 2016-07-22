@@ -203,13 +203,16 @@ const char *controller_ip_strings[] = {
         "10.29.248.157",            //26
         "10.29.248.56",             //27      , FR12
 }; //FR6, FR7, FR8, and FR11 are missing
+
 //** This part aggregate data for each URMS2070 controller in the field   
 	int OnRampIndex [NUM_CONTROLLER_VARS/6] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
 	int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
-//	float float_temp = 0;
-
-    get_current_timestamp(&ts);
+    
+	float hm_speed_prev = 0;
+    float mean_speed_prev = 0;
+    
+	get_current_timestamp(&ts);
 	print_timestamp(dbg_st_file_out, &ts);
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
 		//printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
@@ -217,10 +220,16 @@ const char *controller_ip_strings[] = {
 		// min max function bound the data range and exclude nans.
         controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
-		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, hm_speed_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
-		controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol,controller_mainline_data[i].agg_speed) ) );
-		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
+		 
+		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev ,&confidence[i][0]) ) );
+		 
+		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev, &confidence[i][0]) ) );
         
+        controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol,controller_mainline_data[i].agg_speed) ) );
+		
+		hm_speed_prev = controller_mainline_data[i].agg_speed;
+        mean_speed_prev = controller_mainline_data[i].agg_mean_speed;
+
         fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); 
