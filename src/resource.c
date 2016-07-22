@@ -573,8 +573,8 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 float density_aggregation_mainline(float flow, float hm_speed ){
 	float density = 0.0;
 	
-	hm_speed =  mind(200,maxd(hm_speed * 1.6,0));
-	flow = mind(10000, maxd(flow * 120,0));
+	hm_speed =  mind(200,maxd(hm_speed,0));
+	flow = mind(10000, maxd(flow,0));
 	density = mind(2000,maxd(flow/hm_speed,0));
     
 	// check Nan 
