@@ -368,7 +368,7 @@ int j; //
 	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
 
 	   // check data 
-	   fprintf(dbg_st_file_out,"Sec%d", i); //controller index 
+	   fprintf(dbg_st_file_out,"Sec%d ", i); //controller index 
 	   fprintf(dbg_st_file_out,"%f ", mainline_out_f[i].agg_vol); 
 	   fprintf(dbg_st_file_out,"%f ", mainline_out_f[i].agg_speed); 
 	   fprintf(dbg_st_file_out,"%f ", mainline_out_f[i].agg_occ); 
