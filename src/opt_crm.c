@@ -212,15 +212,8 @@ const char *controller_ip_strings[] = {
     get_current_timestamp(&ts);
 	print_timestamp(dbg_st_file_out, &ts);
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
-		printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
-		/*
-		if( (float_temp = flow_aggregation_mainline(&controller_data[i]) ) >= 0)
-			controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, float_temp ) );
-		else {
-			//controller_mainline_data[i].flag = (int)float_temp;
-			continue;
-		}
-		*/
+		//printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
+		
 		// min max function bound the data range and exclude nans.
         controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
@@ -297,6 +290,13 @@ int j; //
 		mainline_out[cycle_index][i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
 		mainline_out[cycle_index][i].agg_density = Mind(1200.0, Maxd(temp_density/temp_num_ct,0));
 		mainline_out[cycle_index][i].agg_mean_speed =  Mind(150.0, Maxd(temp_mean_speed/temp_num_ct,0));
+
+		fprintf(dbg_st_file_out,"S%d,cyc%f ", i,cycle_index); //controller index 
+		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_vol); 
+		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_speed); 
+		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_occ); 
+		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_density); 
+		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_mean_speed);
 
 		// Initialize all temp variables
 		temp_num_ct = 0.0; 
