@@ -209,11 +209,13 @@ const char *controller_ip_strings[] = {
 	int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
     
-	float hm_speed_prev = 0;
-    float mean_speed_prev = 0;
+	
+	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}}; // this is the register of speed in previous time step
+	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};
     
-	get_current_timestamp(&ts);
-	print_timestamp(dbg_st_file_out, &ts);
+	get_current_timestamp(&ts); // get current time step
+	print_timestamp(dbg_st_file_out, &ts); // print out current time step to file
+ 
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
 		//printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
 		
@@ -221,14 +223,14 @@ const char *controller_ip_strings[] = {
         controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		 
-		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev ,&confidence[i][0]) ) );
+		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev[i], &confidence[i][0]) ) );
 		 
-		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev, &confidence[i][0]) ) );
+		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev[i], &confidence[i][0]) ) );
         
         controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol,controller_mainline_data[i].agg_speed) ) );
 		
-		hm_speed_prev = controller_mainline_data[i].agg_speed;
-        mean_speed_prev = controller_mainline_data[i].agg_mean_speed;
+		hm_speed_prev[i] = controller_mainline_data[i].agg_speed;
+        mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
 
         fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); 
