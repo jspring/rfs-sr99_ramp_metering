@@ -465,13 +465,12 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	    speed = speed*1.6;
 	}
 
-	// speed change rate limiter 
-	if ((speed - hm_speed_prev  >= 60)  && (speed != -1) ){
-	   speed = hm_speed_prev;
-	}else if ((speed - hm_speed_prev  <= -50) && (speed != -1)  ){
-	   speed = hm_speed_prev;
-	}else{
+
+    // speed change rate limiter 
+	if( (speed - hm_speed_prev  >= -50) && (speed - hm_speed_prev  <= 60)  && (speed != -1) ){
 	   speed = speed;
+	}else{
+	   speed = hm_speed_prev;
 	}
 	
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
@@ -535,14 +534,12 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	}
 
 	// speed change rate limiter 
-	if ((speed - mean_speed_prev  >= 60) && (speed != -1)) {
-	   speed = mean_speed_prev;
-	}else if ((speed - mean_speed_prev  <= -50) && (speed != -1) ){
-	   speed = mean_speed_prev;
-	}else{
+	if( (speed - mean_speed_prev  >= -50) && (speed - mean_speed_prev  <= 60)  && (speed != -1) ){
 	   speed = speed;
+	}else{
+	   speed = mean_speed_prev;
 	}
-	
+
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
 	return mind(150.0, speed);
 }
