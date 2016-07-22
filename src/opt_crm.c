@@ -290,13 +290,15 @@ int j; //
 		mainline_out[cycle_index][i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
 		mainline_out[cycle_index][i].agg_density = Mind(1200.0, Maxd(temp_density/temp_num_ct,0));
 		mainline_out[cycle_index][i].agg_mean_speed =  Mind(150.0, Maxd(temp_mean_speed/temp_num_ct,0));
-
+        
+		/*
 		fprintf(dbg_st_file_out,"S%d,cyc%d ", i,cycle_index); //controller index 
 		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_vol); 
 		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_speed); 
 		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_occ); 
 		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_density); 
 		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_mean_speed);
+        */
 
 		// Initialize all temp variables
 		temp_num_ct = 0.0; 
@@ -414,10 +416,10 @@ int j; //
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
 				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
-				fprintf(st_file_out,"%f ", onramp_out_f[i].agg_vol);  			
-				fprintf(st_file_out,"%f ", onramp_out_f[i].agg_occ);  			
-				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_vol);
-				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_occ);
+				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol);  			
+				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);  			
+				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol);
+				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);
 		}
 		
 		//fprintf(st_file_out,"\n");
