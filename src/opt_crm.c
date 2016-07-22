@@ -422,7 +422,7 @@ int j; //
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);
 		}
 		
-		//fprintf(st_file_out,"\n");
+		fprintf(st_file_out,"\n");
 		
 		det_data_4_contr(time);		
 		get_meas(time);				
