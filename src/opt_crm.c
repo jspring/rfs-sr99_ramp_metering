@@ -99,13 +99,16 @@ int main(int argc, char *argv[])
 	agg_data_t onramp_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section
 	agg_data_t offramp_out[NUM_CYCLE_BUFFS][NUM_OFFRAMPS] = {{{0}},{{0}}};  // data aggregated section by section
     
-	agg_data_t mainline_out_f[SecSize] = {{0}};        // save filtered data to this array
+    agg_data_t mainline_out_f[SecSize] = {{0}};        // save filtered data to this array
 	agg_data_t onramp_out_f[NumOnRamp] = {{0}};        // save filtered data to this array
 	agg_data_t offramp_out_f[NUM_OFFRAMPS] = {{0}};    // save filtered data to this array
-
+	
 	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
-	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};               // data aggregated controller by controller
-	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};             // data aggregated controller by controller
+	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};                 // data aggregated controller by controller
+	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};               // data aggregated controller by controller
+	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};               // this is the register of harmonic mean speed in previous time step
+	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};             // this is the register of mean speed in previous time step
+
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
@@ -208,10 +211,6 @@ const char *controller_ip_strings[] = {
 	int OnRampIndex [NUM_CONTROLLER_VARS/6] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
 	int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
-    
-	
-	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {0}; // this is the register of speed in previous time step
-	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {0};
     
 	get_current_timestamp(&ts); // get current time step
 	print_timestamp(dbg_st_file_out, &ts); // print out current time step to file
