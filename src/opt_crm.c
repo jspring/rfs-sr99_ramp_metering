@@ -210,8 +210,8 @@ const char *controller_ip_strings[] = {
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
     
 	
-	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}}; // this is the register of speed in previous time step
-	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};
+	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {0}; // this is the register of speed in previous time step
+	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {0};
     
 	get_current_timestamp(&ts); // get current time step
 	print_timestamp(dbg_st_file_out, &ts); // print out current time step to file

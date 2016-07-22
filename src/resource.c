@@ -466,9 +466,9 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	}
 
 	// speed change rate limiter 
-	if (speed - hm_speed_prev  >= 45){
+	if ((speed - hm_speed_prev  >= 60)  && (speed != -1) ){
 	   speed = hm_speed_prev;
-	}else if (speed - hm_speed_prev  <= -30){
+	}else if ((speed - hm_speed_prev  <= -50) && (speed != -1)  ){
 	   speed = hm_speed_prev;
 	}else{
 	   speed = speed;
@@ -535,9 +535,9 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	}
 
 	// speed change rate limiter 
-	if (speed - mean_speed_prev  >= 45){
+	if ((speed - mean_speed_prev  >= 60) && (speed != -1)) {
 	   speed = mean_speed_prev;
-	}else if (speed - mean_speed_prev  <= -30){
+	}else if ((speed - mean_speed_prev  <= -50) && (speed != -1) ){
 	   speed = mean_speed_prev;
 	}else{
 	   speed = speed;
