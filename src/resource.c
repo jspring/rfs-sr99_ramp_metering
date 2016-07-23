@@ -587,12 +587,12 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 	return mind(500.0, maxd(queue,0));
 }
 
-float density_aggregation_mainline(float flow, float hm_speed ){
+float density_aggregation_mainline(float flow, float hm_speed, float density_prev){
 	float density = 0.0;
 	
 	hm_speed =  mind(200,maxd(hm_speed,0));
 	flow = mind(10000, maxd(flow,0));
-	density = mind(2000,maxd(flow/hm_speed,0));
+	density = mind(200,maxd(flow/hm_speed,0));
     
 	// check Nan 
 	if(isnan(density)){
@@ -607,46 +607,17 @@ float density_aggregation_mainline(float flow, float hm_speed ){
 	    hm_speed = FLOAT_ERROR;
 	}
 
+	// density change rate limiter 
+	if( (density - density_prev  >= -150) && (density - density_prev  <= 150)  && (density != -1) ){
+	   density = density;
+	}else{
+	   density = density_prev;
+	}
+
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
 			mind(10000, maxd(flow,0)),
 			mind(150, maxd(hm_speed,0)),
-			mind(1200.0, maxd(density,0)) 
+			mind(200.0, maxd(density,0)) 
            );
-	return mind(1200.0, density);
+	return mind(200.0, density);
 }
-
-
-/*
-float density_aggregation_mainline(db_urms_status_t *controller_data){
-	float density = 0.0;
-	float flow = 0.0;
-	float speed = 0.0;
-	
-	speed = mean_speed_aggregation_mainline(controller_data);
-	flow = flow_aggregation_mainline(controller_data);
-	speed =  mind(200,maxd(speed * 1.6,0));
-	//flow = mind(10000, maxd(temp_flow,0));
-	flow = mind(10000, maxd(flow * 120,0));
-	density = mind(2000,maxd(flow/speed,0));
-    
-	// check Nan 
-	if(isnan(density)){
-		density = FLOAT_ERROR;
-	}
-
-	if(isnan(flow)){
-		flow = FLOAT_ERROR;
-	}
-
-	if(isnan(speed)){
-	    speed = FLOAT_ERROR;
-	}
-
-	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
-			mind(10000, maxd(flow,0)),
-			mind(150, maxd(speed,0)),
-			mind(1200.0, maxd(density,0)) 
-           );
-	return mind(1200.0, maxd(density,0));
-}
-*/

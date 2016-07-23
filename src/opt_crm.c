@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};               // data aggregated controller by controller
 	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};               // this is the register of harmonic mean speed in previous time step
 	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};             // this is the register of mean speed in previous time step
+    float density_prev [NUM_CONTROLLER_VARS/6] = {{0}};             // this is the register of density in previous time step
 
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
@@ -226,10 +227,11 @@ const char *controller_ip_strings[] = {
 		 
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev[i], &confidence[i][0]) ) );
         
-        controller_mainline_data[i].agg_density = Mind(2000.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol,controller_mainline_data[i].agg_speed) ) );
+        controller_mainline_data[i].agg_density = Mind(200.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
 		
 		hm_speed_prev[i] = controller_mainline_data[i].agg_speed;
         mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
+        density_prev[i] = controller_mainline_data[i].agg_density;
 
         fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); 

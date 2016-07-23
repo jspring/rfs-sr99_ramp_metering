@@ -20,18 +20,6 @@ extern long int nCr(int n, int r);
 //extern int open_file(char controller_data_file[]);
 //extern int read_file(char input_file_name[], char output_file_name[]);
 
-//extern float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3);
-//extern float flow_aggregation_4_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4);
-//extern float flow_aggregation_5_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3, float flow_lane_4, float flow_lane_5);
-
-//extern float occ_aggregation_3_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3);
-//extern float occ_aggregation_4_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4);
-//extern float occ_aggregation_5_lanes(float occ_lane_1,float occ_lane_2, float occ_lane_3, float occ_lane_4, float occ_lane_5);
-
-//extern float speed_aggregation_3_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3);
-//extern float speed_aggregation_4_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4);
-//extern float speed_aggregation_5_lanes(float speed_lane_1,float speed_lane_2, float speed_lane_3, float speed_lane_4, float speed_lane_5);
-
 //extern float get_split_ratio(float upstream_total_flow, float off_ramp_flow);
 
 //extern float get_queue_estimation(float in_flow, float out_flow, float previous_queue);
@@ -57,6 +45,6 @@ extern float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *
 extern float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_speed_prev,struct confidence *confidence);   // harmonic mean speed 
 extern float mean_speed_aggregation_mainline(db_urms_status_t *controller_dat, float mean_speed_prev, struct confidence *confidence);  // mean speed
 
-extern float density_aggregation_mainline(float flow, float hm_speed);
+extern float density_aggregation_mainline(float flow, float hm_speed, float density_prev);
 //extern float density_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 //extern float turning_ratio_offramp(db_urms_status_t *controller_data);
