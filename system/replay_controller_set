@@ -1,15 +1,16 @@
 #!/bin/bash
 
-FILE=$1
+A_FILE=$1
+INTERVAL=$2
 
-if [[ q$FILE == 'q' ]]
+if [[ q$A_FILE == 'q' ]]
 then
-	echo "Usage: $0 <one filename in set>"
+	echo "Usage: $0 <one filename in set> interval (ms)"
 	exit 1
 fi
 
-MATCHSTR=`echo $FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
-MYPATH=`echo $FILE | sed '{s/a_10/ &/g}'| awk '{print $1}'`
+MATCHSTR=`echo $A_FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
+MYPATH=`echo $A_FILE | sed '{s/a_10/ &/g}'| awk '{print $1}'`
 TIMESTAMP=`date +%y%m%d_%H%M%S`
 
 echo $MATCHSTR
@@ -30,9 +31,15 @@ echo "Starting clt_vars"
 sleep 1
 
 y=3000
-for x in `ls $MYPATH/*$MATCHSTR.dat`
+for THIS_PATH in `ls $MYPATH/*$MATCHSTR.dat`
 do
-	/home/sr99_ramp_metering/system/replay_controller_go $y $x 1000
+	IP_AND_PORT=`echo $THIS_PATH | sed '{s/\// /g}' | awk '{print $NF}'| sed '{s/_/ /g}' | awk '{print $2}'| sed '{s/\./ /5}'`
+	CONTROLLER_IP=`echo $IP_AND_PORT | sed '{s/\./ /4}' | awk '{print $1}'`
+	PORT=`echo $IP_AND_PORT | sed '{s/\./ /4}' | awk '{print $2}'`
+	/home/sr99_ramp_metering/system/replay_controller_go $y $THIS_PATH $INTERVAL
+        echo "Starting wrfiles_rm, $CONTROLLER_IP $y $PORT $TIMESTAMP"
+        /home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i $INTERVAL -m 30 -s $y -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_replay"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+
 	y=$(($y+200))
 done
 
