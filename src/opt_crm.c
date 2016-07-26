@@ -113,6 +113,10 @@ int main(int argc, char *argv[])
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
+		float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {{0}};
+		float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {{0}};
 
 	while ((option = getopt(argc, argv, "d")) != EOF) {
 		switch(option) {
@@ -164,8 +168,13 @@ int main(int argc, char *argv[])
 		db_clt_read(pclt, db_controller_list[i+112].id, db_controller_list[i+112].size, &controller_data3[i]);
 	}
 
+
+
+
+//BEGIN MAIN FOR LOOP HERE
 	for(;;)	
 	{
+	cyclic_buff_index = cyclic_buff_index++ % NUM_CYCLIC_BUFFS;
 	for (i = 0; i < num_controller_vars; i++){  //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 		db_clt_read(pclt, db_controller_list[i+84].id, db_controller_list[i+84].size, &controller_data2[i]);
@@ -382,11 +391,8 @@ int j; //
 	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
    }
 
+
    for(i=0;i<NumOnRamp;i++){
-		float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {{0}};
 
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
