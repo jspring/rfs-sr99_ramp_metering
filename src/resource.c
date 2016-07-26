@@ -164,7 +164,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	}else{
 	    flow = flow * 120; // convert 30 second data into hour data
 	}
-	printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
+	//printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
 	return mind(12000.0, flow);
 }
 
@@ -176,8 +176,11 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 		float var_flow = 0.0;
         int num_lane = controller_data->num_meter;
 		float flow_temp [num_lane];
-    // this loop get data from data base
 
+		confidence->num_total_vals = num_lane;
+	    confidence->num_good_vals = num_lane;
+		
+	// this loop get data from data base
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i< controller_data->num_meter;i++) {
 		if(controller_data->metered_lane_stat[i].passage_stat == 2){ 
@@ -217,9 +220,9 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
-	    flow = flow*120;
+	    flow = flow*120; // convert 30 second data into hour data
 	}
-	printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
+	//printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
 return  mind(12000.0, flow); 
 }
 
@@ -232,6 +235,8 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 		int num_lane = 1;
         num_lane = controller_data->num_addl_det;
 		float flow_temp [num_lane];
+	 	confidence->num_total_vals = num_lane;
+	    confidence->num_good_vals = num_lane;
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i< controller_data->num_addl_det; i++){  
@@ -265,9 +270,9 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	if(isnan(flow)){
 		flow = FLOAT_ERROR;
 	}else{
-		flow = flow*120; 
+		flow = flow*120; // convert 30 second data into hour data
 	}
-	printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
+	//printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
 	return mind(12000.0, flow);
 }
 
@@ -328,7 +333,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 		occupancy = FLOAT_ERROR;
 	}
 
-	printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
+	//printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
 	return  mind(100.0, occupancy);
 }
 
@@ -336,70 +341,105 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	int i;
 	int j;
 	float occupancy = 0;
+	float mean_occ = 0.0;
+	float var_occ = 0.0;
+    int num_lane = controller_data->num_main;
+    float occ_temp [MAX_QUEUE_LOOPS];
+
+	confidence->num_total_vals = MAX_QUEUE_LOOPS;
+	confidence->num_good_vals = MAX_QUEUE_LOOPS;
 
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i < controller_data->num_meter; i++) {
-	   	for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
-			if(controller_data2->queue_stat[i][j].stat == 2){
-			occupancy += 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
-				printf("occupancy_aggregation_onramp: Occ %f of detector %d \n", 
-					0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) ),
-					   i
-			    );
-			}else{
-				printf("occupancy_aggregation_onramp: Error %d detector %d\n",
-					controller_data2->queue_stat[i][j].stat,
-					i
-				);
-			}
+	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
+			    if(controller_data2->queue_stat[i][j].stat == 2){
+				    occupancy = 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
+					if(occupancy>=0 && occupancy<=100){
+					    occ_temp[j] = occupancy;
+                        j++;
+					}else{
+					     confidence->num_good_vals--;
+					}
+			    }else{
+				    confidence->num_good_vals--;
+				}
 	        }
-	   }
+	    }
 	}
 	else
 		return FLOAT_ERROR;
 
-	occupancy /= controller_data->num_meter; // this is average onramp occupancy
-    // check Nan 
+	mean_occ = mean_array(occ_temp, confidence->num_good_vals);
+	var_occ = var_array(occ_temp, confidence->num_good_vals);
+    
+    // this loop replace data with large variance
+	for(i=0 ; i < confidence->num_good_vals; i++) {
+	    if (abs(occ_temp[i]-mean_occ)>5*var_occ)
+            occ_temp[i] = mean_occ;
+	}
+
+	// average the cleaned data
+	occupancy = mean_array(occ_temp, confidence->num_good_vals);
+    
+	// check Nan 
 	if(isnan(occupancy)){
 		occupancy = FLOAT_ERROR;
 	}
 
-	printf("Occ_agg %4.2f num_meter %d\n", occupancy, controller_data->num_meter);
-	return  mind(100.0, maxd(occupancy,0));
+	//printf("Occ_agg %4.2f num_meter %d\n", occupancy, controller_data->num_meter);
+	return  mind(100.0, occupancy);
 }
 
 float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence){
 	int i;
+	int j=0;
 	float occupancy = 0;
+	float mean_occ = 0.0;
+	float var_occ = 0.0;
+    int num_lane = controller_data->num_addl_det;
+    float occ_temp [num_lane];
+
+	confidence->num_total_vals = num_lane;
+	confidence->num_good_vals = num_lane;
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i < controller_data->num_addl_det; i++) {
 		if(controller_data->additional_det[i].stat == 2){
-			occupancy += (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
-			occupancy += 0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) );
-			printf("occupancy_aggregation_offramp: Occ %f of detector %d \n", 
-				   0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) ),
-				   i
-		    );
+			occupancy = (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
+			occupancy = 0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) );
+			   if(occupancy>=0 && occupancy<=100){
+				   occ_temp[j] = occupancy;
+                   j++;
+			   }else{
+			       confidence->num_good_vals--;
+			   }
 		}else{
-			printf("occupancy_aggregation_offramp: Error %d detector %d\n",
-				controller_data->additional_det[i].stat,
-				i
-			);
+		      confidence->num_good_vals--;	
 		}
 	    }
 	}
 	else
 		return FLOAT_ERROR;
 
-	occupancy /= controller_data->num_addl_det; // this is average offramp occupancy
+	mean_occ = mean_array(occ_temp, confidence->num_good_vals);
+	var_occ = var_array(occ_temp, confidence->num_good_vals);
+    
+    // this loop replace data with large variance
+	for(i=0 ; i < confidence->num_good_vals; i++) {
+	    if (abs(occ_temp[i]-mean_occ)>5*var_occ)
+            occ_temp[i] = mean_occ;
+	}
+
+	// average the cleaned data
+	occupancy = mean_array(occ_temp, confidence->num_good_vals);
+    
     // check Nan 
 	if(isnan(occupancy)){
 		occupancy = FLOAT_ERROR;
 	}
 
-	printf("Occ_agg %4.2f num_addl_det %d\n", occupancy, controller_data->num_addl_det);
-	return  mind(100.0, maxd(occupancy,0));
+	//printf("Occ_agg %4.2f num_addl_det %d\n", occupancy, controller_data->num_addl_det);
+	return  mind(100.0, occupancy);
 }
 
 
@@ -473,7 +513,7 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	   speed = hm_speed_prev;
 	}
 	
-	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
+	//printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
 	return mind(150.0, speed);
 }
 
@@ -540,7 +580,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	   speed = mean_speed_prev;
 	}
 
-	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
+	//printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
 	return mind(150.0, speed);
 }
 
@@ -583,7 +623,7 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 	if(isnan(queue)){
 		queue = FLOAT_ERROR;
 	}
-	printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
+	//printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
 	return mind(500.0, maxd(queue,0));
 }
 
@@ -613,11 +653,13 @@ float density_aggregation_mainline(float flow, float hm_speed, float density_pre
 	}else{
 	   density = density_prev;
 	}
-
+    
+	/*
 	printf("flow %4.2f speed %4.2f density_agg %4.2f \n",
 			mind(10000, maxd(flow,0)),
 			mind(150, maxd(hm_speed,0)),
 			mind(200.0, maxd(density,0)) 
            );
+    */
 	return mind(200.0, density);
 }

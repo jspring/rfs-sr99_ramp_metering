@@ -411,7 +411,8 @@ int j; //
 			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out_f[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out_f[i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
-			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));  
+			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));
+                fprintf(st_file_out,"Sec %d ", i); 
 			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_vol); 
                 fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 
 				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); 
@@ -428,8 +429,10 @@ int j; //
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
 				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
+				fprintf(st_file_out,"OR %d ", i);
 				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol);  			
 				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);  			
+				fprintf(st_file_out,"FR %d ", i);
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol);
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);
 		}
