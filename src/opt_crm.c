@@ -114,6 +114,15 @@ int main(int argc, char *argv[])
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
 
+    float temp_ary_vol[NUM_CYCLE_BUFFS] = {{0}};    // temporary array of cyclic buffer
+	float temp_ary_speed[NUM_CYCLE_BUFFS] = {{0}};
+	float temp_ary_occ[NUM_CYCLE_BUFFS] = {{0}};
+	float temp_ary_density[NUM_CYCLE_BUFFS] = {{0}};	
+    float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {{0}};
+	float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {{0}};
+	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {{0}};
+	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {{0}};
+
 	while ((option = getopt(argc, argv, "d")) != EOF) {
 		switch(option) {
 			case 'd':
@@ -164,8 +173,10 @@ int main(int argc, char *argv[])
 		db_clt_read(pclt, db_controller_list[i+112].id, db_controller_list[i+112].size, &controller_data3[i]);
 	}
 
+//BEGIN MAIN FOR LOOP HERE
 	for(;;)	
 	{
+	cycle_index = cycle_index++ % NUM_CYCLE_BUFFS;
 	for (i = 0; i < num_controller_vars; i++){  //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 		db_clt_read(pclt, db_controller_list[i+84].id, db_controller_list[i+84].size, &controller_data2[i]);
@@ -245,9 +256,10 @@ const char *controller_ip_strings[] = {
         controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0,occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd(0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
 		
-            //fprintf(dbg_st_file_out,"FR_%d_vol_%f ", i,controller_offramp_data[i].agg_vol); 
-			//fprintf(dbg_st_file_out,"FR_%d_occ_%f ", i, controller_offramp_data[i].agg_occ); 
-			//fprintf(dbg_st_file_out,"FR_%d_sr_%f ", i, controller_offramp_data[i].turning_ratio);
+		fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
+        fprintf(dbg_st_file_out,"%f ", i,controller_offramp_data[i].agg_vol); 
+		fprintf(dbg_st_file_out,"%f ", i, controller_offramp_data[i].agg_occ); 
+		fprintf(dbg_st_file_out,"%f ", i, controller_offramp_data[i].turning_ratio);
 	    }
 
         //fprintf(dbg_st_file_out,"\n");
@@ -255,9 +267,10 @@ const char *controller_ip_strings[] = {
 		if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0,flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0,occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
-
-		    //fprintf(dbg_st_file_out,"OR_%d_vol_%f ", i, controller_onramp_data[i].agg_vol); 
-        	//fprintf(dbg_st_file_out,"OR_%d_occ_%f ", i, controller_onramp_data[i].agg_occ);
+ 
+		fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
+		fprintf(dbg_st_file_out,"%f ", i, controller_onramp_data[i].agg_vol); 
+        fprintf(dbg_st_file_out,"%f ", i, controller_onramp_data[i].agg_occ);
 		}
 		//fprintf(dbg_st_file_out,"\n");
 	}
@@ -360,34 +373,21 @@ int j; //
 
 // average the historical data from data buffer
 
-   for(i=0;i<SecSize;i++){
-
-        float temp_ary_vol[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_speed[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_occ[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_density[NUM_CYCLE_BUFFS] = {{0}};	
-       
+   for(i=0; i<SecSize; i++){
 		for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
          temp_ary_vol[j]= mainline_out[j][i].agg_vol;
 		 temp_ary_speed[j]= mainline_out[j][i].agg_speed;
 		 temp_ary_occ[j]= mainline_out[j][i].agg_occ;
 		 temp_ary_density[j]= mainline_out[j][i].agg_density;
-
 	  }
-
 	   mainline_out_f[i].agg_vol = mean_array(temp_ary_vol,NUM_CYCLE_BUFFS);
 	   mainline_out_f[i].agg_speed = mean_array(temp_ary_speed,NUM_CYCLE_BUFFS);
        mainline_out_f[i].agg_occ = mean_array(temp_ary_occ,NUM_CYCLE_BUFFS);
 	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
    }
 
-   for(i=0;i<NumOnRamp;i++){
-		float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {{0}};
-		float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {{0}};
-
+   for(i=0; i<NumOnRamp; i++){
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
 	     temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
@@ -462,8 +462,8 @@ int j; //
 			Set_Hybrid_Meter(time,time2,timeSta);  // upstream use default; downstream 11 onramps use CRM
 		else;
 
-		cycle_index++;
-		cycle_index %= NUM_CYCLE_BUFFS;
+		//cycle_index++;
+		//cycle_index %= NUM_CYCLE_BUFFS;
 	
 		TIMER_WAIT(ptimer);	
 
