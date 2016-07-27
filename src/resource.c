@@ -183,23 +183,23 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	// this loop get data from data base
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i< controller_data->num_meter;i++) {
-		if(controller_data->metered_lane_stat[i].passage_stat == 2){ 
+//		if(controller_data->metered_lane_stat[i].passage_stat == 2){ 
 			if((float)controller_data->metered_lane_stat[i].passage_vol>= 0 && (float)controller_data->metered_lane_stat[i].passage_vol <= 2000){ // if flow is in the range
 			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].passage_vol;
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
                 confidence->num_good_vals--;
 			}
-		}else if(controller_data->metered_lane_stat[i].demand_stat == 2){
+//		}else if(controller_data->metered_lane_stat[i].demand_stat == 2){
 			if((float)controller_data->metered_lane_stat[i].demand_vol>= 0 && (float)controller_data->metered_lane_stat[i].demand_vol <= 2000){ 
 			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].demand_vol;
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
                 confidence->num_good_vals--;
 			}
-		}else{
-			confidence->num_good_vals--;
-		}
+//		}else{
+//			confidence->num_good_vals--;
+//		}
 	    }
 	}
 	else
@@ -240,16 +240,16 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i< controller_data->num_addl_det; i++){  
-            if(controller_data->additional_det[i].stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
+//            if(controller_data->additional_det[i].stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
 			    if((float)controller_data->additional_det[i].volume>= 0 && (float)controller_data->additional_det[i].volume <= 2000){ // if flow is in the range
 			        flow_temp[j]=(float)controller_data->additional_det[i].volume;
 					j++;
 				}else{  // replce the flow measurement if it is not in the range
 					confidence->num_good_vals--;
 				}
-			}else{
-				confidence->num_good_vals--;
-		    }
+//			}else{
+//				confidence->num_good_vals--;
+//		    }
 	    }
 	}
 	else
@@ -352,7 +352,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i < controller_data->num_meter; i++) {
 	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
-			    if(controller_data2->queue_stat[i][j].stat == 2){
+//			    if(controller_data2->queue_stat[i][j].stat == 2){
 				    occupancy = 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
 					if(occupancy>=0 && occupancy<=100){
 					    occ_temp[j] = occupancy;
@@ -360,9 +360,9 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 					}else{
 					     confidence->num_good_vals--;
 					}
-			    }else{
-				    confidence->num_good_vals--;
-				}
+//			    }else{
+//				    confidence->num_good_vals--;
+//				}
 	        }
 	    }
 	}
@@ -404,7 +404,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i < controller_data->num_addl_det; i++) {
-		if(controller_data->additional_det[i].stat == 2){
+//		if(controller_data->additional_det[i].stat == 2){
 			occupancy = (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
 			occupancy = 0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) );
 			   if(occupancy>=0 && occupancy<=100){
@@ -413,9 +413,9 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 			   }else{
 			       confidence->num_good_vals--;
 			   }
-		}else{
-		      confidence->num_good_vals--;	
-		}
+//		}else{
+//		      confidence->num_good_vals--;	
+//		}
 	    }
 	}
 	else
@@ -596,7 +596,7 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	for(i=0 ;i < controller_data->num_meter; i++) {
 	    for(j=0 ;j < MAX_QUEUE_LOOPS; j++) {
-		if(controller_data2->queue_stat[i][j].stat == 2){
+//		if(controller_data2->queue_stat[i][j].stat == 2){
 			sum_inflow += (float)controller_data2->queue_stat[i][j].vol;  //Advance detector
 			sum_outflow +=  (float)controller_data->metered_lane_stat[i].passage_vol; // Passage detector
 			printf("OR-inflow %d OR-outflow %d of detector %d \n", 
@@ -606,16 +606,16 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 			);
 			queue = (sum_inflow-sum_outflow)*average_vehicle_length;
 			queue /= controller_data->num_meter; // average queue length
-		}
-		else if(controller_data2->queue_stat[i][j].stat == 5){
-			queue = FLOAT_ERROR; // queue attained max queue length  
-		}
-		else{ 
-			printf("queue_onramp: Error %d detector %d\n",
-				controller_data2->queue_stat[i][j].stat,
-				i
-			);
-		}
+//		}
+//		else if(controller_data2->queue_stat[i][j].stat == 5){
+//			queue = FLOAT_ERROR; // queue attained max queue length  
+//		}
+//		else{ 
+//			printf("queue_onramp: Error %d detector %d\n",
+//				controller_data2->queue_stat[i][j].stat,
+//				i
+//			);
+//		}
 	    }
 	    }
 	}
