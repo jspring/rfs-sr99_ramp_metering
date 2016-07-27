@@ -106,22 +106,22 @@ int main(int argc, char *argv[])
 	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
 	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};                 // data aggregated controller by controller
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};               // data aggregated controller by controller
-	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};               // this is the register of harmonic mean speed in previous time step
-	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {{0}};             // this is the register of mean speed in previous time step
-    float density_prev [NUM_CONTROLLER_VARS/6] = {{0}};             // this is the register of density in previous time step
+	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {0};               // this is the register of harmonic mean speed in previous time step
+	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of mean speed in previous time step
+    float density_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of density in previous time step
 
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
 
-    float temp_ary_vol[NUM_CYCLE_BUFFS] = {{0}};    // temporary array of cyclic buffer
-	float temp_ary_speed[NUM_CYCLE_BUFFS] = {{0}};
-	float temp_ary_occ[NUM_CYCLE_BUFFS] = {{0}};
-	float temp_ary_density[NUM_CYCLE_BUFFS] = {{0}};	
-    float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {{0}};
-	float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {{0}};
-	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {{0}};
-	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {{0}};
+    float temp_ary_vol[NUM_CYCLE_BUFFS] = {0};    // temporary array of cyclic buffer
+	float temp_ary_speed[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_occ[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_density[NUM_CYCLE_BUFFS] = {0};	
+    float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
 
 	while ((option = getopt(argc, argv, "d")) != EOF) {
 		switch(option) {
@@ -176,7 +176,8 @@ int main(int argc, char *argv[])
 //BEGIN MAIN FOR LOOP HERE
 	for(;;)	
 	{
-	cycle_index = cycle_index++ % NUM_CYCLE_BUFFS;
+	cycle_index++;
+	cycle_index = cycle_index % NUM_CYCLE_BUFFS;
 	for (i = 0; i < num_controller_vars; i++){  //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 		db_clt_read(pclt, db_controller_list[i+84].id, db_controller_list[i+84].size, &controller_data2[i]);
@@ -228,7 +229,7 @@ const char *controller_ip_strings[] = {
 	print_timestamp(dbg_st_file_out, &ts); // print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
-		//printf("IP %s controller is called by opt_crm.c \n", controller_ip_strings[i]);
+		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_ip_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
 		
 		// min max function bound the data range and exclude nans.
         controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
@@ -250,6 +251,7 @@ const char *controller_ip_strings[] = {
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);
+        fprintf(dbg_st_file_out,"\n");
         
         //if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0, flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
@@ -257,25 +259,24 @@ const char *controller_ip_strings[] = {
 		controller_offramp_data[i].turning_ratio = Mind(1, Maxd( 0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
 		
 		fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
-        fprintf(dbg_st_file_out,"%f ", i, controller_offramp_data[i].agg_vol); 
-		fprintf(dbg_st_file_out,"%f ", i, controller_offramp_data[i].agg_occ); 
-		fprintf(dbg_st_file_out,"%f ", i, controller_offramp_data[i].turning_ratio);
+        fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); 
+		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_occ); 
+		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].turning_ratio);
 	    //}
 
-        //fprintf(dbg_st_file_out,"\n");
+        fprintf(dbg_st_file_out,"\n");
 
 		//if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
  
 		fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
-		fprintf(dbg_st_file_out,"%f ", i, controller_onramp_data[i].agg_vol); 
-        fprintf(dbg_st_file_out,"%f ", i, controller_onramp_data[i].agg_occ);
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); 
+        fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);
 		//}
-		//fprintf(dbg_st_file_out,"\n");
+		fprintf(dbg_st_file_out,"\n");
 	}
     
-		fprintf(dbg_st_file_out,"\n");
 //** This part aggregate data for each section
 // controller index for each mainline section
 int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1 
