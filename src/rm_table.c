@@ -250,65 +250,102 @@ data_log_column_spec_t file_spec[] =
         {"%hhu ",   &db_urms_status2.queue_stat[1][1].stat, BASE_CHAR, REPLAY_USE},	//###180
         {"%hhu ",   &db_urms_status2.queue_stat[1][1].flag, BASE_CHAR, REPLAY_USE},	//###181
 
-        {"%hhu ",   &db_urms_status2.queue_stat[1][2].vol, BASE_CHAR, REPLAY_USE},	//###188
-        {"%hhu ",   &db_urms_status2.queue_stat[1][2].occ_msb, BASE_CHAR, REPLAY_USE},	//###189
-        {"%hhu ",   &db_urms_status2.queue_stat[1][2].occ_lsb, BASE_CHAR, REPLAY_USE},	//###180
-        {"%hhu ",   &db_urms_status2.queue_stat[1][2].stat, BASE_CHAR, REPLAY_USE},	//###181
-        {"%hhu ",   &db_urms_status2.queue_stat[1][2].flag, BASE_CHAR, REPLAY_USE},	//###181
+        {"%hhu ",   &db_urms_status2.queue_stat[1][2].vol, BASE_CHAR, REPLAY_USE},	//###182
+        {"%hhu ",   &db_urms_status2.queue_stat[1][2].occ_msb, BASE_CHAR, REPLAY_USE},	//###183
+        {"%hhu ",   &db_urms_status2.queue_stat[1][2].occ_lsb, BASE_CHAR, REPLAY_USE},	//###184
+        {"%hhu ",   &db_urms_status2.queue_stat[1][2].stat, BASE_CHAR, REPLAY_USE},	//###185
+        {"%hhu ",   &db_urms_status2.queue_stat[1][2].flag, BASE_CHAR, REPLAY_USE},	//###186
 
-        {"%hhu ",   &db_urms_status2.queue_stat[1][3].vol, BASE_CHAR, REPLAY_USE},	//###188
-        {"%hhu ",   &db_urms_status2.queue_stat[1][3].occ_msb, BASE_CHAR, REPLAY_USE},	//###189
-        {"%hhu ",   &db_urms_status2.queue_stat[1][3].occ_lsb, BASE_CHAR, REPLAY_USE},	//###190
-        {"%hhu ",   &db_urms_status2.queue_stat[1][3].stat, BASE_CHAR, REPLAY_USE},	//###191
-        {"%hhu ",   &db_urms_status2.queue_stat[1][3].flag, BASE_CHAR, REPLAY_USE},	//###192
+        {"%hhu ",   &db_urms_status2.queue_stat[1][3].vol, BASE_CHAR, REPLAY_USE},	//###187
+        {"%hhu ",   &db_urms_status2.queue_stat[1][3].occ_msb, BASE_CHAR, REPLAY_USE},	//###188
+        {"%hhu ",   &db_urms_status2.queue_stat[1][3].occ_lsb, BASE_CHAR, REPLAY_USE},	//###189
+        {"%hhu ",   &db_urms_status2.queue_stat[1][3].stat, BASE_CHAR, REPLAY_USE},	//###190
+        {"%hhu ",   &db_urms_status2.queue_stat[1][3].flag, BASE_CHAR, REPLAY_USE},	//###191
 
-        {"%hhu ",   &db_urms_status2.queue_stat[2][0].vol, BASE_CHAR, REPLAY_USE},	//###193
-        {"%hhu ",   &db_urms_status2.queue_stat[2][0].occ_msb, BASE_CHAR, REPLAY_USE},	//###194
-        {"%hhu ",   &db_urms_status2.queue_stat[2][0].occ_lsb, BASE_CHAR, REPLAY_USE},	//###195
-        {"%hhu ",   &db_urms_status2.queue_stat[2][0].stat, BASE_CHAR, REPLAY_USE},	//###196
-        {"%hhu ",   &db_urms_status2.queue_stat[2][0].flag, BASE_CHAR, REPLAY_USE},	//###197
+        {"%hhu ",   &db_urms_status2.queue_stat[2][0].vol, BASE_CHAR, REPLAY_USE},	//###192
+        {"%hhu ",   &db_urms_status2.queue_stat[2][0].occ_msb, BASE_CHAR, REPLAY_USE},	//###193
+        {"%hhu ",   &db_urms_status2.queue_stat[2][0].occ_lsb, BASE_CHAR, REPLAY_USE},	//###194
+        {"%hhu ",   &db_urms_status2.queue_stat[2][0].stat, BASE_CHAR, REPLAY_USE},	//###195
+        {"%hhu ",   &db_urms_status2.queue_stat[2][0].flag, BASE_CHAR, REPLAY_USE},	//###196
 
-        {"%hhu ",   &db_urms_status2.queue_stat[2][1].vol, BASE_CHAR, REPLAY_USE},	//###198
-        {"%hhu ",   &db_urms_status2.queue_stat[2][1].occ_msb, BASE_CHAR, REPLAY_USE},	//###199
-        {"%hhu ",   &db_urms_status2.queue_stat[2][1].occ_lsb, BASE_CHAR, REPLAY_USE},	//###200
-        {"%hhu ",   &db_urms_status2.queue_stat[2][1].stat, BASE_CHAR, REPLAY_USE},	//###201
-        {"%hhu ",   &db_urms_status2.queue_stat[2][1].flag, BASE_CHAR, REPLAY_USE},	//###202
+        {"%hhu ",   &db_urms_status2.queue_stat[2][1].vol, BASE_CHAR, REPLAY_USE},	//###197
+        {"%hhu ",   &db_urms_status2.queue_stat[2][1].occ_msb, BASE_CHAR, REPLAY_USE},	//###198
+        {"%hhu ",   &db_urms_status2.queue_stat[2][1].occ_lsb, BASE_CHAR, REPLAY_USE},	//###199
+        {"%hhu ",   &db_urms_status2.queue_stat[2][1].stat, BASE_CHAR, REPLAY_USE},	//###200
+        {"%hhu ",   &db_urms_status2.queue_stat[2][1].flag, BASE_CHAR, REPLAY_USE},	//###201
 
-        {"%hhu ",   &db_urms_status2.queue_stat[2][2].vol, BASE_CHAR, REPLAY_USE},	//###203
-        {"%hhu ",   &db_urms_status2.queue_stat[2][2].occ_msb, BASE_CHAR, REPLAY_USE},	//###204
-        {"%hhu ",   &db_urms_status2.queue_stat[2][2].occ_lsb, BASE_CHAR, REPLAY_USE},	//###205
-        {"%hhu ",   &db_urms_status2.queue_stat[2][2].stat, BASE_CHAR, REPLAY_USE},	//###206
-        {"%hhu ",   &db_urms_status2.queue_stat[2][2].flag, BASE_CHAR, REPLAY_USE},	//###207
+        {"%hhu ",   &db_urms_status2.queue_stat[2][2].vol, BASE_CHAR, REPLAY_USE},	//###202
+        {"%hhu ",   &db_urms_status2.queue_stat[2][2].occ_msb, BASE_CHAR, REPLAY_USE},	//###203
+        {"%hhu ",   &db_urms_status2.queue_stat[2][2].occ_lsb, BASE_CHAR, REPLAY_USE},	//###204
+        {"%hhu ",   &db_urms_status2.queue_stat[2][2].stat, BASE_CHAR, REPLAY_USE},	//###205
+        {"%hhu ",   &db_urms_status2.queue_stat[2][2].flag, BASE_CHAR, REPLAY_USE},	//###206
 
-        {"%hhu ",   &db_urms_status2.queue_stat[2][3].vol, BASE_CHAR, REPLAY_USE},	//###208
-        {"%hhu ",   &db_urms_status2.queue_stat[2][3].occ_msb, BASE_CHAR, REPLAY_USE},	//###209
-        {"%hhu ",   &db_urms_status2.queue_stat[2][3].occ_lsb, BASE_CHAR, REPLAY_USE},	//###210
-        {"%hhu ",   &db_urms_status2.queue_stat[2][3].stat, BASE_CHAR, REPLAY_USE},	//###211
-        {"%hhu ",   &db_urms_status2.queue_stat[2][3].flag, BASE_CHAR, REPLAY_USE},	//###212
+        {"%hhu ",   &db_urms_status2.queue_stat[2][3].vol, BASE_CHAR, REPLAY_USE},	//###207
+        {"%hhu ",   &db_urms_status2.queue_stat[2][3].occ_msb, BASE_CHAR, REPLAY_USE},	//###208
+        {"%hhu ",   &db_urms_status2.queue_stat[2][3].occ_lsb, BASE_CHAR, REPLAY_USE},	//###209
+        {"%hhu ",   &db_urms_status2.queue_stat[2][3].stat, BASE_CHAR, REPLAY_USE},	//###210
+        {"%hhu ",   &db_urms_status2.queue_stat[2][3].flag, BASE_CHAR, REPLAY_USE},	//###211
 
-        {"%hhu ",   &db_urms_status2.queue_stat[3][0].vol, BASE_CHAR, REPLAY_USE},	//###213
-        {"%hhu ",   &db_urms_status2.queue_stat[3][0].occ_msb, BASE_CHAR, REPLAY_USE},	//###214
-        {"%hhu ",   &db_urms_status2.queue_stat[3][0].occ_lsb, BASE_CHAR, REPLAY_USE},	//###215
-        {"%hhu ",   &db_urms_status2.queue_stat[3][0].stat, BASE_CHAR, REPLAY_USE},	//###216
-        {"%hhu ",   &db_urms_status2.queue_stat[3][0].flag, BASE_CHAR, REPLAY_USE},	//###217
+        {"%hhu ",   &db_urms_status2.queue_stat[3][0].vol, BASE_CHAR, REPLAY_USE},	//###212
+        {"%hhu ",   &db_urms_status2.queue_stat[3][0].occ_msb, BASE_CHAR, REPLAY_USE},	//###213
+        {"%hhu ",   &db_urms_status2.queue_stat[3][0].occ_lsb, BASE_CHAR, REPLAY_USE},	//###214
+        {"%hhu ",   &db_urms_status2.queue_stat[3][0].stat, BASE_CHAR, REPLAY_USE},	//###215
+        {"%hhu ",   &db_urms_status2.queue_stat[3][0].flag, BASE_CHAR, REPLAY_USE},	//###216
 
-        {"%hhu ",   &db_urms_status2.queue_stat[3][1].vol, BASE_CHAR, REPLAY_USE},	//###218
-        {"%hhu ",   &db_urms_status2.queue_stat[3][1].occ_msb, BASE_CHAR, REPLAY_USE},	//###219
-        {"%hhu ",   &db_urms_status2.queue_stat[3][1].occ_lsb, BASE_CHAR, REPLAY_USE},	//###220
-        {"%hhu ",   &db_urms_status2.queue_stat[3][1].stat, BASE_CHAR, REPLAY_USE},	//###221
-        {"%hhu ",   &db_urms_status2.queue_stat[3][1].flag, BASE_CHAR, REPLAY_USE},	//###222
+        {"%hhu ",   &db_urms_status2.queue_stat[3][1].vol, BASE_CHAR, REPLAY_USE},	//###217
+        {"%hhu ",   &db_urms_status2.queue_stat[3][1].occ_msb, BASE_CHAR, REPLAY_USE},	//###218
+        {"%hhu ",   &db_urms_status2.queue_stat[3][1].occ_lsb, BASE_CHAR, REPLAY_USE},	//###219
+        {"%hhu ",   &db_urms_status2.queue_stat[3][1].stat, BASE_CHAR, REPLAY_USE},	//###220
+        {"%hhu ",   &db_urms_status2.queue_stat[3][1].flag, BASE_CHAR, REPLAY_USE},	//###221
 
-        {"%hhu ",   &db_urms_status2.queue_stat[3][2].vol, BASE_CHAR, REPLAY_USE},	//###223
-        {"%hhu ",   &db_urms_status2.queue_stat[3][2].occ_msb, BASE_CHAR, REPLAY_USE},	//###224
-        {"%hhu ",   &db_urms_status2.queue_stat[3][2].occ_lsb, BASE_CHAR, REPLAY_USE},	//###225
-        {"%hhu ",   &db_urms_status2.queue_stat[3][2].stat, BASE_CHAR, REPLAY_USE},	//###226
-        {"%hhu ",   &db_urms_status2.queue_stat[3][2].flag, BASE_CHAR, REPLAY_USE},	//###227
+        {"%hhu ",   &db_urms_status2.queue_stat[3][2].vol, BASE_CHAR, REPLAY_USE},	//###222
+        {"%hhu ",   &db_urms_status2.queue_stat[3][2].occ_msb, BASE_CHAR, REPLAY_USE},	//###223
+        {"%hhu ",   &db_urms_status2.queue_stat[3][2].occ_lsb, BASE_CHAR, REPLAY_USE},	//###224
+        {"%hhu ",   &db_urms_status2.queue_stat[3][2].stat, BASE_CHAR, REPLAY_USE},	//###225
+        {"%hhu ",   &db_urms_status2.queue_stat[3][2].flag, BASE_CHAR, REPLAY_USE},	//###226
 
-        {"%hhu ",   &db_urms_status2.queue_stat[3][3].vol, BASE_CHAR, REPLAY_USE},	//###228
-        {"%hhu ",   &db_urms_status2.queue_stat[3][3].occ_msb, BASE_CHAR, REPLAY_USE},	//###229
-        {"%hhu ",   &db_urms_status2.queue_stat[3][3].occ_lsb, BASE_CHAR, REPLAY_USE},	//###230
-        {"%hhu ",   &db_urms_status2.queue_stat[3][3].stat, BASE_CHAR, REPLAY_USE},	//###231
-        {"%hhu ",   &db_urms_status2.queue_stat[3][3].flag, BASE_CHAR, REPLAY_USE},	//###232
+        {"%hhu ",   &db_urms_status2.queue_stat[3][3].vol, BASE_CHAR, REPLAY_USE},	//###227
+        {"%hhu ",   &db_urms_status2.queue_stat[3][3].occ_msb, BASE_CHAR, REPLAY_USE},	//###228
+        {"%hhu ",   &db_urms_status2.queue_stat[3][3].occ_lsb, BASE_CHAR, REPLAY_USE},	//###229
+        {"%hhu ",   &db_urms_status2.queue_stat[3][3].stat, BASE_CHAR, REPLAY_USE},	//###230
+        {"%hhu ",   &db_urms_status2.queue_stat[3][3].flag, BASE_CHAR, REPLAY_USE},	//###231
+
+        {"%hhu ",   &db_urms_status.mainline_stat[6].lead_stat, BASE_CHAR, REPLAY_USE},	//###232
+        {"%hhu ",   &db_urms_status.mainline_stat[6].lead_vol, BASE_CHAR, REPLAY_USE},	//###233
+        {"%.3f ",   &urms_datafile.mainline_lead_occ[6], BASE_FLOAT, REPLAY_USE},	//###234
+        {"%hhu ",   &db_urms_status.mainline_stat[6].trail_stat, BASE_CHAR, REPLAY_USE},//###235
+        {"%hhu ",   &db_urms_status.mainline_stat[6].trail_vol, BASE_CHAR, REPLAY_USE},	//###236
+        {"%.3f ",   &urms_datafile.mainline_trail_occ[6], BASE_FLOAT, REPLAY_USE},	//###237
+        {"%hhu ",   &db_urms_status.mainline_stat[6].speed, BASE_CHAR, REPLAY_USE},	//###238
+
+        {"%hhu ",   &db_urms_status.mainline_stat[7].lead_stat, BASE_CHAR, REPLAY_USE},	//###239
+        {"%hhu ",   &db_urms_status.mainline_stat[7].lead_vol, BASE_CHAR, REPLAY_USE},	//###240
+        {"%.3f ",   &urms_datafile.mainline_lead_occ[7], BASE_FLOAT, REPLAY_USE},	//###241
+        {"%hhu ",   &db_urms_status.mainline_stat[7].trail_stat, BASE_CHAR, REPLAY_USE},//###242
+        {"%hhu ",   &db_urms_status.mainline_stat[7].trail_vol, BASE_CHAR, REPLAY_USE},	//###243
+        {"%.3f ",   &urms_datafile.mainline_trail_occ[7], BASE_FLOAT, REPLAY_USE},	//###244
+        {"%hhu ",   &db_urms_status.mainline_stat[7].speed, BASE_CHAR, REPLAY_USE},	//###245
+
+        {"%hhu ",   &db_urms_status.metered_lane_stat[3].demand_vol, BASE_CHAR, REPLAY_USE},	//###246
+        {"%hhu ",   &db_urms_status.metered_lane_stat[3].passage_vol, BASE_CHAR, REPLAY_USE},	//###247
+        {"%.3f ",   &urms_datafile.queue_occ[3], BASE_FLOAT, REPLAY_USE},	//###248
+        {"%hhu ",   &db_urms_status2.queue_stat[3][0].vol, BASE_CHAR, REPLAY_USE},	//###249
+        {"%hu ",    &urms_datafile.metering_rate[3], BASE_SHORT, REPLAY_USE},	//###250
+        {"%hhu ",   &db_urms_status3.cmd_src[3], BASE_CHAR, REPLAY_USE},		//###251
+        {"%hhu ",   &db_urms_status3.action[3], BASE_CHAR, REPLAY_USE},		//###252
+        {"%hhu ",   &db_urms_status3.plan[3], BASE_CHAR, REPLAY_USE},		//###253
+
+        {"%hhu ",   &db_urms_status.metered_lane_stat[0].demand_stat, BASE_CHAR, REPLAY_USE},	//###254
+        {"%hhu ",   &db_urms_status.metered_lane_stat[0].passage_stat, BASE_CHAR, REPLAY_USE},	//###255
+
+        {"%hhu ",   &db_urms_status.metered_lane_stat[1].demand_stat, BASE_CHAR, REPLAY_USE},	//###256
+        {"%hhu ",   &db_urms_status.metered_lane_stat[1].passage_stat, BASE_CHAR, REPLAY_USE},	//###257
+
+        {"%hhu ",   &db_urms_status.metered_lane_stat[2].demand_stat, BASE_CHAR, REPLAY_USE},	//###258
+        {"%hhu ",   &db_urms_status.metered_lane_stat[2].passage_stat, BASE_CHAR, REPLAY_USE},	//###259
+
+        {"%hhu ",   &db_urms_status.metered_lane_stat[3].demand_stat, BASE_CHAR, REPLAY_USE},	//###260
+        {"%hhu ",   &db_urms_status.metered_lane_stat[3].passage_stat, BASE_CHAR, REPLAY_USE},	//###261
 };
 
 #define NUM_FILE_COLUMNS sizeof(file_spec)/sizeof(data_log_column_spec_t)
