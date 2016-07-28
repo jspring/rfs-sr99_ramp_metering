@@ -672,5 +672,5 @@ float turning_ratio_offramp = 0.0;
 	    turning_ratio_offramp = 0.0;
 	}
 
-	return maxd(100,turning_ratio_offramp);
+	return mind(100,turning_ratio_offramp);
 }
