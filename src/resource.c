@@ -663,3 +663,14 @@ float density_aggregation_mainline(float flow, float hm_speed, float density_pre
     */
 	return mind(200.0, density);
 }
+
+float turning_ratio_offramp(float FR_flow, float ML_flow){
+float turning_ratio_offramp = 0.0;
+	if(FR_flow>=0 && ML_flow>0){
+		turning_ratio_offramp = (FR_flow/ML_flow)*100;
+	}else{
+	    turning_ratio_offramp = 0.0;
+	}
+
+	return maxd(100,turning_ratio_offramp);
+}

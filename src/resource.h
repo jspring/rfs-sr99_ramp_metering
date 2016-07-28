@@ -47,4 +47,5 @@ extern float mean_speed_aggregation_mainline(db_urms_status_t *controller_dat, f
 
 extern float density_aggregation_mainline(float flow, float hm_speed, float density_prev);
 //extern float density_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
-//extern float turning_ratio_offramp(db_urms_status_t *controller_data);
+
+extern float turning_ratio_offramp(float FR_flow, float ML_flow);

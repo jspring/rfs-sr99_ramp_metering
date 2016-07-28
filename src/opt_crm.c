@@ -256,7 +256,7 @@ const char *controller_ip_strings[] = {
         //if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0, flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
         controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0, occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
-		controller_offramp_data[i].turning_ratio = Mind(1, Maxd( 0, controller_offramp_data[i].agg_vol/controller_mainline_data[i-1].agg_vol));
+		controller_offramp_data[i].turning_ratio = turning_ratio_offramp(controller_offramp_data[i].agg_vol,controller_mainline_data[i-1].agg_vol);
 		
 		fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
         fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); 
@@ -421,8 +421,8 @@ int j; //
 
 
 		} 
-
-		//fprintf(st_file_out,"\n");
+        
+     	fprintf(st_file_out,"\n");
 
 		for(i=0;i<NumOnRamp;i++)
 		{	
@@ -432,13 +432,15 @@ int j; //
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
 				fprintf(st_file_out,"OR %d ", i);
 				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol);  			
-				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);  			
+				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);
+				fprintf(st_file_out,"\n");
 				fprintf(st_file_out,"FR %d ", i);
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol);
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);
+				fprintf(st_file_out,"\n");
 		}
 		
-		fprintf(st_file_out,"\n");
+		
 		
 		det_data_4_contr(time);		
 		get_meas(time);				
