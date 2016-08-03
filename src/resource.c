@@ -142,6 +142,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 		}else{
 			confidence->num_good_vals--;
 		}
+
 	    }
 	}
 	else
