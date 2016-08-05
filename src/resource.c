@@ -353,7 +353,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i < controller_data->num_meter; i++) {
 	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
- 			    if(controller_data2->queue_stat[i][j].stat == 2){
+ 			    if( (controller_data2->queue_stat[i][j].stat == 2) || (controller_data2->queue_stat[i][j].stat == 1) ){
 				    occupancy = 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
 					if(occupancy>=0 && occupancy<=100){
 					    occ_temp[j] = occupancy;
@@ -405,7 +405,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i < controller_data->num_addl_det; i++) {
- 		if(controller_data->additional_det[i].stat == 2){
+ 		if( (controller_data->additional_det[i].stat == 2) || (controller_data2->queue_stat[i][j].stat == 1) ){
 			occupancy = (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
 			occupancy = 0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) );
 			   if(occupancy>=0 && occupancy<=100){
@@ -674,4 +674,17 @@ float turning_ratio_offramp = 0.0;
 	}
 
 	return mind(100,turning_ratio_offramp);
+}
+
+float butt_2(float in_dat)
+{
+   float x[2]={0.0,0.0}, out_dat=0.0;
+   static float x_old[2]={0.0,0.0};
+   
+   x[0]=0.2779*x_old[0] - 0.4152*x_old[1] + 0.5872*in_dat;
+   x[1]=0.4152*x_old[0] + 0.8651*x_old[1] + 0.1908*in_dat;  
+   out_dat = 0.1468*x[0] + 0.6594*x[1] + 0.0675*in_dat;
+   x_old[0]=x[0];
+   x_old[1]=x[1];
+   return out_dat;
 }
