@@ -341,14 +341,15 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){ 
 	int i;
 	int j;
+	int k=0;
 	float occupancy = 0;
 	float mean_occ = 0.0;
 	float var_occ = 0.0;
     int num_lane = controller_data->num_main;
-    float occ_temp [MAX_QUEUE_LOOPS];
+    float occ_temp [MAX_METERED_LANES * MAX_QUEUE_LOOPS];
 
-	confidence->num_total_vals = MAX_QUEUE_LOOPS;
-	confidence->num_good_vals = MAX_QUEUE_LOOPS;
+	confidence->num_total_vals = MAX_METERED_LANES * MAX_QUEUE_LOOPS;
+	confidence->num_good_vals = MAX_METERED_LANES * MAX_QUEUE_LOOPS;
 
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i < controller_data->num_meter; i++) {
@@ -356,8 +357,8 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
  			    if( (controller_data2->queue_stat[i][j].stat == 2) || (controller_data2->queue_stat[i][j].stat == 1) ){
 				    occupancy = 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
 					if(occupancy>=0 && occupancy<=100){
-					    occ_temp[j] = occupancy;
-                        j++;
+					    occ_temp[k] = occupancy;
+                        			k++;
 					}else{
 					     confidence->num_good_vals--;
 					}
