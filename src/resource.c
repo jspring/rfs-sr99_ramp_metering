@@ -241,7 +241,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i< controller_data->num_addl_det; i++){  
-             if( (controller_data->additional_det[i].stat == 2) || (controller_data->additional_det[i].stat == 1)){ // if the controller report the flow data is correct, then check the data is in the range or not
+             if( (controller_data->additional_det[i].stat == 2) || (controller_data->additional_det[i].stat == 1) ){ // if the controller report the flow data is correct, then check the data is in the range or not
 			    if((float)controller_data->additional_det[i].volume>= 0 && (float)controller_data->additional_det[i].volume <= 2000){ // if flow is in the range
 			        flow_temp[j]=(float)controller_data->additional_det[i].volume;
 					j++;
