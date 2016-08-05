@@ -405,7 +405,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i < controller_data->num_addl_det; i++) {
- 		if( (controller_data->additional_det[i].stat == 2) || (controller_data2->queue_stat[i][j].stat == 1) ){
+ 		if( (controller_data->additional_det[i].stat == 2) || (controller_data->additional_det[i].stat == 1) ){
 			occupancy = (float)((controller_data->additional_det[i].occ_msb << 8) + controller_data->additional_det[i].occ_lsb);
 			occupancy = 0.1 * ( ((controller_data->additional_det[i].occ_msb << 8) & 0xFF00) + ((controller_data->additional_det[i].occ_lsb) & 0xFF) );
 			   if(occupancy>=0 && occupancy<=100){
