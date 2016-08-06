@@ -38,7 +38,7 @@ do
 	PORT=`echo $IP_AND_PORT | sed '{s/\./ /4}' | awk '{print $2}'`
 	/home/sr99_ramp_metering/system/replay_controller_go $y $THIS_PATH $INTERVAL
         echo "Starting wrfiles_rm, $CONTROLLER_IP $y $PORT $TIMESTAMP"
-        /home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i $INTERVAL -m 30 -s $y -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_replay"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+        /home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i $INTERVAL -m 30 -s $y -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP"replay" 1>>/big/data/ac_rm_1/"wrfiles_replay"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
 
 	y=$(($y+200))
 done
