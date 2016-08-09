@@ -85,6 +85,9 @@ int main(int argc, char *argv[])
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/6];  //See warning at top of file
+	trig_info_typ trig_info;
+	int recv_type;
+
 	int option;
 	int exitsig;
 	db_clt_typ *pclt;
@@ -142,15 +145,15 @@ int main(int argc, char *argv[])
 	get_local_name(hostname, MAXHOSTNAMELEN);
 	if ((pclt = db_list_init(argv[0], hostname, domain, xport,
 		//db_vars_list, num_db_vars, NULL, 0)) == NULL) {
-		NULL, 0, NULL, 0)) == NULL) {
+		NULL, 0, db_trig_list, NUM_TRIG_VARS)) == NULL) {
 		printf("Database initialization error in %s.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	/* Setup a timer for every 'interval' msec. */
-	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
-		printf("Unable to initialize wrfiles timer\n");
-		exit(EXIT_FAILURE);
-	}
+//	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
+//		printf("Unable to initialize wrfiles timer\n");
+//		exit(EXIT_FAILURE);
+//	}
 
 	if(( exitsig = setjmp(exit_env)) != 0) {
 		db_list_done(pclt, NULL, 0, NULL, 0);
@@ -176,6 +179,9 @@ int main(int argc, char *argv[])
 //BEGIN MAIN FOR LOOP HERE
 	for(;;)	
 	{
+		/* Now wait for a trigger. */
+		recv_type= clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
+
 	cycle_index++;
 	cycle_index = cycle_index % NUM_CYCLE_BUFFS;
 	for (i = 0; i < num_controller_vars; i++){  //See warning at top of file
@@ -471,7 +477,7 @@ int j; //
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
-		TIMER_WAIT(ptimer);	
+//		TIMER_WAIT(ptimer);	
 
 	} 
 	

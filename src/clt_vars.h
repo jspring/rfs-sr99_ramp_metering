@@ -244,3 +244,36 @@ db_id_t db_controller_list[] =  {
 	{DB_10_29_248_56_VAR + 5, sizeof(db_ramp_data_t)},
 };
 #define NUM_CONTROLLER_VARS (sizeof(db_controller_list)/sizeof(db_id_t))
+
+
+int db_trig_list[] =  {
+	DB_10_29_248_108_VAR,
+	DB_10_254_25_113_VAR,
+	DB_10_254_25_120_VAR,
+	DB_10_29_249_46_VAR,
+	DB_10_29_248_42_VAR,
+	DB_10_29_248_20_VAR,
+	DB_10_29_248_128_VAR,
+	DB_10_254_27_67_VAR,
+	DB_10_254_27_82_VAR,
+	DB_10_254_27_81_VAR,
+	DB_10_29_248_76_VAR,
+	DB_10_254_28_213_VAR,
+	DB_10_254_28_212_VAR,
+	DB_10_254_28_211_VAR,
+	DB_10_29_248_118_VAR,
+	DB_10_29_248_52_VAR,
+	DB_10_254_24_156_VAR,
+	DB_10_254_24_157_VAR,
+	DB_10_29_248_185_VAR,
+	DB_10_29_248_66_VAR,
+	DB_10_29_248_81_VAR,
+	DB_10_29_248_213_VAR,
+	DB_10_29_248_155_PORT_1001_VAR,
+	DB_10_29_248_155_PORT_1002_VAR,
+	DB_10_29_248_124_VAR,
+	DB_10_29_248_67_VAR,
+	DB_10_29_248_157_VAR,
+	DB_10_29_248_56_VAR,
+};
+#define NUM_TRIG_VARS (sizeof(db_trig_list)/sizeof(int))
