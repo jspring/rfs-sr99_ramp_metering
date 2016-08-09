@@ -23,11 +23,6 @@ static void sig_hand(int code)
                 longjmp(exit_env, code);
 }
 
-int db_trig_list[] =  {
-        DB_URMS_VAR
-};
-unsigned int num_trig_variables = sizeof(db_trig_list)/sizeof(int);
-
 const char *usage = "-d <Database number (Modulo 4!)> -f <filename> -i (loop interval) -v (verbose)\n"; 
 
 int main(int argc, char *argv[]) {
