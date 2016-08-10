@@ -50,9 +50,10 @@ extern float density_aggregation_mainline(float flow, float hm_speed, float dens
 
 extern float turning_ratio_offramp(float FR_flow, float ML_flow);
 
-extern float interp_OR_HIS_FLOW(timestamp_t *ts, int OR_idx );
+//extern float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT);
+#define	NUM_5MIN_INTERVALS	288
+#define	NUM_ONRAMPS_PLUS_1	17
+
+extern float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]);
 
 extern float interp_FR_HIS_FLOW(timestamp_t *ts, int FR_idx );
-
-
-

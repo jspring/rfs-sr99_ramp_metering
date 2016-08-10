@@ -691,10 +691,8 @@ float butt_2(float in_dat)
    return out_dat;
 }
 
-float interp_OR_HIS_FLOW(timestamp_t *ts, int OR_idx ){
-    
     // add On-ramp 5 minute historical data as a look up table, 288 is the time vector and 16 is the number of total on-ramp 
-const float OR_HIS_FLOW_DATA[288][16+1] = {
+const float OR_HIS_FLOW_DATA[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1] = {
 {	1.000	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	}	,
 {	2.000	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	}	,
 {	3.000	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	,	10	}	,
@@ -984,6 +982,9 @@ const float OR_HIS_FLOW_DATA[288][16+1] = {
 {	287.000	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	,	5	}	,
 {	288.000	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	,	3	}	};
 
+float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+	timestamp_t ts;
     get_current_timestamp(&ts);
 
 	int t_0 = 0;
@@ -1003,7 +1004,7 @@ const float OR_HIS_FLOW_DATA[288][16+1] = {
     t_1 = mind(t_1,288);
 	t_1 = maxd(0,t_1);
     
-    OR_flow = OR_HIS_FLOW_DATA[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DATA[t_1][OR_idx+1] - OR_HIS_FLOW_DATA[t_0][OR_idx+1] ));
+    OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
 
     return OR_flow;
 }
