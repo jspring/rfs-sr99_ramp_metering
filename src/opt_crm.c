@@ -232,9 +232,6 @@ const char *controller_ip_strings[] = {
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
     
 	get_current_timestamp(&ts); // get current time step
-	ts.sec
-	ts.min
-	ts.hour
 	print_timestamp(dbg_st_file_out, &ts); // print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
