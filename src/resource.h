@@ -6,8 +6,8 @@
 #include <urms.h>
 
 struct confidence {
-        int num_good_vals;
-        int num_total_vals;
+        float num_good_vals;
+        float num_total_vals;
 };
 
 extern float maxd(float a,float b);
