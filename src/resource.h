@@ -49,3 +49,10 @@ extern float density_aggregation_mainline(float flow, float hm_speed, float dens
 //extern float density_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 
 extern float turning_ratio_offramp(float FR_flow, float ML_flow);
+
+extern float interp_OR_HIS_FLOW(float t, int OR_idx );
+
+extern float interp_FR_HIS_FLOW(float t, int FR_idx );
+
+
+
