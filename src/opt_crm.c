@@ -438,7 +438,7 @@ int j; //
       
 	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)==0.0){
 		  if(FR_flow_zero_counter[i] > num_zero_tolerant ){
-                  offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+2, FR_HIS_FLOW_DATA);
+                  offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA);
 		  }else{
 		          offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 		  }
@@ -450,7 +450,7 @@ int j; //
 
 	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)==0.0){
 		  if(FR_occ_zero_counter[i] > num_zero_tolerant ){
-                  offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+2, FR_HIS_OCC_DATA);
+                  offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA);
 		  }else{
 		          offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
 		  }
