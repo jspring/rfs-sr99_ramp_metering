@@ -364,8 +364,8 @@ int j; //
 			offramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
 			offramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
 		}else{
-			offramp_out[cycle_index][i].agg_vol = 0;
-			offramp_out[cycle_index][i].agg_occ = 0;
+			offramp_out[cycle_index][i].agg_vol = 0.0;
+			offramp_out[cycle_index][i].agg_occ = 0.0;
 		}
 	} 
 
