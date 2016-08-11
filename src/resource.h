@@ -4,10 +4,11 @@
 
 #pragma once
 #include <urms.h>
+//#include "look_up_table.h"
 // define the array size of look up table here
 #define	NUM_5MIN_INTERVALS	288
 #define	NUM_ONRAMPS_PLUS_1	17
-
+#define NUM_OFFRAMPS_PLUS_1	13
 struct confidence {
         float num_good_vals;
         float num_total_vals;
@@ -34,6 +35,9 @@ extern long int nCr(int n, int r);
 //extern float get_on_ramp_flow_by_flow_balance(float upstream_total_flow, float downstream_total_flow, float off_ramp_flow);
 
 extern const char *controller_strings[];
+extern const float *OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1];
+extern const float *FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1];
+
 
 extern float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 extern float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confidence *confidence);
@@ -57,4 +61,4 @@ extern float turning_ratio_offramp(float FR_flow, float ML_flow);
 
 extern float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]);
 
-extern float interp_FR_HIS_FLOW(timestamp_t *ts, int FR_idx );
+extern float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1]);

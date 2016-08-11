@@ -1,6 +1,6 @@
 #include <db_include.h>
 #include "resource.h"
-//#include "look_up_table.h"
+
 #include <urms.h>
 #include <math.h>
 
@@ -719,4 +719,32 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
     //OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
     OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + ( ( (t_convert - t_0) )*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ) ); 
     return OR_flow;
+}
+
+
+float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1]){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+	timestamp_t ts;
+    get_current_timestamp(&ts);
+
+	int t_0 = 0;
+	int t_1 = 0;
+	float t_convert = 0.0; 
+	float FR_flow = 0.0;
+    
+    t_convert = (12*ts.hour) + (ts.min/5) ;
+	t_convert = mind(t_convert,288);
+	t_convert = maxd(0,t_convert);
+    
+	t_0 = floor(t_convert);
+    t_0 = mind(t_0,288);
+	t_0 = maxd(0,t_0);
+     
+	t_1 = ceil(t_convert);
+    t_1 = mind(t_1,288);
+	t_1 = maxd(0,t_1);
+    
+    //OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
+    FR_flow = FR_HIS_FLOW_DAT[t_0][FR_idx+1] + ( ( (t_convert - t_0) )*(FR_HIS_FLOW_DAT[t_1][FR_idx+1] - FR_HIS_FLOW_DAT[t_0][FR_idx+1] ) ); 
+    return FR_flow;
 }

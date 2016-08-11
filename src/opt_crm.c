@@ -413,6 +413,9 @@ int j; //
 	   if (onramp_out_f[i].agg_vol == 0){
 	       onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i, OR_HIS_FLOW_DATA);
 	   }
+	   if (offramp_out_f[i].agg_vol == 0){
+	       offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i, FR_HIS_FLOW_DATA);
+	   }
    }
    
 
