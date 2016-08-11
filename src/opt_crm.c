@@ -127,6 +127,12 @@ int main(int argc, char *argv[])
 	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
 
+	int num_zero_tolerant = 10;
+    int OR_flow_zero_counter[NumOnRamp] = {0};
+    int OR_occ_zero_counter[NumOnRamp] = {0};
+    int FR_flow_zero_counter[NumOnRamp] = {0};
+    int FR_occ_zero_counter[NumOnRamp] = {0};
+
 	while ((option = getopt(argc, argv, "d")) != EOF) {
 		switch(option) {
 			case 'd':
@@ -395,11 +401,6 @@ int j; //
 	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
    }
 
-   int num_zero_tolerant = 10;
-   int OR_flow_zero_counter[NumOnRamp] = {0};
-   int OR_occ_zero_counter[NumOnRamp] = {0};
-   int FR_flow_zero_counter[NumOnRamp] = {0};
-   int FR_occ_zero_counter[NumOnRamp] = {0};
 
    for(i=0; i<NumOnRamp; i++){
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
