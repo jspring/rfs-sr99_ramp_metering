@@ -704,7 +704,7 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
 	float t_convert = 0.0; 
 	float OR_flow = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5);
+    t_convert = (12*ts.hour) + (ts.min/5) ;
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -717,6 +717,6 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
 	t_1 = maxd(0,t_1);
     
     //OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
-    OR_flow = t_convert; 
+    OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1]; 
     return OR_flow;
 }
