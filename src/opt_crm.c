@@ -408,13 +408,23 @@ int j; //
       offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 	  offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
    }
-
+   
+   int num_zero_tolerant = 10;
+   int OR_flow_zero_counter = 0;
+   int FR_flow_zero_counter = 0;
+  
    for(i=0; i<NumOnRamp; i++){
-	   if (onramp_out_f[i].agg_vol == 0){
+	   if (onramp_out_f[i].agg_vol == 0 && OR_flow_zero_counter >= num_zero_tolerant){
 	       onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i, OR_HIS_FLOW_DATA);
+		   OR_flow_zero_counter++; // increase the counter 
+	   }else{
+	       OR_flow_zero_counter=0;
 	   }
-	   if (offramp_out_f[i].agg_vol == 0){
+
+	   if (offramp_out_f[i].agg_vol == 0 && FR_flow_zero_counter >= num_zero_tolerant){
 	       offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i, FR_HIS_FLOW_DATA);
+	   }else{
+	       FR_flow_zero_counter=0;
 	   }
    }
    
