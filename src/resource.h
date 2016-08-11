@@ -8,7 +8,7 @@
 // define the array size of look up table here
 #define	NUM_5MIN_INTERVALS	288
 #define	NUM_ONRAMPS_PLUS_1	17
-#define NUM_OFFRAMPS_PLUS_1	12
+#define NUM_OFFRAMPS_PLUS_1	17
 struct confidence {
         float num_good_vals;
         float num_total_vals;
