@@ -35,9 +35,6 @@ extern long int nCr(int n, int r);
 //extern float get_on_ramp_flow_by_flow_balance(float upstream_total_flow, float downstream_total_flow, float off_ramp_flow);
 
 extern const char *controller_strings[];
-extern const float *OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1];
-extern const float *FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1];
-
 
 extern float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 extern float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confidence *confidence);
