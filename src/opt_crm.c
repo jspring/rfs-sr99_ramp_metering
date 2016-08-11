@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "parameters.h"
-//#include "look_up_table.h"
+#include "look_up_table.h"
 
 #define NRANSI
 
@@ -408,6 +408,13 @@ int j; //
       offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 	  offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
    }
+
+   for(i=0; i<NumOnRamp; i++){
+	   if (onramp_out_f[i].agg_vol == 0){
+	       onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i, OR_HIS_FLOW_DATA);
+	   }
+   }
+   
 
 /*###################################################################################################################
 ###################################################################################################################*/

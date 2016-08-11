@@ -1,6 +1,6 @@
 #include <db_include.h>
 #include "resource.h"
-#include "look_up_table.h"
+//#include "look_up_table.h"
 #include <urms.h>
 #include <math.h>
 
