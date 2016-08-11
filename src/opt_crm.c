@@ -358,7 +358,7 @@ int j; //
 	}
 
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
-	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23,25}; // 4 off-ramp is missing, total number of off-ramps is 9 
+	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9 
 	for(i=0;i<NumOnRamp;i++){ 
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
 			offramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
@@ -438,7 +438,7 @@ int j; //
       
 	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)==0.0){
 		  if(FR_flow_zero_counter[i] > num_zero_tolerant ){
-                  offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA);
+                  offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i, FR_HIS_FLOW_DATA);
 		  }else{
 		          offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 		  }
@@ -450,7 +450,7 @@ int j; //
 
 	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)==0.0){
 		  if(FR_occ_zero_counter[i] > num_zero_tolerant ){
-                  offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA);
+                  offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i, FR_HIS_OCC_DATA);
 		  }else{
 		          offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
 		  }
