@@ -704,7 +704,7 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
 	float t_convert = 0.0; 
 	float OR_flow = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5) ;
+    t_convert = (12*ts.hour) + (ts.min/5) + (ts.sec/300) ;
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -731,7 +731,7 @@ float interp_OR_HIS_OCC(int OR_idx, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM
 	float t_convert = 0.0; 
 	float OR_occ = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5) ;
+    t_convert = (12*ts.hour) + (ts.min/5) + (ts.sec/300) ;
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -760,7 +760,7 @@ float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
 	float t_convert = 0.0; 
 	float FR_flow = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5) ;
+    t_convert = (12*ts.hour) + (ts.min/5) + (ts.sec/300);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -788,7 +788,7 @@ float interp_FR_HIS_OCC(int FR_idx, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM
 	float t_convert = 0.0; 
 	float FR_occ = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5) ;
+    t_convert = (12*ts.hour) + (ts.min/5) + (ts.sec/300);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
