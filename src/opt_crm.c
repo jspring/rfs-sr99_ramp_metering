@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "parameters.h"
+//#include "look_up_table.h"
 
 #define NRANSI
 

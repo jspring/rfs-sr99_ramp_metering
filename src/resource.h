@@ -4,6 +4,9 @@
 
 #pragma once
 #include <urms.h>
+// define the array size of look up table here
+#define	NUM_5MIN_INTERVALS	288
+#define	NUM_ONRAMPS_PLUS_1	17
 
 struct confidence {
         float num_good_vals;
@@ -51,8 +54,6 @@ extern float density_aggregation_mainline(float flow, float hm_speed, float dens
 extern float turning_ratio_offramp(float FR_flow, float ML_flow);
 
 //extern float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT);
-#define	NUM_5MIN_INTERVALS	288
-#define	NUM_ONRAMPS_PLUS_1	17
 
 extern float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]);
 
