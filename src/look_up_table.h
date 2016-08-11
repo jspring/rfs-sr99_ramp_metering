@@ -2,7 +2,6 @@
 #define	NUM_ONRAMPS_PLUS_1	17
 #define	NUM_OFFRAMPS_PLUS_1	13
 
-//#include "resource.h"
 // add On-ramp 5 minute historical data as a look up table, 288 is the time vector and 16 is the number of total on-ramp 
 const float OR_HIS_FLOW_DATA[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1] = {
 {	1.000	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	,	4	}	,

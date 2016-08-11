@@ -4,7 +4,7 @@
 
 #pragma once
 #include <urms.h>
-//#include "look_up_table.h"
+
 // define the array size of look up table here
 #define	NUM_5MIN_INTERVALS	288
 #define	NUM_ONRAMPS_PLUS_1	17
