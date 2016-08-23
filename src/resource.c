@@ -457,7 +457,9 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	float mean_speed = 0.0;
 	float var_speed = 0.0;
 	int num_lane = controller_data->num_main;
-	float speed_temp [num_lane];
+	float speed_temp[MAX_MAINLINES];
+
+	memset(speed_temp, 0, sizeof(float) * MAX_MAINLINES);
 
     confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
@@ -498,10 +500,12 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 
     // compute harmonic mean
 	for(i=0 ; i < confidence->num_good_vals; i++) {
-	    tmp += (1.0/speed_temp[i]);
+	    if(speed_temp[i] != 0)
+		tmp += (1.0/speed_temp[i]);
 	}
 
-	speed = max((confidence->num_good_vals)/tmp,0);
+	if(tmp != 0)
+		speed = max((confidence->num_good_vals)/tmp,0);
 	
 	// check Nan 
 	if(isnan(speed)){
@@ -518,7 +522,7 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	   speed = hm_speed_prev;
 	}
 	
-	//printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
+	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
 	return mind(150.0, speed);
 }
 
@@ -530,10 +534,12 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
     float mean_speed = 0.0;
 	float var_speed = 0.0;
 	int num_lane = controller_data->num_main;
-	float speed_temp [num_lane];
+	float speed_temp [MAX_MAINLINES];
 
 	confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
+
+	memset(speed_temp, 0, sizeof(float) * MAX_MAINLINES);
 	
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
@@ -585,7 +591,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	   speed = mean_speed_prev;
 	}
 
-	//printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
+	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
 	return mind(150.0, speed);
 }
 
