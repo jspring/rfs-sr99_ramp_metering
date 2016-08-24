@@ -34,8 +34,6 @@ extern long int nCr(int n, int r);
 
 //extern float get_on_ramp_flow_by_flow_balance(float upstream_total_flow, float downstream_total_flow, float off_ramp_flow);
 
-extern const char *controller_strings[];
-
 extern float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 extern float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confidence *confidence);
 extern float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence);
