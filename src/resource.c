@@ -4,44 +4,14 @@
 #include <urms.h>
 #include <math.h>
 
-#define FLOAT_ERROR -1.0 
+#define NAN_ERROR -1.0 
+#define RANGE_ERROR -2.0 
+#define MAX_30_SEC_FLOW	17 //Maximum 30-second flow rate per lane (sample time is 30 seconds, so this value corresponds to 2000 vehicles per hour)
 
 // units
 // flow is vehicle per hour
 // speed is miles per hour
 // occupancy is 0 to 100
-
-//
-const char *controller_strings[] = {
-        "10.29.248.108",             //0, OR1
-        "10.254.25.113",             //1
-        "10.254.25.120",             //2, OR2, FR1
-        "10.29.249.46",              //3, OR3,
-        "10.29.248.42",              //4
-        "10.29.248.20",              //5, OR4, FR2
-        "10.29.248.128",             //6, OR5
-        "10.254.27.67",              //7,
-        "10.254.27.82",              //8, OR6, FR3
-        "10.254.27.81",              //9, OR7
-        "10.29.248.76",             //10     , FR4
-        "10.254.28.213",            //11, OR8
-        "10.254.28.212",            //12, OR9
-        "10.254.28.211",            //13
-        "10.29.248.118",            //14
-        "10.29.248.52",             //15
-        "10.254.24.156",            //16, OR10, FR5
-        "10.254.24.157",            //17, OR11
-        "10.29.248.185",            //18       
-        "10.29.248.66",             //19, OR12
-        "10.29.248.81",             //20, OR13
-        "10.29.248.213",            //21      , FR9
-        "10.29.248.155_PORT_1001",  //22, OR14
-        "10.29.248.155_PORT_1002",  //23, OR15, FR10
-        "10.29.248.124",            //24
-        "10.29.248.67",             //25, OR16 
-        "10.29.248.157",            //26
-        "10.29.248.56",             //27      , FR12
-}; //FR6, FR7, FR8, and FR11 are missing
 
 //float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3);
 
@@ -75,10 +45,11 @@ float sum_array(float a[], int num_elements){
 
 float mean_array(float a[], int num_elements){   
 	float temp = 0.0;
-	float mean = 0.0;
+    if(num_elements == 0)
+	return 0.0;
     temp = sum_array(a , num_elements);
 	temp /= (float)num_elements;
-    return mean = temp;
+    return temp;
 }
 
 float var_array(float a[], int num_elements){
@@ -87,6 +58,8 @@ float var_array(float a[], int num_elements){
 	float var=0.0;
 	int i;
 
+    if(num_elements == 0)
+	return 0.0;
     mean = mean_array(a , num_elements);
 	  
     for(i=0;i<num_elements;i++)
@@ -129,14 +102,14 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){ // if the controller report the flow data is correct, then check the data is in the range or not
-			if((float)controller_data->mainline_stat[i].lead_vol >= 0 && (float)controller_data->mainline_stat[i].lead_vol <= 2000){ // if flow is in the range
+			if((float)controller_data->mainline_stat[i].lead_vol >= 0 && (float)controller_data->mainline_stat[i].lead_vol <= MAX_30_SEC_FLOW){ // if flow is in the range
 			    flow_temp[j]=(float)controller_data->mainline_stat[i].lead_vol;  
 			    j++;
 			}else{  // replce the flow measurement if it is not in the range
 				confidence->num_good_vals--;
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
-			if((float)controller_data->mainline_stat[i].trail_vol >= 0 && (float)controller_data->mainline_stat[i].trail_vol <= 2000){
+			if((float)controller_data->mainline_stat[i].trail_vol >= 0 && (float)controller_data->mainline_stat[i].trail_vol <= MAX_30_SEC_FLOW){
 			     flow_temp[j]=(float)controller_data->mainline_stat[i].trail_vol;  
 			     j++;
 			}else{
@@ -149,7 +122,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	    }
 	}
 	else
-		return FLOAT_ERROR; // <--handle the float error here
+		return NAN_ERROR; // <--handle the float error here
 
 	mean_flow = mean_array(flow_temp, confidence->num_good_vals);
 	var_flow = var_array(flow_temp, confidence->num_good_vals);
@@ -164,7 +137,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	flow = mean_array(flow_temp, confidence->num_good_vals);
     
 	if(isnan(flow)){
-		flow = FLOAT_ERROR;
+		flow = NAN_ERROR;
 	}else{
 	    flow = flow * 120; // convert 30 second data into hour data
 	}
@@ -188,14 +161,14 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 	    for(i=0 ; i< controller_data->num_meter;i++) {
  		if(controller_data->metered_lane_stat[i].passage_stat == 2){ 
-			if((float)controller_data->metered_lane_stat[i].passage_vol>= 0 && (float)controller_data->metered_lane_stat[i].passage_vol <= 2000){ // if flow is in the range
+			if((float)controller_data->metered_lane_stat[i].passage_vol>= 0 && (float)controller_data->metered_lane_stat[i].passage_vol <= MAX_30_SEC_FLOW){ // if flow is in the range
 			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].passage_vol;
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
                 confidence->num_good_vals--;
 			}
  		}else if(controller_data->metered_lane_stat[i].demand_stat == 2){
-			if((float)controller_data->metered_lane_stat[i].demand_vol>= 0 && (float)controller_data->metered_lane_stat[i].demand_vol <= 2000){ 
+			if((float)controller_data->metered_lane_stat[i].demand_vol>= 0 && (float)controller_data->metered_lane_stat[i].demand_vol <= MAX_30_SEC_FLOW){ 
 			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].demand_vol;
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
@@ -207,7 +180,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return NAN_ERROR;
 
 	mean_flow = mean_array(flow_temp, confidence->num_good_vals);
     var_flow = var_array(flow_temp, confidence->num_good_vals);
@@ -222,7 +195,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	flow = mean_array(flow_temp, confidence->num_good_vals);
 
 	if(isnan(flow)){
-		flow = FLOAT_ERROR;
+		flow = NAN_ERROR;
 	}else{
 	    flow = flow*120; // convert 30 second data into hour data
 	}
@@ -245,7 +218,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
 	    for(i=0 ; i< controller_data->num_addl_det; i++){  
              if( (controller_data->additional_det[i].stat == 2) || (controller_data->additional_det[i].stat == 1) ){ // if the controller report the flow data is correct, then check the data is in the range or not
-			    if((float)controller_data->additional_det[i].volume>= 0 && (float)controller_data->additional_det[i].volume <= 2000){ // if flow is in the range
+			    if((float)controller_data->additional_det[i].volume>= 0 && (float)controller_data->additional_det[i].volume <= MAX_30_SEC_FLOW){ // if flow is in the range
 			        flow_temp[j]=(float)controller_data->additional_det[i].volume;
 					j++;
 				}else{  // replce the flow measurement if it is not in the range
@@ -257,7 +230,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return NAN_ERROR;
 
 	mean_flow = mean_array(flow_temp, confidence->num_good_vals);
     var_flow = var_array(flow_temp, confidence->num_good_vals);
@@ -272,7 +245,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	flow = mean_array(flow_temp, confidence->num_good_vals);
     
 	if(isnan(flow)){
-		flow = FLOAT_ERROR;
+		flow = NAN_ERROR;
 	}else{
 		flow = flow*120; // convert 30 second data into hour data
 	}
@@ -318,7 +291,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return NAN_ERROR;
 
 	mean_occ = mean_array(occ_temp, confidence->num_good_vals);
 	var_occ = var_array(occ_temp, confidence->num_good_vals);
@@ -334,7 +307,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
     
     // check Nan 
 	if(isnan(occupancy)){
-		occupancy = FLOAT_ERROR;
+		occupancy = NAN_ERROR;
 	}
 
 	//printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
@@ -351,10 +324,10 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
     int num_lane = controller_data->num_main;
     float occ_temp [MAX_METERED_LANES * MAX_QUEUE_LOOPS];
 
-	confidence->num_total_vals = MAX_METERED_LANES * MAX_QUEUE_LOOPS;
-	confidence->num_good_vals = MAX_METERED_LANES * MAX_QUEUE_LOOPS;
 
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
+		confidence->num_total_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
+		confidence->num_good_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
 	    for(i=0 ; i < controller_data->num_meter; i++) {
 	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
  			    if( (controller_data2->queue_stat[i][j].stat == 2) || (controller_data2->queue_stat[i][j].stat == 1) ){
@@ -372,7 +345,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return NAN_ERROR;
 
 	mean_occ = mean_array(occ_temp, confidence->num_good_vals);
 	var_occ = var_array(occ_temp, confidence->num_good_vals);
@@ -388,7 +361,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
     
 	// check Nan 
 	if(isnan(occupancy)){
-		occupancy = FLOAT_ERROR;
+		occupancy = NAN_ERROR;
 	}
 
 	//printf("Occ_agg %4.2f num_meter %d\n", occupancy, controller_data->num_meter);
@@ -424,7 +397,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return NAN_ERROR;
 
 	mean_occ = mean_array(occ_temp, confidence->num_good_vals);
 	var_occ = var_array(occ_temp, confidence->num_good_vals);
@@ -440,7 +413,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
     
     // check Nan 
 	if(isnan(occupancy)){
-		occupancy = FLOAT_ERROR;
+		occupancy = NAN_ERROR;
 	}
 
 	//printf("Occ_agg %4.2f num_addl_det %d\n", occupancy, controller_data->num_addl_det);
@@ -467,14 +440,14 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
+			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
 			    speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
                 confidence->num_good_vals--; 
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
-			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){
+			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){
 			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;  
 			     j++;
 			}else{
@@ -487,7 +460,7 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return NAN_ERROR;
 
 	mean_speed = mean_array(speed_temp, confidence->num_good_vals);
 	var_speed = var_array(speed_temp, confidence->num_good_vals);
@@ -508,20 +481,15 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 		speed = max((confidence->num_good_vals)/tmp,0);
 	
 	// check Nan 
-	if(isnan(speed)){
-		speed = FLOAT_ERROR;
-	}else{
-	    speed = speed*1.6;
-	}
-
-    /*
+	if(isnan(speed))
+		return NAN_ERROR;
+    
     // speed change rate limiter 
-	if( (speed - hm_speed_prev  >= -50) && (speed - hm_speed_prev  <= 60)  && (speed != -1) ){
-	   speed = speed;
-	}else{
-	   speed = hm_speed_prev;
+	if( (hm_speed_prev > 0.0) && ((speed - hm_speed_prev  < -50) || (speed - hm_speed_prev  > 60)) ){
+		printf("hm_speed_agg error: speed %f hm_speed_prev %f\n", speed, hm_speed_prev);
+		return RANGE_ERROR;
 	}
-	*/
+	
 
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
 	return mind(150.0, speed);
@@ -545,14 +513,14 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
-			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
+			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
 			    speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
                 confidence->num_good_vals--; 
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
-			if((float)controller_data->mainline_stat[i].speed >= 0 && (float)controller_data->mainline_stat[i].speed <= 150){
+			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){
 			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;  
 			     j++;
 			}else{
@@ -565,7 +533,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	    }
 	}
 	else
-		return FLOAT_ERROR;
+		return NAN_ERROR;
     
 	mean_speed = mean_array(speed_temp, confidence->num_good_vals);
     var_speed = var_array(speed_temp, confidence->num_good_vals);
@@ -579,20 +547,15 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
     speed = mean_array(speed_temp, confidence->num_good_vals);
 	
 	// check Nan 
-	if(isnan(speed)){
-		speed = FLOAT_ERROR;
-	}else{
-		speed = speed * 1.6;
-	}
-    
-	/*
+	if(isnan(speed))
+		return NAN_ERROR;
+	
 	// speed change rate limiter 
-	if( (speed - mean_speed_prev  >= -50) && (speed - mean_speed_prev  <= 60)  && (speed != -1) ){
-	   speed = speed;
-	}else{
-	   speed = mean_speed_prev;
+	if( (mean_speed_prev > 0.0) && ((speed - mean_speed_prev  < -50) || (speed - mean_speed_prev  > 60)) ){
+		printf("mean_speed_agg error: speed %f mean_speed_prev %f\n", speed, mean_speed_prev);
+		return RANGE_ERROR;
 	}
-	*/
+	
 
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
 	return mind(150.0, speed);
@@ -608,9 +571,11 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 	int j; //  queue loop number index
 
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
+	confidence->num_good_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
+	confidence->num_total_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
 	for(i=0 ;i < controller_data->num_meter; i++) {
 	    for(j=0 ;j < MAX_QUEUE_LOOPS; j++) {
- 		if(controller_data2->queue_stat[i][j].stat == 2){
+ 		if(controller_data2->queue_stat[i][j].stat == 1){
 			sum_inflow += (float)controller_data2->queue_stat[i][j].vol;  //Advance detector
 			sum_outflow +=  (float)controller_data->metered_lane_stat[i].passage_vol; // Passage detector
 			printf("OR-inflow %d OR-outflow %d of detector %d \n", 
@@ -622,7 +587,7 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 			queue /= controller_data->num_meter; // average queue length
  		}
     	else if(controller_data2->queue_stat[i][j].stat == 5){
- 			queue = FLOAT_ERROR; // queue attained max queue length  
+ 			queue = NAN_ERROR; // queue attained max queue length  
  		}
  		else{ 
 //  		printf("queue_onramp: Error %d detector %d\n",
@@ -635,7 +600,7 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 	}
 	// check Nan 
 	if(isnan(queue)){
-		queue = FLOAT_ERROR;
+		queue = NAN_ERROR;
 	}
 	//printf("queue_agg %4.2f num_meter %d\n", queue,controller_data->num_meter);
 	return mind(500.0, maxd(queue,0));
@@ -650,15 +615,15 @@ float density_aggregation_mainline(float flow, float hm_speed, float density_pre
     
 	// check Nan 
 	if(isnan(density)){
-		density = FLOAT_ERROR;
+		density = NAN_ERROR;
 	}
 
 	if(isnan(flow)){
-		flow = FLOAT_ERROR;
+		flow = NAN_ERROR;
 	}
 
 	if(isnan(hm_speed)){
-	    hm_speed = FLOAT_ERROR;
+	    hm_speed = NAN_ERROR;
 	}
 
 	// density change rate limiter 
