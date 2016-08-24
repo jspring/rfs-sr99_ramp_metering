@@ -18,7 +18,6 @@ then
 	INTERVAL=5000
 fi
 
-a_10.254.28.212.1000.160505_170010_0505005.dat
 EXT=`echo $FILENAME | sed '{s/\// /g}' | awk '{print $NF}' | cut -c 2- | sed '{s/dat/err/g}'`
 
 echo "Starting replay_controller, $DBNUM $FILENAME $INTERVAL"
