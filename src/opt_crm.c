@@ -74,6 +74,38 @@ const char *usage = "-d (debug mode, i.e. use the two controllers in my office)"
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
 #define NUM_CYCLE_BUFFS       5
+//
+const char *controller_strings[] = {
+        "10.29.248.108",             //0, OR1
+        "10.254.25.113",             //1
+        "10.254.25.120",             //2, OR2, FR1
+        "10.29.249.46",              //3, OR3,
+        "10.29.248.42",              //4
+        "10.29.248.20",              //5, OR4, FR2
+        "10.29.248.128",             //6, OR5
+        "10.254.27.67",              //7,
+        "10.254.27.82",              //8, OR6, FR3
+        "10.254.27.81",              //9, OR7
+        "10.29.248.76",             //10     , FR4
+        "10.254.28.213",            //11, OR8
+        "10.254.28.212",            //12, OR9
+        "10.254.28.211",            //13
+        "10.29.248.118",            //14
+        "10.29.248.52",             //15
+        "10.254.24.156",            //16, OR10, FR5
+        "10.254.24.157",            //17, OR11
+        "10.29.248.185",            //18
+        "10.29.248.66",             //19, OR12
+        "10.29.248.81",             //20, OR13
+        "10.29.248.213",            //21      , FR9
+        "10.29.248.155_PORT_1001",  //22, OR14
+        "10.29.248.155_PORT_1002",  //23, OR15, FR10
+        "10.29.248.124",            //24
+        "10.29.248.67",             //25, OR16
+        "10.29.248.157",            //26
+        "10.29.248.56",             //27      , FR12
+}; //FR6, FR7, FR8, and FR11 are missing
+
 
 int main(int argc, char *argv[])
 {
@@ -110,9 +142,10 @@ int main(int argc, char *argv[])
 	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
 	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};                 // data aggregated controller by controller
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};               // data aggregated controller by controller
-	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {0};               // this is the register of harmonic mean speed in previous time step
-	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of mean speed in previous time step
+	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};               // this is the register of harmonic mean speed in previous time step
+	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};             // this is the register of mean speed in previous time step
     float density_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of density in previous time step
+	float float_temp;
 
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
@@ -202,36 +235,6 @@ int main(int argc, char *argv[])
 
 //** Cheng-Ju's code here **//
 // 4 off-ramp is missing, total number of off-ramps is 9. After D3 fix those missing off-ramps, OffRampIndex table need to be updated. 
-const char *controller_ip_strings[] = {
-        "10.29.248.108",             //0, OR1
-        "10.254.25.113",             //1
-        "10.254.25.120",             //2, OR2, FR1
-        "10.29.249.46",              //3, OR3,
-        "10.29.248.42",              //4
-        "10.29.248.20",              //5, OR4, FR2
-        "10.29.248.128",             //6, OR5
-        "10.254.27.67",              //7,
-        "10.254.27.82",              //8, OR6, FR3
-        "10.254.27.81",              //9, OR7
-        "10.29.248.76",             //10     , FR4
-        "10.254.28.213",            //11, OR8
-        "10.254.28.212",            //12, OR9
-        "10.254.28.211",            //13
-        "10.29.248.118",            //14
-        "10.29.248.52",             //15
-        "10.254.24.156",            //16, OR10, FR5
-        "10.254.24.157",            //17, OR11
-        "10.29.248.185",            //18       
-        "10.29.248.66",             //19, OR12
-        "10.29.248.81",             //20, OR13
-        "10.29.248.213",            //21      , FR9
-        "10.29.248.155_PORT_1001",  //22, OR14
-        "10.29.248.155_PORT_1002",  //23, OR15, FR10
-        "10.29.248.124",            //24
-        "10.29.248.67",             //25, OR16 
-        "10.29.248.157",            //26
-        "10.29.248.56",             //27      , FR12
-}; //FR6, FR7, FR8, and FR11 are missing
 
 //** This part aggregate data for each URMS2070 controller in the field   
 	//int OnRampIndex [NUM_CONTROLLER_VARS/6] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
@@ -242,15 +245,28 @@ const char *controller_ip_strings[] = {
 	print_timestamp(dbg_st_file_out, &ts); // print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
-		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_ip_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
+		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
 		
 		// min max function bound the data range and exclude nans.
         controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		 
-		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev[i], &confidence[i][0]) ) );
+		float_temp = hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev[i], &confidence[i][0]);
+		if(float_temp < 0){
+			printf("Error %f in calculating harmonic speed for controller %s\n", float_temp, controller_strings[i]);
+			float_temp = hm_speed_prev[i];
+		}
+		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, float_temp) );
 		 
-		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev[i], &confidence[i][0]) ) );
+		float_temp = mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev[i], &confidence[i][0]);
+		if(float_temp < 0){
+			printf("Error %f in calculating mean speed for controller %s\n", float_temp, controller_strings[i]);
+			float_temp = mean_speed_prev[i];
+		}
+		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, float_temp) );
+
+		if(confidence[i][0].num_total_vals > 0)
+			printf("Confidence for controller %s mainline %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][0].num_good_vals/confidence[i][0].num_total_vals, (float)confidence[i][0].num_total_vals, (float)confidence[i][0].num_good_vals);
         
         controller_mainline_data[i].agg_density = Mind(200.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
 		
@@ -270,6 +286,8 @@ const char *controller_ip_strings[] = {
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0, flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
         controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0, occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
 		controller_offramp_data[i].turning_ratio = turning_ratio_offramp(controller_offramp_data[i].agg_vol,controller_mainline_data[i-1].agg_vol);
+		if(confidence[i][2].num_total_vals > 0)
+			printf("Confidence for controller %s offramp %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][2].num_good_vals/confidence[i][2].num_total_vals, (float)confidence[i][2].num_total_vals, (float)confidence[i][2].num_good_vals);
 		
 		fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
         fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); 
@@ -281,7 +299,11 @@ const char *controller_ip_strings[] = {
 
 		//if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
+		if(confidence[i][1].num_total_vals > 0)
+			printf("Confidence for controller %s onramp flow %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
+		if(confidence[i][1].num_total_vals > 0)
+			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
  
 		fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); 
