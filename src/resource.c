@@ -93,8 +93,8 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	    float mean_flow = 0.0;
 	    float var_flow = 0.0;
 	    int num_lane = controller_data->num_main;
-	    float flow_temp [MAX_MAINLINES];
-		memset(flow_temp, 0, sizeof(float) * MAX_MAINLINES);
+	    float flow_temp [num_lane];
+		//memset(flow_temp, 0, sizeof(float) * MAX_MAINLINES);
 
 	confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
