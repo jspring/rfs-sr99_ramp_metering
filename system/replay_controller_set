@@ -62,6 +62,7 @@ do
 	if [[ $? != 0 ]]
 	then
 		killall opt_crm
+		killall wrfiles_rm
 		killall clt_vars
 		killall db_slv
 		exit 1
