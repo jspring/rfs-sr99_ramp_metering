@@ -93,7 +93,8 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	    float mean_flow = 0.0;
 	    float var_flow = 0.0;
 	    int num_lane = controller_data->num_main;
-	    float flow_temp [num_lane];
+	    float flow_temp [MAX_MAINLINES];
+		memset(flow_temp, 0, sizeof(float) * MAX_MAINLINES);
 
 	confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
@@ -142,7 +143,8 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	    flow = flow * 120; // convert 30 second data into hour data
 	}
 	//printf("ML-flow_agg %4.2f num_main %d\n", flow, controller_data->num_main);
-	return mind(12000.0, flow);
+	flow = maxd(flow,600*num_lane); //factor 600 is veh/hr/lane in free flow
+	return mind(2000*num_lane,flow);
 }
 
 float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confidence *confidence){
@@ -152,7 +154,9 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 		float mean_flow = 0.0;
 		float var_flow = 0.0;
         int num_lane = controller_data->num_meter;
-		float flow_temp [num_lane];
+		float flow_temp [MAX_MAINLINES];
+        memset(flow_temp, 0, sizeof(float) * MAX_MAINLINES); 
+
 
 		confidence->num_total_vals = num_lane;
 	    confidence->num_good_vals = num_lane;
@@ -200,7 +204,8 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	    flow = flow*120; // convert 30 second data into hour data
 	}
 	//printf("OR-flow_agg %4.2f num_meter %d\n",	flow, controller_data->num_meter);
-return  mind(12000.0, flow); 
+    flow = maxd(flow,200*num_lane); //factor 200 is veh/hr/lane in free flow
+	return mind(950*num_lane,flow); 
 }
 
 float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence){
@@ -211,7 +216,9 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 		float var_flow = 0.0;
 		int num_lane = 1;
         num_lane = controller_data->num_addl_det;
-		float flow_temp [num_lane];
+		float flow_temp [MAX_MAINLINES];
+        memset(flow_temp, 0, sizeof(float) * MAX_MAINLINES); 
+
 	 	confidence->num_total_vals = num_lane;
 	    confidence->num_good_vals = num_lane;
 
@@ -250,7 +257,8 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 		flow = flow*120; // convert 30 second data into hour data
 	}
 	//printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
-	return mind(12000.0, flow);
+	flow = maxd(flow,50*num_lane); //factor 200 is veh/hr/lane in free flow
+	return mind(1500*num_lane,flow); 
 }
 
 float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
@@ -262,8 +270,10 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 	float mean_occ = 0.0;
 	float var_occ = 0.0;
     int num_lane = controller_data->num_main;
-    float occ_temp [num_lane];
+    float occ_temp [MAX_MAINLINES];
 
+	memset(occ_temp, 0, sizeof(float) * MAX_MAINLINES);
+    
 	confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
 
@@ -311,7 +321,8 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 	}
 
 	//printf("Occ_agg %4.2f num_main %d\n", occupancy, controller_data->num_main);
-	return  mind(100.0, occupancy);
+	occupancy = maxd(occupancy,10.0); 
+	return  mind(90.0, occupancy);
 }
 
 float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){ 
@@ -323,6 +334,8 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	float var_occ = 0.0;
     int num_lane = controller_data->num_main;
     float occ_temp [MAX_METERED_LANES * MAX_QUEUE_LOOPS];
+
+	memset(occ_temp, 0, sizeof(float) * MAX_METERED_LANES * MAX_QUEUE_LOOPS);
 
 
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
@@ -365,7 +378,8 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	}
 
 	//printf("Occ_agg %4.2f num_meter %d\n", occupancy, controller_data->num_meter);
-	return  mind(100.0, occupancy);
+	occupancy = maxd(occupancy,10.0); //factor 200 is veh/hr/lane in free flow
+	return  mind(90.0, occupancy);
 }
 
 float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence){
@@ -375,7 +389,9 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 	float mean_occ = 0.0;
 	float var_occ = 0.0;
     int num_lane = controller_data->num_addl_det;
-    float occ_temp [num_lane];
+    float occ_temp [MAX_MAINLINES];
+
+	memset(occ_temp, 0, sizeof(float) * MAX_MAINLINES);
 
 	confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
@@ -417,7 +433,8 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 	}
 
 	//printf("Occ_agg %4.2f num_addl_det %d\n", occupancy, controller_data->num_addl_det);
-	return  mind(100.0, occupancy);
+	occupancy = maxd(occupancy,10.0); //factor 200 is veh/hr/lane in free flow
+	return  mind(90.0, occupancy);
 }
 
 
@@ -429,26 +446,40 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 	float speed = 0.0;
 	float mean_speed = 0.0;
 	float var_speed = 0.0;
+	float lead_occ = 0.0;
+	float trail_occ = 0.0;
 	int num_lane = controller_data->num_main;
 	float speed_temp[MAX_MAINLINES];
-
+	float flow[MAX_MAINLINES];
+	float occupancy[MAX_MAINLINES];
 	memset(speed_temp, 0, sizeof(float) * MAX_MAINLINES);
+    memset(flow, 0, sizeof(float) * MAX_MAINLINES);
+    memset(occupancy, 0, sizeof(float) * MAX_MAINLINES);
 
     confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
 
+	// obtained flow and occupancy data here for comparison
+
+
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
+            lead_occ = 0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) );
+            trail_occ = 0.1 * ( ((controller_data->mainline_stat[i].trail_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].trail_occ_lsb) & 0xFF) );
 		if(controller_data->mainline_stat[i].lead_stat == 2){
 			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
 			    speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
+                occupancy[j]= lead_occ;
+				flow[j]=(float)controller_data->mainline_stat[i].lead_vol;  
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
                 confidence->num_good_vals--; 
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
 			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){
-			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;  
+			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
+				 occupancy[j] = trail_occ;
+				 flow[j]=(float)controller_data->mainline_stat[i].trail_vol;  
 			     j++;
 			}else{
                  confidence->num_good_vals--;
@@ -473,7 +504,10 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 
     // compute harmonic mean
 	for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if(speed_temp[i] != 0)
+		if((flow[i] < 10 && occupancy[i] < 1 )) // check flow and occupancy
+		    speed_temp[i]= maxd(hm_speed_prev,5);
+			
+		speed_temp[i] = maxd(speed_temp[i],5);
 		tmp += (1.0/speed_temp[i]);
 	}
 
@@ -490,38 +524,51 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
 		return RANGE_ERROR;
 	}
 	
-
 	printf("speed_agg %4.2f num_main %d\n", speed, controller_data->num_main);
-	return mind(150.0, speed);
+	
+	return mind(120.0, speed); // speed is in km/hr
 }
 
 float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float mean_speed_prev, struct confidence *confidence){
 	// compute mean of speed
 	int i; //  lane number index
 	int j = 0;
+    float tmp = 0.0;
 	float speed = 0.0;
     float mean_speed = 0.0;
 	float var_speed = 0.0;
+    float lead_occ = 0.0;
+	float trail_occ = 0.0;
 	int num_lane = controller_data->num_main;
 	float speed_temp [MAX_MAINLINES];
+	float flow[MAX_MAINLINES];
+	float occupancy[MAX_MAINLINES];
 
 	confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
 
 	memset(speed_temp, 0, sizeof(float) * MAX_MAINLINES);
+	memset(flow, 0, sizeof(float) * MAX_MAINLINES);
+    memset(occupancy, 0, sizeof(float) * MAX_MAINLINES);
 	
 	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
-	    for(i=0 ; i < controller_data->num_main; i++) {
+            lead_occ = 0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) );
+            trail_occ = 0.1 * ( ((controller_data->mainline_stat[i].trail_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].trail_occ_lsb) & 0xFF) );
+		for(i=0 ; i < controller_data->num_main; i++) {
 		if(controller_data->mainline_stat[i].lead_stat == 2){
 			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){ // if flow is in the range
 			    speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
+				occupancy[j]= lead_occ;
+				flow[j]=(float)controller_data->mainline_stat[i].lead_vol;
 				j++;
 			}else{  // replce the flow measurement if it is not in the range
                 confidence->num_good_vals--; 
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
 			if((float)controller_data->mainline_stat[i].speed > 0 && (float)controller_data->mainline_stat[i].speed <= 150){
-			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;  
+			     speed_temp[j]=(float)controller_data->mainline_stat[i].speed;
+				 occupancy[j] = trail_occ;
+				 flow[j]=(float)controller_data->mainline_stat[i].trail_vol;
 			     j++;
 			}else{
                  confidence->num_good_vals--;
@@ -544,8 +591,21 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
             speed_temp[i] = mean_speed;
 	}
 
-    speed = mean_array(speed_temp, confidence->num_good_vals);
+    //speed = mean_array(speed_temp, confidence->num_good_vals);
 	
+    // compute harmonic mean
+	for(i=0 ; i < confidence->num_good_vals; i++) {
+		if((flow[i] < 10 && occupancy[i] < 1 )) // check flow and occupancy
+		    speed_temp[i]= maxd(mean_speed_prev,5);
+			
+		speed_temp[i] = maxd(speed_temp[i],5);
+		tmp += speed_temp[i];
+	}
+
+	if(tmp != 0)
+		speed = max(tmp/(confidence->num_good_vals),0);
+
+
 	// check Nan 
 	if(isnan(speed))
 		return NAN_ERROR;
@@ -558,7 +618,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	
 
 	printf("mean_speed_agg %4.2f num_main %d\n", speed,	controller_data->num_main);
-	return mind(150.0, speed);
+	return mind(120.0, speed); // speed is in km/hr
 }
 
 
@@ -609,9 +669,9 @@ float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *control
 float density_aggregation_mainline(float flow, float hm_speed, float density_prev){
 	float density = 0.0;
 	
-	hm_speed =  mind(200,maxd(hm_speed,0));
-	flow = mind(10000, maxd(flow,0));
-	density = mind(200,maxd(flow/hm_speed,0));
+	hm_speed =  mind(120.0,maxd(hm_speed,10.0));
+	flow = mind(2000.0, maxd(flow,200.0));
+	density = mind(124.0,maxd(flow/hm_speed,10.0));
     
 	// check Nan 
 	if(isnan(density)){
@@ -627,7 +687,7 @@ float density_aggregation_mainline(float flow, float hm_speed, float density_pre
 	}
 
 	// density change rate limiter 
-	if( (density - density_prev  >= -150) && (density - density_prev  <= 150)  && (density != -1) ){
+	if( (density - density_prev  >= -50) && (density - density_prev  <= 50)  && (density != -1) ){
 	   density = density;
 	}else{
 	   density = density_prev;
@@ -640,7 +700,7 @@ float density_aggregation_mainline(float flow, float hm_speed, float density_pre
 			mind(200.0, maxd(density,0)) 
            );
     */
-	return mind(200.0, density);
+	return mind(124.0, density);
 }
 
 float turning_ratio_offramp(float FR_flow, float ML_flow){

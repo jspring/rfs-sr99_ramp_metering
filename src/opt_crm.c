@@ -263,12 +263,12 @@ int main(int argc, char *argv[])
 			printf("Error %f in calculating mean speed for controller %s\n", float_temp, controller_strings[i]);
 			float_temp = mean_speed_prev[i];
 		}
-		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 0, float_temp) );
+		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 1, float_temp) );
 
 		if(confidence[i][0].num_total_vals > 0)
 			printf("Confidence for controller %s mainline %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][0].num_good_vals/confidence[i][0].num_total_vals, (float)confidence[i][0].num_total_vals, (float)confidence[i][0].num_good_vals);
         
-        controller_mainline_data[i].agg_density = Mind(200.0,Maxd( 0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
+        controller_mainline_data[i].agg_density = Mind(200.0,Maxd( 1,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
 		
 		hm_speed_prev[i] = controller_mainline_data[i].agg_speed;
         mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
