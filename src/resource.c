@@ -716,7 +716,8 @@ float density_aggregation_mainline(float flow, float hm_speed, float density_pre
 	
 	hm_speed =  mind(MAX_HARMONIC_SPEED,maxd(hm_speed,MIN_HARMONIC_SPEED));
 	flow = mind(MAX_FLOW_PER_LANE, maxd(flow,MIN_FLOW));
-	density = mind(MAX_DENSITY,maxd(flow/hm_speed,MIN_DENSITY));
+	density = flow/hm_speed;
+	density = mind(MAX_DENSITY,maxd(density,MIN_DENSITY));
     
 	// check Nan 
 	if(isnan(density)){

@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
 		
 		// min max function bound the data range and exclude nans.
-        controller_mainline_data[i].agg_vol = Mind(MAX_FLOW_PER_LANE, Maxd( MIN_FLOW, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
+        controller_mainline_data[i].agg_vol = Mind(MAX_FLOW_PER_LANE*5, Maxd( MIN_FLOW, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 1, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		 
 		float_temp = hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev[i], &confidence[i][0]);
