@@ -338,15 +338,16 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 							 {23, -1, -1, -1}, // controller in section 11 
 							 {24, 25, 26, -1}}; // controller in section 12 
 int j; //
-//This part aggregate mainline data for each section
- 	for(i=0;i<SecSize;i++){
-		// this loop aggregates all controller data in each section
 		float temp_num_ct = 0.0; // number of controllers per section
 		float temp_vol = 0.0;
 		float temp_speed = 0.0;
 		float temp_occ = 0.0;
 		float temp_density = 0.0;
-		float temp_mean_speed = 0.0;	
+		float temp_mean_speed = 0.0;
+//This part aggregate mainline data for each section
+ 	for(i=0;i<SecSize;i++){
+		// this loop aggregates all controller data in each section
+	
 		for(j=0;j<4;j++){
 			if(secCTidx[i][j]>0){
 				temp_vol += controller_mainline_data[secCTidx[i][j]].agg_vol;
@@ -360,7 +361,7 @@ int j; //
 		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
-        mainline_out[cycle_index][i].agg_density =  Mind(MAX_DENSITY, Maxd(temp_density/temp_num_ct,1));
+        mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density/temp_num_ct,1));
 
 		/*
 		fprintf(dbg_st_file_out,"S%d,cyc%d ", i,cycle_index); //controller index 
