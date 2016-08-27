@@ -8,12 +8,6 @@
 #define RANGE_ERROR -2.0 
 //#define MAX_30_SEC_FLOW	40 // JAS,8/26/2016 I saw 30 in the data (corresponding to 3600 VPH), so this number is larger than that, but XYL says that's local
 #define MAX_30_SEC_FLOW		17 //JAS,8/26/2016 from XYL:Maximum 30-second flow rate per lane (sample time is 30 seconds, so this value corresponds to 2000 vehicles per hour)
-#define MIN_HARMONIC_SPEED	10.0
-#define MAX_HARMONIC_SPEED	120.0
-#define MIN_DENSITY		10.0
-#define MAX_DENSITY		124.0
-#define MIN_FLOW		200.0
-#define MAX_FLOW_PER_LANE	2000.0
 
 // units
 // flow is vehicle per hour

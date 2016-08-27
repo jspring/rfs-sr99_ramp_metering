@@ -9,6 +9,14 @@
 #define	NUM_5MIN_INTERVALS	288
 #define	NUM_ONRAMPS_PLUS_1	17
 #define NUM_OFFRAMPS_PLUS_1	13
+#define MIN_HARMONIC_SPEED	10.0
+#define MAX_HARMONIC_SPEED	120.0
+#define MIN_DENSITY		10.0
+#define MAX_DENSITY		124.0
+#define MIN_FLOW		200.0
+#define MAX_FLOW_PER_LANE	2000.0
+
+
 struct confidence {
         float num_good_vals;
         float num_total_vals;
