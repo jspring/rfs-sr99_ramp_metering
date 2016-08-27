@@ -131,7 +131,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 
 	// this loop replace data with large variance
 	for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
+	    if (abs(flow_temp[i]-mean_flow)>5*sqrt(abs(var_flow)))
             flow_temp[i] = mean_flow;
 	}
 	
@@ -197,7 +197,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 
 	// this loop replace data with large variance
     for(i=0 ; i <confidence->num_good_vals; i++) {
-	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
+	    if (abs(flow_temp[i]-mean_flow)>5*sqrt(abs(var_flow)))
             flow_temp[i] = mean_flow;
 	}
     
@@ -254,7 +254,7 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 
 	// this loop replace data with large variance
     for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if (abs(flow_temp[i]-mean_flow)>5*var_flow)
+	    if (abs(flow_temp[i]-mean_flow)>5*sqrt(abs(var_flow)))
             flow_temp[i] = mean_flow;
 	}
 
@@ -322,7 +322,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 
 	// this loop replace data with large variance
 	for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if (abs(occ_temp[i]-mean_occ)>5*var_occ)
+	    if (abs(occ_temp[i]-mean_occ)>5*sqrt(abs(var_occ)))
             occ_temp[i] = mean_occ;
 	}
 	
@@ -382,7 +382,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
     
     // this loop replace data with large variance
 	for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if (abs(occ_temp[i]-mean_occ)>5*var_occ)
+	    if (abs(occ_temp[i]-mean_occ)>5*sqrt(abs(var_occ)))
             occ_temp[i] = mean_occ;
 	}
 
@@ -441,7 +441,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
     
     // this loop replace data with large variance
 	for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if (abs(occ_temp[i]-mean_occ)>5*var_occ)
+	    if (abs(occ_temp[i]-mean_occ)>5*sqrt(abs(var_occ)))
             occ_temp[i] = mean_occ;
 	}
 
@@ -523,7 +523,7 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
     
     // this loop replace data with large variance
 	for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if (abs(speed_temp[i]-mean_speed)>5*var_speed)
+	    if (abs(speed_temp[i]-mean_speed)>5*sqrt(abs(var_speed)))
             speed_temp[i] = mean_speed;
 	}
 
@@ -622,7 +622,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 
 	// this loop replace data with large variance
     for(i=0 ; i < confidence->num_good_vals; i++) {
-	    if (abs(speed_temp[i]-mean_speed)>5*var_speed)
+	    if (abs(speed_temp[i]-mean_speed)>5*sqrt(abs(var_speed)))
             speed_temp[i] = mean_speed;
 	}
 
