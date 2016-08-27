@@ -357,9 +357,9 @@ int j; //
 				temp_num_ct ++;
 			}
 		}
-		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,0));
-		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,0));
-		mainline_out[cycle_index][i].agg_occ =  Mind(100.0, Maxd(temp_occ/temp_num_ct,0));
+		mainline_out[cycle_index][i].agg_vol = Mind(MAX_FLOW_PER_LANE, Maxd(temp_vol/temp_num_ct,MIN_FLOW));
+		mainline_out[cycle_index][i].agg_speed = Mind(MAX_HARMONIC_SPEED, Maxd(temp_speed/temp_num_ct,MIN_HARMONIC_SPEED));
+		mainline_out[cycle_index][i].agg_occ =  Mind(MAX_OCCUPANCY, Maxd(temp_occ/temp_num_ct,MIN_OCCUPANCY));
         mainline_out[cycle_index][i].agg_density =  Mind(MAX_DENSITY, Maxd(temp_density/temp_num_ct,MIN_DENSITY));
 
 		/*
@@ -384,8 +384,8 @@ int j; //
 //This part aggregate onramp data for each section
 	int onrampCTidx[NumOnRamp] = {8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 
 	for(i=0;i<NumOnRamp;i++){
-		onramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
-		onramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0));
+		onramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,10));
+		onramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,10));
 
 	}
 
@@ -393,11 +393,11 @@ int j; //
 	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9 
 	for(i=0;i<NumOnRamp;i++){ 
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
-			offramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
-			offramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0));
+			offramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,10));
+			offramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,10));
 		}else{
-			offramp_out[cycle_index][i].agg_vol = 0.0;
-			offramp_out[cycle_index][i].agg_occ = 0.0;
+			offramp_out[cycle_index][i].agg_vol = 10.0;
+			offramp_out[cycle_index][i].agg_occ = 10.0;
 		}
 	} 
 

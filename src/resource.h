@@ -15,6 +15,8 @@
 #define MAX_DENSITY		124.0
 #define MIN_FLOW		200.0
 #define MAX_FLOW_PER_LANE	2000.0
+#define MIN_OCCUPANCY 10.0
+#define MAX_OCCUPANCY 90.0
 
 
 struct confidence {
