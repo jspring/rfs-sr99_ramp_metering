@@ -430,7 +430,7 @@ int j; //
 	   mainline_out_f[i].agg_vol = mean_array(temp_ary_vol,NUM_CYCLE_BUFFS);
 	   mainline_out_f[i].agg_speed = mean_array(temp_ary_speed,NUM_CYCLE_BUFFS);
        mainline_out_f[i].agg_occ = mean_array(temp_ary_occ,NUM_CYCLE_BUFFS);
-	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
+	   mainline_out_f[i].agg_density = mainline_out_f[i].agg_vol/mainline_out_f[i].agg_speed; //mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
    }
 
 
