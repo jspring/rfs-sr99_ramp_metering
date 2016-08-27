@@ -345,7 +345,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 	printf("OCCUPANCY_AGGREGATION_MAINLINE: occ_temp ");
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, occ_temp[i]);
-	printf("num_lane %d mean_occupancy %f var_occupancy %f flow %4.2f\n", num_lane, mean_occ, var_occ, occupancy);
+	printf("num_lane %d mean_occupancy %f var_occupancy %f occupancy %4.2f\n", num_lane, mean_occ, var_occ, occupancy);
 	return  mind(90.0, occupancy);
 }
 
@@ -405,7 +405,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	printf("OCCUPANCY_AGGREGATION_ONRAMP: occ_temp ");
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, occ_temp[i]);
-	printf("num_lane %2.0f mean_occupancy %f var_occupancy %f flow %4.2f\n", confidence->num_good_vals, mean_occ, var_occ, occupancy);
+	printf("num_lane %2.0f mean_occupancy %f var_occupancy %f occupancy %4.2f\n", confidence->num_good_vals, mean_occ, var_occ, occupancy);
 	return  mind(90.0, occupancy);
 }
 
@@ -464,7 +464,7 @@ float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct c
 	printf("OCCUPANCY_AGGREGATION_OFFRAMP: occ_temp ");
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, occ_temp[i]);
-	printf("num_lane %d mean_occupancy %f var_occupancy %f flow %4.2f\n", num_lane, mean_occ, var_occ, occupancy);
+	printf("num_lane %d mean_occupancy %f var_occupancy %f occupancy %4.2f\n", num_lane, mean_occ, var_occ, occupancy);
 	return  mind(90.0, occupancy);
 }
 
