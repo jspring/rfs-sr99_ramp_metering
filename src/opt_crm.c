@@ -384,8 +384,8 @@ int j; //
 //This part aggregate onramp data for each section
 	int onrampCTidx[NumOnRamp] = {8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 
 	for(i=0;i<NumOnRamp;i++){
-		onramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,10));
-		onramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,10));
+		onramp_out[cycle_index][i].agg_vol = Mind(MAX_OR_RAMP_FLOW_PER_LANE, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,MIN_OR_RAMP_FLOW_PER_LANE));
+		onramp_out[cycle_index][i].agg_occ = Mind(90.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,MIN_OCCUPANCY ));
 
 	}
 
@@ -393,11 +393,11 @@ int j; //
 	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9 
 	for(i=0;i<NumOnRamp;i++){ 
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
-			offramp_out[cycle_index][i].agg_vol = Mind(6000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,10));
-			offramp_out[cycle_index][i].agg_occ = Mind(100.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,10));
+			offramp_out[cycle_index][i].agg_vol = Mind(MAX_FR_RAMP_FLOW_PER_LANE, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,MIN_FR_RAMP_FLOW_PER_LANE));
+			offramp_out[cycle_index][i].agg_occ = Mind(90.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,MIN_OCCUPANCY ));
 		}else{
-			offramp_out[cycle_index][i].agg_vol = 10.0;
-			offramp_out[cycle_index][i].agg_occ = 10.0;
+			offramp_out[cycle_index][i].agg_vol = 0.0;
+			offramp_out[cycle_index][i].agg_occ = 0.0;
 		}
 	} 
 
