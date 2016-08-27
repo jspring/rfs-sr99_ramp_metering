@@ -260,14 +260,14 @@ int main(int argc, char *argv[])
 		
 		// min max function bound the data range and exclude nans.
         controller_mainline_data[i].agg_vol = Mind(MAX_FLOW_PER_LANE, Maxd( MIN_FLOW, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
-		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
+		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 1, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		 
 		float_temp = hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev[i], &confidence[i][0]);
 		if(float_temp < 0){
 			printf("Error %f in calculating harmonic speed for controller %s\n", float_temp, controller_strings[i]);
 			float_temp = hm_speed_prev[i];
 		}
-		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 0, float_temp) );
+		controller_mainline_data[i].agg_speed = Mind(150.0, Maxd( 1, float_temp) );
 		 
 		float_temp = mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev[i], &confidence[i][0]);
 		if(float_temp < 0){
@@ -294,8 +294,8 @@ int main(int argc, char *argv[])
         fprintf(dbg_st_file_out,"\n");
         
         //if(i==OffRampIndex[i]){
-		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0, flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
-        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0, occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
+		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 1, flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
+        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 1, occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
 		controller_offramp_data[i].turning_ratio = turning_ratio_offramp(controller_offramp_data[i].agg_vol,controller_mainline_data[i-1].agg_vol);
 		if(confidence[i][2].num_total_vals > 0)
 			printf("Confidence for controller %s offramp %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][2].num_good_vals/confidence[i][2].num_total_vals, (float)confidence[i][2].num_total_vals, (float)confidence[i][2].num_good_vals);
@@ -309,10 +309,10 @@ int main(int argc, char *argv[])
         fprintf(dbg_st_file_out,"\n");
 
 		//if(i==OnRampIndex[i]){
-		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
+		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 1, flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
 		if(confidence[i][1].num_total_vals > 0)
 			printf("Confidence for controller %s onramp flow %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
-		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
+		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 1, occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
 		if(confidence[i][1].num_total_vals > 0)
 			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
  
