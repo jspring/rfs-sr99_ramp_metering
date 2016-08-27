@@ -147,8 +147,8 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, flow_temp[i]);
 	printf("num_lane %d mean_flow %f var_flow %f calculated flow %4.2f max flow %4.2f min flow %d ", num_lane, mean_flow, var_flow, flow, MAX_FLOW_PER_LANE*num_lane, 600*num_lane);
-	flow = maxd(flow,MIN_FLOW); //factor 600 is veh/hr/lane in free flow
-	flow = mind(MAX_FLOW_PER_LANE,flow);
+	flow = maxd(flow,MIN_FLOW*num_lane); //factor 600 is veh/hr/lane in free flow
+	flow = mind(MAX_FLOW_PER_LANE*num_lane,flow);
 	printf("returned flow %4.2f\n", flow);
 	return flow;
 }
