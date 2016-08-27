@@ -54,7 +54,7 @@ fi
 
 ln -s Out_Data_$TIMESTAMP Out_Data
 
-./lnx/opt_crm 1>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.log 2>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.err &
+./lnx/opt_crm -i $INTERVAL 1>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.log 2>/big/data/ac_rm_1/opt_crm_$TIMESTAMP.err &
 
 while [[ 1 ]] 
 do
