@@ -357,10 +357,10 @@ int j; //
 				temp_num_ct ++;
 			}
 		}
-		mainline_out[cycle_index][i].agg_vol = Mind(MAX_FLOW_PER_LANE, Maxd(temp_vol/temp_num_ct,MIN_FLOW));
-		mainline_out[cycle_index][i].agg_speed = Mind(MAX_HARMONIC_SPEED, Maxd(temp_speed/temp_num_ct,MIN_HARMONIC_SPEED));
-		mainline_out[cycle_index][i].agg_occ =  Mind(MAX_OCCUPANCY, Maxd(temp_occ/temp_num_ct,MIN_OCCUPANCY));
-        mainline_out[cycle_index][i].agg_density =  Mind(MAX_DENSITY, Maxd(temp_density/temp_num_ct,MIN_DENSITY));
+		mainline_out[cycle_index][i].agg_vol = Mind(MAX_FLOW_PER_LANE, Maxd(temp_vol/temp_num_ct,1));
+		mainline_out[cycle_index][i].agg_speed = Mind(MAX_HARMONIC_SPEED, Maxd(temp_speed/temp_num_ct,1));
+		mainline_out[cycle_index][i].agg_occ =  Mind(MAX_OCCUPANCY, Maxd(temp_occ/temp_num_ct,1));
+        mainline_out[cycle_index][i].agg_density =  Mind(MAX_DENSITY, Maxd(temp_density/temp_num_ct,1));
 
 		/*
 		fprintf(dbg_st_file_out,"S%d,cyc%d ", i,cycle_index); //controller index 
@@ -430,7 +430,7 @@ int j; //
 	   mainline_out_f[i].agg_vol = mean_array(temp_ary_vol,NUM_CYCLE_BUFFS);
 	   mainline_out_f[i].agg_speed = mean_array(temp_ary_speed,NUM_CYCLE_BUFFS);
        mainline_out_f[i].agg_occ = mean_array(temp_ary_occ,NUM_CYCLE_BUFFS);
-	   mainline_out_f[i].agg_density = mainline_out_f[i].agg_vol/mainline_out_f[i].agg_speed; //mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
+	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
    }
 
 
