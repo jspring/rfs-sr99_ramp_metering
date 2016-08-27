@@ -69,7 +69,7 @@ static void sig_hand(int code)
                 longjmp(exit_env, code);
 }
 
-const char *usage = "-d (debug mode, i.e. use the two controllers in my office)";
+const char *usage = "-i <loop interval>";
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
@@ -125,8 +125,8 @@ int main(int argc, char *argv[])
 	int exitsig;
 	db_clt_typ *pclt;
 	char hostname[MAXHOSTNAMELEN+1];
-	int interval = 1000;      /// Number of milliseconds between saves
 	posix_timer_typ *ptimer;       /* Timing proxy */
+	int interval = 0;      /// Number of milliseconds between saves. The loop timer is used only in replay
 	int cycle_index = 0;
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
@@ -166,10 +166,13 @@ int main(int argc, char *argv[])
     int FR_flow_zero_counter[NumOnRamp] = {0};
     int FR_occ_zero_counter[NumOnRamp] = {0};
 
-	while ((option = getopt(argc, argv, "d")) != EOF) {
+	while ((option = getopt(argc, argv, "di:")) != EOF) {
 		switch(option) {
 			case 'd':
 				debug = 1;
+				break;
+			case 'i':
+				interval = atoi(optarg);
 				break;
 			default:
 				printf("\nUsage: %s %s\n", argv[0], usage);
@@ -183,17 +186,24 @@ int main(int argc, char *argv[])
 	memset(controller_data3, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status3_t)));//See warning at top of file
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
-	if ((pclt = db_list_init(argv[0], hostname, domain, xport,
-		//db_vars_list, num_db_vars, NULL, 0)) == NULL) {
-		NULL, 0, db_trig_list, NUM_TRIG_VARS)) == NULL) {
+
+	//Initialize database with triggered variables only if not using replay
+	if ( (interval == 0) && ((pclt = db_list_init(argv[0], hostname, domain, xport,
+		NULL, 0, db_trig_list, NUM_TRIG_VARS)) == NULL)) {
+		printf("Database initialization error in %s.\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	else //Initialize database without triggered variables only if using replay
+	if ( (pclt = db_list_init(argv[0], hostname, domain, xport,
+		NULL, 0, NULL, 0)) == NULL) {
 		printf("Database initialization error in %s.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	/* Setup a timer for every 'interval' msec. */
-//	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
-//		printf("Unable to initialize wrfiles timer\n");
-//		exit(EXIT_FAILURE);
-//	}
+	if ( (interval > 0) && ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL)) {
+		printf("Unable to initialize wrfiles timer\n");
+		exit(EXIT_FAILURE);
+	}
 
 	if(( exitsig = setjmp(exit_env)) != 0) {
 		db_list_done(pclt, NULL, 0, NULL, 0);
@@ -219,8 +229,9 @@ int main(int argc, char *argv[])
 //BEGIN MAIN FOR LOOP HERE
 	for(;;)	
 	{
-		/* Now wait for a trigger. */
-		recv_type= clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
+		/* Now wait for a trigger, but only if we're not timing the infinite loop (i.e. running replay) */
+		if(interval == 0)
+			recv_type= clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
 
 	cycle_index++;
 	cycle_index = cycle_index % NUM_CYCLE_BUFFS;
@@ -552,8 +563,8 @@ int j; //
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
-//		TIMER_WAIT(ptimer);	
-
+		if(interval > 0)
+			TIMER_WAIT(ptimer);	
 	} 
 	
 	Finish_sim_data_io();
