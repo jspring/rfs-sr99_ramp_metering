@@ -9,15 +9,19 @@
 #define	NUM_5MIN_INTERVALS	288
 #define	NUM_ONRAMPS_PLUS_1	17
 #define NUM_OFFRAMPS_PLUS_1	13
-#define MIN_HARMONIC_SPEED	10.0
-#define MAX_HARMONIC_SPEED	120.0
-#define MIN_DENSITY		10.0
-#define MAX_DENSITY		124.0
-#define MIN_FLOW		200.0
-#define MAX_FLOW_PER_LANE	2000.0
-#define MIN_OCCUPANCY 10.0
-#define MAX_OCCUPANCY 90.0
-
+#define MIN_HARMONIC_SPEED	10.0    // km/hr
+#define MAX_HARMONIC_SPEED	120.0   // km/hr 
+#define MAX_MEAN_SPEED 120.0        // km/hr
+#define MIN_DENSITY		10.0        // veh/km
+#define MAX_DENSITY		124.0       // veh/km
+#define MIN_FLOW		200.0       // veh/hr/lane
+#define MAX_FLOW_PER_LANE	2000.0  // veh/hr/lane
+#define MIN_OCCUPANCY 2             // unitless number from 0-100
+#define MAX_OCCUPANCY 90.0          // unitless number from 0-100
+#define MIN_OR_RAMP_FLOW_PER_LANE 200
+#define MAX_OR_RAMP_FLOW_PER_LANE 950
+#define MIN_FR_RAMP_FLOW_PER_LANE 50
+#define MAX_FR_RAMP_FLOW_PER_LANE 1500 
 
 struct confidence {
         float num_good_vals;
