@@ -361,7 +361,7 @@ int j; //
 		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
-        mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density/temp_num_ct,1));
+        mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density,1));
 
 		/*
 		fprintf(dbg_st_file_out,"S%d,cyc%d ", i,cycle_index); //controller index 
