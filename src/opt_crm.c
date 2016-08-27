@@ -259,8 +259,8 @@ int main(int argc, char *argv[])
 		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
 		
 		// min max function bound the data range and exclude nans.
-        controller_mainline_data[i].agg_vol = Mind(MAX_FLOW_PER_LANE*5, Maxd( MIN_FLOW, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
-		controller_mainline_data[i].agg_occ = Mind(100.0, Maxd( 1, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
+        controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 1, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
+		controller_mainline_data[i].agg_occ = Mind(90.0, Maxd( 1, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		 
 		float_temp = hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev[i], &confidence[i][0]);
 		if(float_temp < 0){
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
 		if(confidence[i][0].num_total_vals > 0)
 			printf("Confidence for controller %s mainline %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][0].num_good_vals/confidence[i][0].num_total_vals, (float)confidence[i][0].num_total_vals, (float)confidence[i][0].num_good_vals);
         
-        controller_mainline_data[i].agg_density = Mind(MAX_DENSITY,Maxd( MIN_DENSITY,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
+        controller_mainline_data[i].agg_density = Mind(125.0,Maxd( 1,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
 		
 		hm_speed_prev[i] = controller_mainline_data[i].agg_speed;
         mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
@@ -357,9 +357,9 @@ int j; //
 				temp_num_ct ++;
 			}
 		}
-		mainline_out[cycle_index][i].agg_vol = Mind(MAX_FLOW_PER_LANE, Maxd(temp_vol/temp_num_ct,1));
-		mainline_out[cycle_index][i].agg_speed = Mind(MAX_HARMONIC_SPEED, Maxd(temp_speed/temp_num_ct,1));
-		mainline_out[cycle_index][i].agg_occ =  Mind(MAX_OCCUPANCY, Maxd(temp_occ/temp_num_ct,1));
+		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,1));
+		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,1));
+		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
         mainline_out[cycle_index][i].agg_density =  Mind(MAX_DENSITY, Maxd(temp_density/temp_num_ct,1));
 
 		/*
