@@ -499,8 +499,7 @@ int j; //
 /*###################################################################################################################
 ###################################################################################################################*/
 
-		get_current_timestamp(&ts);
-		print_timestamp(st_file_out, &ts);//1
+		print_timestamp(st_file_out, &controller_data2[13].ts);//1
 		for(i=0;i<SecSize;i++)
 		{
 			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out_f[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
