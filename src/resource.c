@@ -6,8 +6,8 @@
 
 #define NAN_ERROR -1.0 
 #define RANGE_ERROR -2.0 
-//#define MAX_30_SEC_FLOW	40 // JAS,8/26/2016 I saw 30 in the data (corresponding to 3600 VPH), so this number is larger than that, but XYL says that's local
-#define MAX_30_SEC_FLOW		17 //JAS,8/26/2016 from XYL:Maximum 30-second flow rate per lane (sample time is 30 seconds, so this value corresponds to 2000 vehicles per hour)
+#define MAX_30_SEC_FLOW		40 // JAS,8/26/2016 I saw 30 in the data (corresponding to 3600 VPH), so this number is larger than that, but XYL says that's local
+//#define MAX_30_SEC_FLOW	17 //JAS,8/26/2016 from XYL:Maximum 30-second flow rate per lane (sample time is 30 seconds, so this value corresponds to 2000 vehicles per hour)
 
 // units
 // flow is vehicle per hour
@@ -86,7 +86,7 @@ long int nCr(int n, int r){
 	return ncr;
 }
 
-// Def minumum lane flow 
+// Def minimum lane flow 
 float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
         int i;
         int j = 0;
@@ -107,7 +107,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 			if((float)controller_data->mainline_stat[i].lead_vol >= 0 && (float)controller_data->mainline_stat[i].lead_vol <= MAX_30_SEC_FLOW){ // if flow is in the range
 			    flow_temp[j]=(float)controller_data->mainline_stat[i].lead_vol;  
 			    j++;
-			}else{  // replce the flow measurement if it is not in the range
+			}else{  // replace the flow measurement if it is not in the range
 				confidence->num_good_vals--;
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
@@ -141,7 +141,7 @@ float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confid
 	if(isnan(flow)){
 		flow = NAN_ERROR;
 	}else{
-	    flow = flow * 120; // convert 30 second data into hour data
+	    flow = num_lane * (flow * 120); // convert 30 second data into hour data
 	}
 	printf("FLOW_AGGREGATION_MAINLINE: flow_temp ");
 	for(i=0; i<MAX_MAINLINES;i++)
@@ -174,14 +174,14 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 			if((float)controller_data->metered_lane_stat[i].passage_vol>= 0 && (float)controller_data->metered_lane_stat[i].passage_vol <= MAX_30_SEC_FLOW){ // if flow is in the range
 			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].passage_vol;
 				j++;
-			}else{  // replce the flow measurement if it is not in the range
+			}else{  // replace the flow measurement if it is not in the range
                 confidence->num_good_vals--;
 			}
  		}else if(controller_data->metered_lane_stat[i].demand_stat == 2){
 			if((float)controller_data->metered_lane_stat[i].demand_vol>= 0 && (float)controller_data->metered_lane_stat[i].demand_vol <= MAX_30_SEC_FLOW){ 
 			    flow_temp[j]=(float)controller_data->metered_lane_stat[i].demand_vol;
 				j++;
-			}else{  // replce the flow measurement if it is not in the range
+			}else{  // replace the flow measurement if it is not in the range
                 confidence->num_good_vals--;
 			}
  		}else{
@@ -232,13 +232,13 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	 	confidence->num_total_vals = num_lane;
 	    confidence->num_good_vals = num_lane;
 
-	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= 16) ) {
+	if( (controller_data->num_addl_det > 0) && (controller_data->num_addl_det <= MAX_OFFRAMPS) ) {
 	    for(i=0 ; i< controller_data->num_addl_det; i++){  
              if( (controller_data->additional_det[i].stat == 2) || (controller_data->additional_det[i].stat == 1) ){ // if the controller report the flow data is correct, then check the data is in the range or not
 			    if((float)controller_data->additional_det[i].volume>= 0 && (float)controller_data->additional_det[i].volume <= MAX_30_SEC_FLOW){ // if flow is in the range
 			        flow_temp[j]=(float)controller_data->additional_det[i].volume;
 					j++;
-				}else{  // replce the flow measurement if it is not in the range
+				}else{  // replace the flow measurement if it is not in the range
 					confidence->num_good_vals--;
 				}
  			}else{
@@ -264,15 +264,15 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 	if(isnan(flow)){
 		flow = NAN_ERROR;
 	}else{
-		flow = flow*120; // convert 30 second data into hour data
+	    	flow = num_lane * (flow * 120); // convert 30 second data into hour data
 	}
 	//printf("FR-flow_agg %4.2f num_addl_det %d\n", flow, controller_data->num_addl_det );
-	flow = maxd(flow,MIN_FR_RAMP_FLOW_PER_LANE); //factor 200 is veh/hr/lane in free flow
+	flow = maxd(flow,num_lane * MIN_FR_RAMP_FLOW_PER_LANE); //factor 200 is veh/hr/lane in free flow
 	printf("FLOW_AGGREGATION_OFFRAMP: flow_temp ");
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, flow_temp[i]);
 	printf("num_lane %d mean_flow %f var_flow %f flow %4.2f\n", num_lane, mean_flow, var_flow, flow);
-	return mind(MAX_FR_RAMP_FLOW_PER_LANE,flow); 
+	return mind(num_lane * MAX_FR_RAMP_FLOW_PER_LANE,flow); 
 }
 
 float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
@@ -497,7 +497,7 @@ float hm_speed_aggregation_mainline(db_urms_status_t *controller_data, float hm_
                 occupancy[j]= lead_occ;
 				flow[j]=(float)controller_data->mainline_stat[i].lead_vol;  
 				j++;
-			}else{  // replce the flow measurement if it is not in the range
+			}else{  // replace the flow measurement if it is not in the range
                 confidence->num_good_vals--; 
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
@@ -596,7 +596,7 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 				occupancy[j]= lead_occ;
 				flow[j]=(float)controller_data->mainline_stat[i].lead_vol;
 				j++;
-			}else{  // replce the flow measurement if it is not in the range
+			}else{  // replace the flow measurement if it is not in the range
                 confidence->num_good_vals--; 
 			}
 		}else if(controller_data->mainline_stat[i].trail_stat == 2){
