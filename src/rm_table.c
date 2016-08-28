@@ -15,8 +15,6 @@ urms_datafile_t urms_datafile;
 db_ramp_data_t db_ramp_data;
 db_urms_t db_urms;
 
-timestamp_t timestamp;
-
 /**
  *      This array is used to specify how to read in the DB vars.
  */
@@ -35,7 +33,7 @@ int num_ac_rm_vars = (sizeof(db_vars_ac_rm)/sizeof(db_var_spec_t));
  */
 data_log_column_spec_t file_spec[] = 
 {
-        {"HH:MM:SS.SSS ", &timestamp, BASE_TIMESTAMP, REPLAY_TIME},		//###1
+        {"HH:MM:SS.SSS ", &db_urms_status2.ts, BASE_TIMESTAMP, REPLAY_TIME},		//###1
 //get_long_status8_resp_mess_typ
         {"%hhu ",   &db_urms_status.mainline_stat[0].lead_stat, BASE_CHAR, REPLAY_USE},	//###2
         {"%hhu ",   &db_urms_status.mainline_stat[0].lead_vol, BASE_CHAR, REPLAY_USE},	//###3
