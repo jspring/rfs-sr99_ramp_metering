@@ -56,7 +56,6 @@ FILE *f_ac_rm = NULL;
 buff_typ *pfirst_buff;
 buff_typ *pbuff_ac_rm;
 
-extern timestamp_t timestamp;                 // used when reading back in
 extern double utc_seconds_since_midnight;    // UTC seconds since midnight
 extern double seconds_since_start;       // seconds since start of run
 
@@ -75,6 +74,7 @@ int main(int argc, char *argv[])
 	char monthday[80];
 	char serialnum[80];
 	char *controller_str;
+	timestamp_t timestamp;                 // used when reading back in
 
 	int db_urms_status_var = 0;
 	int db_urms_datafile_var = 0;
