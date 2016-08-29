@@ -534,7 +534,7 @@ int j; //
 		}
 		
 		fprintf(st_file_out,"\n");
-		
+printf("Got to 1\n");		
 		det_data_4_contr(time);		
 		get_meas(time);				
 		update_q_R();
@@ -549,6 +549,7 @@ int j; //
 				fprintf(cal_opt_f,"%lf\n", opt_r[i][1]);
 		}
 		
+printf("Got to 2\n");		
 		ln_rm_distrib();
 	
 		if (use_CRM == 1)
@@ -561,6 +562,7 @@ int j; //
 			Set_Hybrid_Meter(time,time2,timeSta);  // upstream use default; downstream 11 onramps use CRM
 		else;
 
+printf("Got to 3\n");		
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
