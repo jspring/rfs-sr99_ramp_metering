@@ -799,8 +799,12 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
     t_1 = mind(t_1,288);
 	t_1 = maxd(0,t_1);
     
-    //OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
-    OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx] + ( ( (t_convert - t_0) )*(OR_HIS_FLOW_DAT[t_1][OR_idx] - OR_HIS_FLOW_DAT[t_0][OR_idx] ) ); 
+	if (t_1!=t_0){
+	    OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx] - OR_HIS_FLOW_DAT[t_0][OR_idx] ));
+	}
+	else{
+	    OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx];
+	} 
     return OR_flow;
 }
 
@@ -825,10 +829,15 @@ float interp_OR_HIS_OCC(int OR_idx, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM
 	t_1 = ceil(t_convert);
     t_1 = mind(t_1,288);
 	t_1 = maxd(0,t_1);
+
+	if (t_1!=t_0){
+	   OR_occ = OR_HIS_OCC_DAT[t_0][OR_idx] + ( ( (t_convert - t_0)/(t_1-t_0) )*(OR_HIS_OCC_DAT[t_1][OR_idx] - OR_HIS_OCC_DAT[t_0][OR_idx] ) );
+	}
+	else{
+	   OR_occ = OR_HIS_OCC_DAT[t_0][OR_idx];
+	}  
     
-    //OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
-    OR_occ = OR_HIS_OCC_DAT[t_0][OR_idx] + ( ( (t_convert - t_0) )*(OR_HIS_OCC_DAT[t_1][OR_idx] - OR_HIS_OCC_DAT[t_0][OR_idx] ) ); 
-    return OR_occ;
+	return OR_occ;
 }
 
 
@@ -855,8 +864,12 @@ float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
     t_1 = mind(t_1,288);
 	t_1 = maxd(0,t_1);
     
-    //OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
-    FR_flow = FR_HIS_FLOW_DAT[t_0][FR_idx] + ( ( (t_convert - t_0) )*(FR_HIS_FLOW_DAT[t_1][FR_idx] - FR_HIS_FLOW_DAT[t_0][FR_idx] ) ); 
+	if (t_1!=t_0){
+	    FR_flow = FR_HIS_FLOW_DAT[t_0][FR_idx] + ( ( (t_convert - t_0)/(t_1-t_0) )*(FR_HIS_FLOW_DAT[t_1][FR_idx] - FR_HIS_FLOW_DAT[t_0][FR_idx] ) ); 
+	}
+	else{
+		FR_flow = FR_HIS_FLOW_DAT[t_0][FR_idx];
+	}  
     return FR_flow;
 }
 
@@ -882,8 +895,14 @@ float interp_FR_HIS_OCC(int FR_idx, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM
 	t_1 = ceil(t_convert);
     t_1 = mind(t_1,288);
 	t_1 = maxd(0,t_1);
-    
-    //OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx+1] + (((t_convert - t_0)/(t_1-t_0))*(OR_HIS_FLOW_DAT[t_1][OR_idx+1] - OR_HIS_FLOW_DAT[t_0][OR_idx+1] ));
-    FR_occ = FR_HIS_OCC_DAT[t_0][FR_idx] + ( ( (t_convert - t_0) )*(FR_HIS_OCC_DAT[t_1][FR_idx] - FR_HIS_OCC_DAT[t_0][FR_idx] ) ); 
+
+
+    if (t_1!=t_0){
+	    FR_occ = FR_HIS_OCC_DAT[t_0][FR_idx] + ( ( (t_convert - t_0)/(t_1-t_0)  )*(FR_HIS_OCC_DAT[t_1][FR_idx] - FR_HIS_OCC_DAT[t_0][FR_idx] ) );
+	}
+	else{
+		FR_occ = FR_HIS_OCC_DAT[t_0][FR_idx];
+	}  
+
     return FR_occ;
 }
