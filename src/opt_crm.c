@@ -393,7 +393,8 @@ int j; //
 	}
 
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
-	int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9 
+	//int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9
+	int offrampCTidx[NumOnRamp] = {8, 9, -1, -1, 16, 17, 19, 20, 22, 23, 27}; // 4 off-ramp is missing, total number of off-ramps is 9
 	for(i=0;i<NumOnRamp;i++){ 
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
 			offramp_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
