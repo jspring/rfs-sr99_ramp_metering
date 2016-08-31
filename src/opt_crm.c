@@ -447,6 +447,13 @@ int j; //
 		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;   
 	  }
 
+
+      if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)!=0.0){
+		  onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS);
+	  }else{
+          onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA); // interpolate missing value from table
+	  } 
+      /*
 	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)==0.0){
 		  if(OR_flow_zero_counter[i] > num_zero_tolerant ){
                   onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA); // interpolate missing value from table
@@ -458,7 +465,7 @@ int j; //
           onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS);
 		  OR_flow_zero_counter[i] = 0; // reset the counter 
 	  }
-
+      */
 	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)==0.0){
 		  if(OR_occ_zero_counter[i] > num_zero_tolerant ){
                   onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA); // interpolate missing value from table
@@ -470,8 +477,14 @@ int j; //
           onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
 		  OR_occ_zero_counter[i] = 0; // reset the counter 
 	  }
+
+	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)!=0.0){
+		  offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
+	  }else{
+          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA); // interpolate missing value from table
+	  } 
       
-      
+      /*
 	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)==0.0){
 		  if(FR_flow_zero_counter[i] > num_zero_tolerant ){
                   offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA); // interpolate missing value from table
@@ -483,7 +496,7 @@ int j; //
           offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 		  FR_flow_zero_counter[i] = 0; // reset the counter 
 	  }
-
+      */
 	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)==0.0){
 		  if(FR_occ_zero_counter[i] > num_zero_tolerant ){
                   offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA); // interpolate missing value from table
