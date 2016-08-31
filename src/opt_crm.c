@@ -449,7 +449,7 @@ int j; //
 
 
 	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)!=0.0){
-	     onramp_out_f[i].agg_vol = 120*mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS); 
+	     onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS); 
 	  }else{
 	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA); // interpolate missing value from table    
 	  }
@@ -462,7 +462,7 @@ int j; //
       
       
 	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)!=0.0){
-		  offramp_out_f[i].agg_vol = 120*mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
+		  offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 	  }else{
           offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA); // interpolate missing value from table
 	  }
