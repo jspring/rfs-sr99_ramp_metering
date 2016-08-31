@@ -547,7 +547,7 @@ int j; //
         
      	//fprintf(st_file_out,"\n");
 
-		for(i=0;i<NumOnRamp+1;i++)
+		for(i=0;i<NumOnRamp;i++)
 		{	
 				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
