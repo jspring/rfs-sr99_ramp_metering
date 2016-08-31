@@ -512,7 +512,7 @@ int j; //
 				//fprintf(st_file_out,"\n");//
 		}
 		
-		//fprintf(st_file_out,"\n");
+		fprintf(st_file_out,"\n");
 printf("Got to 1\n");		
 		det_data_4_contr(time);		
 		get_meas(time);				
