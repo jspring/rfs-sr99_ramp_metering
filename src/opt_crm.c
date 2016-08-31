@@ -525,11 +525,11 @@ int j; //
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
 				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
-				//fprintf(st_file_out,"OR %d ", i);//
+				fprintf(st_file_out,"OR %d ", i);//
 				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol); //50,54,58,62,66,70,74,78,82,86,90  			
 				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ); //51,55,59,63,67,71,75,79,83,87,91 
 				//fprintf(st_file_out,"\n");//
-				//fprintf(st_file_out,"FR %d ", i);//
+				fprintf(st_file_out,"FR %d ", i);//
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol); //52,56,60,64,68,72,76,80,84,88,92 
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ); //53,57,61,65,69,73,77,81,85,89,93 
 				//fprintf(st_file_out,"\n");//
