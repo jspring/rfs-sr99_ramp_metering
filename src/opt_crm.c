@@ -363,7 +363,7 @@ int j; //
 		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
-        mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density,1));
+        mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density/temp_num_ct,1));
 
 		/*
 		fprintf(dbg_st_file_out,"S%d,cyc%d ", i,cycle_index); //controller index 
@@ -394,7 +394,7 @@ int j; //
 
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
 	//int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9
-	int offrampCTidx[NumOnRamp] = {8, 9, -1, -1, 16, 17, 19, 20, 22, 23, 26}; // 4 off-ramp is missing, total number of off-ramps is 9
+	int offrampCTidx[NumOnRamp] = {8, -1, 9, -1, 16, 17, 19, 20, 22, 23, 26}; // 4 off-ramp is missing, total number of off-ramps is 9
 	for(i=0;i<NumOnRamp;i++){ 
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
 			offramp_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
@@ -405,6 +405,57 @@ int j; //
 		}
 	} 
 
+// flow balance of mainline by using filtered data
+      for(i=0;i<SecSize;i++){
+		  if(mainline_out[cycle_index][i].agg_vol < 100.0){
+			  if (i==0){
+                  mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol+offramp_out[cycle_index][1].agg_vol;
+			  }else if (i==11){
+                  mainline_out[cycle_index][i].agg_vol = offramp_out[cycle_index][i].agg_vol-onramp_out[cycle_index][i-1].agg_vol;
+			  }else{
+                  mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol+offramp_out[cycle_index][i-1].agg_vol-onramp_out[cycle_index][i-1].agg_vol;
+			  }
+		  }
+	  }
+
+// moving average filter for on-ramp off-ramp
+   for(i=0; i<NumOnRamp; i++){
+	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
+	  {
+	     temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
+		 temp_ary_OR_occ[j] = onramp_out[j][i].agg_occ;   
+		 temp_ary_FR_vol[j] = offramp_out[j][i].agg_vol;   
+		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;   
+	  }
+
+      // fill out zero on-ramp off-ramp data by look up table
+ 	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>50.0){ // the threshold is in hourly flow rate
+	     onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS); 
+	  }else{
+	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA); // interpolate missing value from table    
+	  }
+
+	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)>1.0){
+	     onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
+	  }else{
+         onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA); // interpolate missing value from table
+	  }
+        
+	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)>50.0){
+		  offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
+	  }else{
+          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA); // interpolate missing value from table
+	  }
+
+	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)>1.0){
+	       offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
+	  }else{
+          offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA); // interpolate missing value from table 
+	  }
+ 
+    }
+
+   
 // replace bad flow data by upstream data
 //if flow < 100 do upstream downstrean interpolation for all the data
 //only check flow, then interpolate flow, speed,occupancy, density
@@ -443,7 +494,7 @@ int j; //
     }
 
 // average the historical data from data buffer
-
+// moving average filter for mainline
    for(i=0; i<SecSize; i++){
 		for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
@@ -459,43 +510,8 @@ int j; //
    }
 
 
-   for(i=0; i<NumOnRamp; i++){
-	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
-	  {
-	     temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
-		 temp_ary_OR_occ[j] = onramp_out[j][i].agg_occ;   
-		 temp_ary_FR_vol[j] = offramp_out[j][i].agg_vol;   
-		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;   
-	  }
 
-      // fill out zero on-ramp off-ramp data by look up table
- 	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>50.0){ // the threshold is in hourly flow rate
-	     onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS); 
-	  }else{
-	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA); // interpolate missing value from table    
-	  }
 
-	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)>1.0){
-	     onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
-	  }else{
-         onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA); // interpolate missing value from table
-	  }
-        
-	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)>50.0){
-		  offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
-	  }else{
-          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA); // interpolate missing value from table
-	  }
-
-	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)>1.0){
-	       offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
-	  }else{
-          offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA); // interpolate missing value from table 
-	  }
- 
-    }
- 
-   
 /*###################################################################################################################
 ###################################################################################################################*/
 
