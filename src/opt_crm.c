@@ -406,20 +406,26 @@ int j; //
 	} 
 
 // replace bad flow data by upstream data
-   //for(i=0;i<SecSize;i++){
-	  // if( (i==0) && (mainline_out[cycle_index][i].agg_vol==-1.0)){
-	  //     mainline_out[cycle_index][i].agg_vol = 1000;
-	  // }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i-1].agg_vol!=-1.0) && (mainline_out[cycle_index][i+1].agg_vol=-1.0))
-	  // {
-	  //     mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
-	  // }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol==-1.0) &&  (mainline_out[cycle_index][i].agg_vol!=-1.0) &&  (mainline_out[cycle_index][i+1].agg_vol!=-1.0) && (i!=(SecSize-1)))
-	  // {
-   //        mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
-	  // }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol==-1.0))
-	  // {
-   //        mainline_out[cycle_index][SecSize-1].agg_vol = 1000; 
-	  // }
-   //}
+//if flow < 100 do upstream downstrean interpolation for all the data
+//only check flow, then interpolate flow, speed,occupancy, density
+    for(i=0;i<SecSize;i++){   
+        if( (i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) && (mainline_out[cycle_index][i+1].agg_vol>100.0) )
+		{ // case for first VDS is bad, but second one is good 
+	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol;
+		}else if ((i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) )
+		{ // case for first VDS is bad
+		    mainline_out[cycle_index][i].agg_vol = 600.0; 
+	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol>100.0) && (mainline_out[cycle_index][i+1].agg_vol<100.0))
+	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
+	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
+	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i].agg_vol>100.0) &&  (mainline_out[cycle_index][i+1].agg_vol>100.0) && (i!=(SecSize-1)))
+	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
+           mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
+	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol<100.0)) // case for last VDS is bad, but VDS i-1 are good
+	    {
+            mainline_out[cycle_index][SecSize-1].agg_vol = 600.0; 
+	    }
+    }
 
 // average the historical data from data buffer
 
@@ -448,25 +454,25 @@ int j; //
 	  }
 
       // fill out zero on-ramp off-ramp data by look up table
- 	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>5.0){ //(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)<10.0)
+ 	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>50.0){ // the threshold is in hourly flow rate
 	     onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS); 
 	  }else{
 	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA); // interpolate missing value from table    
 	  }
 
-	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)!=0.0){
+	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)>1.0){
 	     onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
 	  }else{
          onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA); // interpolate missing value from table
 	  }
         
-	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)>5.0){
+	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)>50.0){
 		  offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 	  }else{
           offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA); // interpolate missing value from table
 	  }
 
-	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)!=0.0){
+	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)>1.0){
 	       offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
 	  }else{
           offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA); // interpolate missing value from table 
