@@ -109,7 +109,7 @@ const char *controller_strings[] = {
 
 int main(int argc, char *argv[])
 {
-	timestamp_t ts;
+//	timestamp_t ts;
 	float time = 0, time2 = 0,timeSta = 0;
 //	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
@@ -252,8 +252,8 @@ int main(int argc, char *argv[])
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
     
-	get_current_timestamp(&ts); // get current time step
-	print_timestamp(dbg_st_file_out, &ts); // print out current time step to file
+//	get_current_timestamp(&ts); // get current time step
+	print_timestamp(dbg_st_file_out, &controller_data2[13].ts); // print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
 		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
@@ -421,10 +421,10 @@ int j; //
 // moving average filter for on-ramp off-ramp
    for(i=0; i<NumOnRamp; i++){
       // Use historical data only
-      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA),50)); // interpolate missing value from table    
-      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA),5)); // interpolate missing value from table
-      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA),50)); // interpolate missing value from table
-      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA),5)); // interpolate missing value from table 
+      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table    
+      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table
+      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table
+      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table 
 
 /*
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
@@ -440,25 +440,25 @@ int j; //
  	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>50.0){ // the threshold is in hourly flow rate
 	     onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS); 
 	  }else{
-	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA); // interpolate missing value from table    
+	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA, &controller_data2[13].ts); // interpolate missing value from table    
 	  }
 
 	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)>1.0){
 	     onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
 	  }else{
-         onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA); // interpolate missing value from table
+         onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA, &controller_data2[13].ts); // interpolate missing value from table
 	  }
         
 	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)>50.0){
 		  offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
 	  }else{
-          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA); // interpolate missing value from table
+          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA, &controller_data2[13].ts); // interpolate missing value from table
 	  }
 
 	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)>1.0){
 	       offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
 	  }else{
-          offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA); // interpolate missing value from table 
+          offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA, &controller_data2[13].ts); // interpolate missing value from table 
 	  }
 */ 
     }
@@ -1519,7 +1519,7 @@ int set_coef(float c[MP][NP],float Qm)
 		for (m=1;m<NP;m++)
 			c[i][m]=-c[i][m];
 	}
-
+/*
 	sprintf(str,"up_rho:");
 	fprintf(pp,"%s\n",str);	
 	for(m=0;m<Np;m++)
@@ -1556,12 +1556,12 @@ int set_coef(float c[MP][NP],float Qm)
 	fprintf(pp,"\n");
 
 	//sprintf(str,"Q_o:");
-	/*fprintf(pp,"Q_o=:\n");
-	for(m=0;m<NumOnRamp;m++)
-	{
-		fprintf(pp,"%lf ",Q_o[m]);		
-	}
-	fprintf(pp,"\n") */
+//	fprintf(pp,"Q_o=:\n");
+//	for(m=0;m<NumOnRamp;m++)
+//	{
+//		fprintf(pp,"%lf ",Q_o[m]);		
+//	}
+//	fprintf(pp,"\n") 
 	
 
 	sprintf(str,"Onramp Length:");
@@ -1652,11 +1652,11 @@ int set_coef(float c[MP][NP],float Qm)
 	
 
 
-/*sprintf(str,"M1 & M2:");
-	fprintf(pp,"%s\n",str);
-	fprintf(pp,"%i %i ",M1, M2); //b_l[m]);		
-	fprintf(pp,"\n");	
-*/
+//sprintf(str,"M1 & M2:");
+//	fprintf(pp,"%s\n",str);
+//	fprintf(pp,"%i %i ",M1, M2); //b_l[m]);		
+//	fprintf(pp,"\n");	
+//
 	sprintf(str,"c:");
 	fprintf(pp,"%s\n",str);
 	for(m=0;m<MP;m++)
@@ -1667,7 +1667,7 @@ int set_coef(float c[MP][NP],float Qm)
 		}
 		fprintf(pp,"\n");		
 	}
-
+*/
 	
 	return 0;
 }
