@@ -420,6 +420,13 @@ int j; //
 
 // moving average filter for on-ramp off-ramp
    for(i=0; i<NumOnRamp; i++){
+      // Use historical data only
+      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA),50)); // interpolate missing value from table    
+      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA),5)); // interpolate missing value from table
+      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA),50)); // interpolate missing value from table
+      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA),5)); // interpolate missing value from table 
+
+/*
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
 	     temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
@@ -427,7 +434,8 @@ int j; //
 		 temp_ary_FR_vol[j] = offramp_out[j][i].agg_vol;   
 		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;   
 	  }
-
+*/   
+/* disable all the on-ramp off-ramp measurement 
       // fill out zero on-ramp off-ramp data by look up table
  	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>50.0){ // the threshold is in hourly flow rate
 	     onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS); 
@@ -452,9 +460,8 @@ int j; //
 	  }else{
           offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA); // interpolate missing value from table 
 	  }
- 
+*/ 
     }
-
    
 // replace bad flow data by upstream data
 //if flow < 100 do upstream downstrean interpolation for all the data
