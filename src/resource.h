@@ -68,8 +68,8 @@ extern float turning_ratio_offramp(float FR_flow, float ML_flow);
 
 //extern float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT);
 
-extern float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts);
-extern float interp_OR_HIS_OCC(int OR_idx, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts);
+extern float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts);
+extern float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts);
 
-extern float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts);
-extern float interp_FR_HIS_OCC(int FR_idx, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts);
+extern float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts);
+extern float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts);

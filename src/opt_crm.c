@@ -145,7 +145,12 @@ int main(int argc, char *argv[])
 	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};               // this is the register of harmonic mean speed in previous time step
 	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};             // this is the register of mean speed in previous time step
     float density_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of density in previous time step
+	float OR_flow_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp flow in previous time step
+	float OR_occupancy_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp occupancy in previous time step
+	float FR_flow_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp flow in previous time step
+	float FR_occupancy_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp occupancy in previous time step
 	float float_temp;
+    
 
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
@@ -421,11 +426,16 @@ int j; //
 // moving average filter for on-ramp off-ramp
    for(i=0; i<NumOnRamp; i++){
       // Use historical data only
-      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table    
-      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table
-      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1, FR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table
-      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table 
+      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i] , OR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table    
+      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table
+      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table
+      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i], FR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table 
 
+	  // register of on-ramp and off-ramp data in previous time step
+	  OR_flow_prev[i] = onramp_out_f[i].agg_vol;   
+	  OR_occupancy_prev[i] = onramp_out_f[i].agg_occ;
+	  FR_flow_prev[i] =  offramp_out_f[i].agg_vol;
+	  FR_occupancy_prev[i] = offramp_out_f[i].agg_occ;
 /*
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
