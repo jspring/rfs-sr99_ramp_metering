@@ -73,7 +73,7 @@ const char *usage = "-i <loop interval>";
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
-#define NUM_CYCLE_BUFFS       5
+#define NUM_CYCLE_BUFFS    2
 //
 const char *controller_strings[] = {
         "10.29.248.108",             //0, OR1
@@ -509,9 +509,9 @@ int j; //
 	    }
     }
 
-	 for(i=0;i<SecSize;i++){  
-			// replace bad speed data by upstream data
+// replace bad speed data by upstream data
 //if speed < 5.0 do upstream downstrean interpolation flow data
+	 for(i=0;i<SecSize;i++){  
         if( (i==0) && (mainline_out[cycle_index][i].agg_speed<5.0) && (mainline_out[cycle_index][i+1].agg_speed>5.0) )
 		{ // case for first VDS is bad, but second one is good 
 	        mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed;  
@@ -530,9 +530,10 @@ int j; //
 	    }
 	 }
 
-	  for(i=0;i<SecSize;i++){  
+
 //replace bad occupancy data by upstream data
 //if occupancy < 5 do upstream downstrean interpolation flow data
+	  for(i=0;i<SecSize;i++){  
         if( (i==0) && (mainline_out[cycle_index][i].agg_occ<5.0) && (mainline_out[cycle_index][i+1].agg_occ>5.0) )
 		{ // case for first VDS is bad, but second one is good 
 	         mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;    
@@ -551,9 +552,9 @@ int j; //
 	    }
 	  }
 
-	   for(i=0;i<SecSize;i++){  
 // replace bad density data by upstream data
 //if density < 5.0 do upstream downstrean interpolation flow data
+	   for(i=0;i<SecSize;i++){  
         if( (i==0) && (mainline_out[cycle_index][i].agg_density<5.0) && (mainline_out[cycle_index][i+1].agg_density>5.0) )
 		{ // case for first VDS is bad, but second one is good 
 	        mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density; 
