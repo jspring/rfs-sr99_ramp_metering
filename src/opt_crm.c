@@ -507,32 +507,28 @@ int j; //
 		    //mainline_out[cycle_index][SecSize-1].agg_occ = 5.0;   
             //mainline_out[cycle_index][SecSize-1].agg_density = 100.0; 
 	    }
-    }
 
-// replace bad speed data by upstream data
-//if speed < 10.0 do upstream downstrean interpolation flow data
-    for(i=0;i<SecSize;i++){   
-        if( (i==0) && (mainline_out[cycle_index][i].agg_speed<10.0) && (mainline_out[cycle_index][i+1].agg_speed>10.0) )
+		// replace bad speed data by upstream data
+//if speed < 5.0 do upstream downstrean interpolation flow data
+        if( (i==0) && (mainline_out[cycle_index][i].agg_speed<5.0) && (mainline_out[cycle_index][i+1].agg_speed>5.0) )
 		{ // case for first VDS is bad, but second one is good 
 	        mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed;  
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_speed<10.0) )
+		}else if ((i==0) && (mainline_out[cycle_index][i].agg_speed<5.0) )
 		{ // case for first VDS is bad
             mainline_out[cycle_index][i].agg_speed = 80.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_speed<10.0) &&  (mainline_out[cycle_index][i-1].agg_speed>10.0) && (mainline_out[cycle_index][i+1].agg_speed<10.0))
+	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_speed<5.0) &&  (mainline_out[cycle_index][i-1].agg_speed>5.0) && (mainline_out[cycle_index][i+1].agg_speed<5.0))
 	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
             mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i-1].agg_speed ; 
-	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_speed<10.0) &&  (mainline_out[cycle_index][i].agg_speed>10.0) &&  (mainline_out[cycle_index][i+1].agg_speed>10.0) && (i!=(SecSize-1)))
+	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_speed<5.0) &&  (mainline_out[cycle_index][i].agg_speed>5.0) &&  (mainline_out[cycle_index][i+1].agg_speed>5.0) && (i!=(SecSize-1)))
 	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
            mainline_out[cycle_index][i].agg_speed = 0.5*(mainline_out[cycle_index][i-1].agg_speed+mainline_out[cycle_index][i+1].agg_speed);
-	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_speed<10.0)) // case for last VDS is bad, but VDS i-1 are good
+	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_speed<5.0)) // case for last VDS is bad, but VDS i-1 are good
 	    {
 			mainline_out[cycle_index][SecSize-1].agg_speed = 80.0; 
 	    }
-    }
 
 //replace bad occupancy data by upstream data
 //if occupancy < 5 do upstream downstrean interpolation flow data
-    for(i=0;i<SecSize;i++){   
         if( (i==0) && (mainline_out[cycle_index][i].agg_occ<5.0) && (mainline_out[cycle_index][i+1].agg_occ>5.0) )
 		{ // case for first VDS is bad, but second one is good 
 	         mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;    
@@ -549,28 +545,27 @@ int j; //
 	    {
 			mainline_out[cycle_index][SecSize-1].agg_occ = 5.0; 
 	    }
-    }
 
 // replace bad density data by upstream data
-//if density < 20.0 do upstream downstrean interpolation flow data
-    for(i=0;i<SecSize;i++){   
-        if( (i==0) && (mainline_out[cycle_index][i].agg_density<20.0) && (mainline_out[cycle_index][i+1].agg_density>20.0) )
+//if density < 5.0 do upstream downstrean interpolation flow data
+        if( (i==0) && (mainline_out[cycle_index][i].agg_density<5.0) && (mainline_out[cycle_index][i+1].agg_density>5.0) )
 		{ // case for first VDS is bad, but second one is good 
 	        mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density; 
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_density<20.0) )
+		}else if ((i==0) && (mainline_out[cycle_index][i].agg_density<5.0) )
 		{ // case for first VDS is bad
 		    mainline_out[cycle_index][i].agg_density = 100.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_density<20.0) &&  (mainline_out[cycle_index][i-1].agg_density>20.0) && (mainline_out[cycle_index][i+1].agg_density<20.0))
+	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_density<5.0) &&  (mainline_out[cycle_index][i-1].agg_density>5.0) && (mainline_out[cycle_index][i+1].agg_density<5.0))
 	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
 	        mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i-1].agg_density;
-	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_density<20.0) &&  (mainline_out[cycle_index][i].agg_density>20.0) &&  (mainline_out[cycle_index][i+1].agg_density>20.0) && (i!=(SecSize-1)))
+	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_density<5.0) &&  (mainline_out[cycle_index][i].agg_density>5.0) &&  (mainline_out[cycle_index][i+1].agg_density>5.0) && (i!=(SecSize-1)))
 	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
            mainline_out[cycle_index][i].agg_density = 0.5*(mainline_out[cycle_index][i-1].agg_density+mainline_out[cycle_index][i+1].agg_density);
-	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_density<20.0)) // case for last VDS is bad, but VDS i-1 are good
+	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_density<5.0)) // case for last VDS is bad, but VDS i-1 are good
 	    {
  			mainline_out[cycle_index][SecSize-1].agg_density = 100.0; 
 	    }
     }
+
 
 // average the historical data from data buffer
 // moving average filter for mainline
