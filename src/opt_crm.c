@@ -507,8 +507,10 @@ int j; //
 		    //mainline_out[cycle_index][SecSize-1].agg_occ = 5.0;   
             //mainline_out[cycle_index][SecSize-1].agg_density = 100.0; 
 	    }
+    }
 
-		// replace bad speed data by upstream data
+	 for(i=0;i<SecSize;i++){  
+			// replace bad speed data by upstream data
 //if speed < 5.0 do upstream downstrean interpolation flow data
         if( (i==0) && (mainline_out[cycle_index][i].agg_speed<5.0) && (mainline_out[cycle_index][i+1].agg_speed>5.0) )
 		{ // case for first VDS is bad, but second one is good 
@@ -526,7 +528,9 @@ int j; //
 	    {
 			mainline_out[cycle_index][SecSize-1].agg_speed = 80.0; 
 	    }
+	 }
 
+	  for(i=0;i<SecSize;i++){  
 //replace bad occupancy data by upstream data
 //if occupancy < 5 do upstream downstrean interpolation flow data
         if( (i==0) && (mainline_out[cycle_index][i].agg_occ<5.0) && (mainline_out[cycle_index][i+1].agg_occ>5.0) )
@@ -545,7 +549,9 @@ int j; //
 	    {
 			mainline_out[cycle_index][SecSize-1].agg_occ = 5.0; 
 	    }
+	  }
 
+	   for(i=0;i<SecSize;i++){  
 // replace bad density data by upstream data
 //if density < 5.0 do upstream downstrean interpolation flow data
         if( (i==0) && (mainline_out[cycle_index][i].agg_density<5.0) && (mainline_out[cycle_index][i+1].agg_density>5.0) )
@@ -564,8 +570,7 @@ int j; //
 	    {
  			mainline_out[cycle_index][SecSize-1].agg_density = 100.0; 
 	    }
-    }
-
+	   }
 
 // average the historical data from data buffer
 // moving average filter for mainline
