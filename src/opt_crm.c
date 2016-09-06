@@ -73,7 +73,7 @@ const char *usage = "-i <loop interval>";
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
-#define NUM_CYCLE_BUFFS    2
+#define NUM_CYCLE_BUFFS    10
 //
 const char *controller_strings[] = {
         "10.29.248.108",             //0, OR1
