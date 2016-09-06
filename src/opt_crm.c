@@ -290,13 +290,13 @@ int main(int argc, char *argv[])
         mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
         density_prev[i] = controller_mainline_data[i].agg_density;
 
-        fprintf(dbg_st_file_out,"C%d ", i); //controller index 
+        //fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);
-        fprintf(dbg_st_file_out,"\n");
+        //fprintf(dbg_st_file_out,"\n");
         
 		// assign off-ramp data to array
         //if(i==OffRampIndex[i]){
@@ -306,13 +306,13 @@ int main(int argc, char *argv[])
 		if(confidence[i][2].num_total_vals > 0)
 			printf("Confidence for controller %s offramp %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][2].num_good_vals/confidence[i][2].num_total_vals, (float)confidence[i][2].num_total_vals, (float)confidence[i][2].num_good_vals);
 		
-		fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
+		//fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
         fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); 
 		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_occ); 
 		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].turning_ratio);
 	    //}
 
-        fprintf(dbg_st_file_out,"\n");
+        //fprintf(dbg_st_file_out,"\n");
         
 		// assign on-ramp data to array
 		//if(i==OnRampIndex[i]){
@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
 		if(confidence[i][1].num_total_vals > 0)
 			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
  
-		fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
+		//fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); 
         fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);
 		//}
