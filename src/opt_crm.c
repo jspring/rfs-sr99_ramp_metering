@@ -327,8 +327,9 @@ int main(int argc, char *argv[])
 		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); 
         fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);
 		//}
-		fprintf(dbg_st_file_out,"\n");
+		//fprintf(dbg_st_file_out,"\n");
 	}
+	fprintf(dbg_st_file_out,"\n");
     
 //** This part aggregate data for each section
 // controller index for each mainline section
