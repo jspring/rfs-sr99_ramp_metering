@@ -73,7 +73,7 @@ const char *usage = "-i <loop interval>";
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
-#define NUM_CYCLE_BUFFS    1
+#define NUM_CYCLE_BUFFS  5
 //
 const char *controller_strings[] = {
         "10.29.248.108",             //0, OR1
@@ -534,19 +534,19 @@ int j; //
 //replace bad occupancy data by upstream data
 //if occupancy < 5 do upstream downstrean interpolation flow data
 	  for(i=0;i<SecSize;i++){  
-        if( (i==0) && (mainline_out[cycle_index][i].agg_occ<5.0) && (mainline_out[cycle_index][i+1].agg_occ>5.0) )
+        if( (i==0) && (mainline_out[cycle_index][i].agg_occ<1.0) && (mainline_out[cycle_index][i+1].agg_occ>1.0) )
 		{ // case for first VDS is bad, but second one is good 
 	         mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;    
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_occ<5.0) )
+		}else if ((i==0) && (mainline_out[cycle_index][i].agg_occ<1.0) )
 		{ // case for first VDS is bad
             mainline_out[cycle_index][i].agg_occ = 5.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_occ<5.0) &&  (mainline_out[cycle_index][i-1].agg_occ>5.0) && (mainline_out[cycle_index][i+1].agg_occ<5.0))
+	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_occ<1.0) &&  (mainline_out[cycle_index][i-1].agg_occ>1.0) && (mainline_out[cycle_index][i+1].agg_occ<1.0))
 	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
 	        mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i-1].agg_occ;   
-        }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_occ<5.0) &&  (mainline_out[cycle_index][i].agg_occ>5.0) &&  (mainline_out[cycle_index][i+1].agg_occ>5.0) && (i!=(SecSize-1)))
+        }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_occ<1.0) &&  (mainline_out[cycle_index][i].agg_occ>1.0) &&  (mainline_out[cycle_index][i+1].agg_occ>1.0) && (i!=(SecSize-1)))
 	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
             mainline_out[cycle_index][i].agg_occ = 0.5*(mainline_out[cycle_index][i-1].agg_occ+mainline_out[cycle_index][i+1].agg_occ);
-	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_occ<5.0)) // case for last VDS is bad, but VDS i-1 are good
+	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_occ<1.0)) // case for last VDS is bad, but VDS i-1 are good
 	    {
 			mainline_out[cycle_index][SecSize-1].agg_occ = 5.0; 
 	    }
