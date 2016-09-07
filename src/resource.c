@@ -215,7 +215,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, flow_temp[i]);
 	printf("num_lane %d mean_flow %f var_flow %f flow %4.2f\n", num_lane, mean_flow, var_flow, flow);
-	return mind(MAX_OR_RAMP_FLOW_PER_LANE,flow); 
+	return mind(num_lane * MAX_OR_RAMP_FLOW_PER_LANE,flow); 
 }
 
 float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence){
@@ -665,7 +665,40 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	printf("num_lane %d mean_speed %f var_speed %f speed %4.2f\n", num_lane, mean_speed, var_speed, speed);
 	return mind(MAX_MEAN_SPEED, speed); // speed is in km/hr
 }
+float flow_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
+	float onramp_demand = 0.0;
+	int i; //  lane number index
+	int j; //  queue loop number index
+    int num_lane = controller_data->num_meter;
 
+	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
+ 	for(i=0; i < controller_data->num_meter; i++) {
+	    for(j=0; j < MAX_QUEUE_LOOPS; j++) {
+ 		if(controller_data2->queue_stat[i][j].stat == 1){
+			onramp_demand += (float)controller_data2->queue_stat[i][j].vol;  //queue detector flow
+		}else if(controller_data2->queue_stat[i][j].stat == 5){
+ 			onramp_demand  = NAN_ERROR; 
+ 		}else{
+
+        }
+	    }
+	}
+	}
+	// check Nan 
+	if(isnan(onramp_demand)){
+		onramp_demand  = NAN_ERROR;
+	}else{
+	    onramp_demand  = onramp_demand*120; // convert 30 second data into hour data
+	}
+	onramp_demand = maxd(onramp_demand,MIN_OR_RAMP_FLOW_PER_LANE); 
+
+	return mind(MAX_OR_RAMP_FLOW_PER_LANE*num_lane,onramp_demand);
+}
+
+float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
+	float occ_onramp_queue = 0.0;
+   	return occ_onramp_queue;
+}
 
 float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
 	float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
@@ -885,6 +918,35 @@ float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DA
 	   FR_occ = FR_occupancy_prev;
 	}
 	return FR_occ;
+}
+
+float ratio_ML_HIS_FLOW(float current_most_upstream_flow, float MOST_UPSTREAM_MAINLINE_FLOW_DATA[NUM_5MIN_INTERVALS][2], timestamp_t *ts){
+	//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_0 = 0;
+	float t_convert = 0.0; 
+	float ML_flow = 0.0;
+    float ratio = 0.0;
+
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	t_convert = mind(t_convert,288);
+	t_convert = maxd(0,t_convert);
+    
+	t_0 = floor(t_convert);
+    t_0 = mind(t_0,288);
+	t_0 = maxd(0,t_0);
+     
+	ML_flow = MOST_UPSTREAM_MAINLINE_FLOW_DATA[t_0][1]; 
+	
+	// flow change rate limiter 
+	if( abs(current_most_upstream_flow-ML_flow) > 0 ){
+		ratio = current_most_upstream_flow/ML_flow;
+	}else{
+	    ratio = 1;
+	}
+    return ratio;
 }
 
 

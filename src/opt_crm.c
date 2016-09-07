@@ -133,14 +133,18 @@ int main(int argc, char *argv[])
 //	int verbose = 0;
 	agg_data_t mainline_out[NUM_CYCLE_BUFFS][SecSize] =  {{{0}},{{0}}};      // data aggregated section by section
 	agg_data_t onramp_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section
+    agg_data_t onramp_queue_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section
 	agg_data_t offramp_out[NUM_CYCLE_BUFFS][NUM_OFFRAMPS] = {{{0}},{{0}}};  // data aggregated section by section
     
     agg_data_t mainline_out_f[SecSize] = {{0}};        // save filtered data to this array
 	agg_data_t onramp_out_f[NumOnRamp] = {{0}};        // save filtered data to this array
 	agg_data_t offramp_out_f[NUM_OFFRAMPS] = {{0}};    // save filtered data to this array
+	agg_data_t onramp_queue_out_f[NumOnRamp] = {{0}};  // save filtered data queue detector data to this array
+	 
 	
 	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
 	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};                 // data aggregated controller by controller
+	agg_data_t controller_onramp_queue_detector_data[NUM_ONRAMPS] = {{0}};
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};               // data aggregated controller by controller
 	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};               // this is the register of harmonic mean speed in previous time step
 	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};             // this is the register of mean speed in previous time step
@@ -150,8 +154,8 @@ int main(int argc, char *argv[])
 	float FR_flow_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp flow in previous time step
 	float FR_occupancy_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp occupancy in previous time step
 	float float_temp;
-    
-
+    float ML_flow_ratio = 0.0; // current most upstream flow to historical most upstream flow
+    float current_most_upstream_flow = 0.0;
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
@@ -162,6 +166,8 @@ int main(int argc, char *argv[])
 	float temp_ary_density[NUM_CYCLE_BUFFS] = {0};	
     float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_OR_queue_detector_vol[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_OR_queue_detector_occ[NUM_CYCLE_BUFFS] = {0}; 
 	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
 
@@ -320,12 +326,19 @@ int main(int argc, char *argv[])
 		if(confidence[i][1].num_total_vals > 0)
 			printf("Confidence for controller %s onramp flow %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
+		// data from on-ramp queue detector
+		controller_onramp_queue_detector_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
+        controller_onramp_queue_detector_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
+
 		if(confidence[i][1].num_total_vals > 0)
 			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
  
 		//fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); 
         fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_vol); 
+        fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_occ);
+
 		//}
 		//fprintf(dbg_st_file_out,"\n");
 	}
@@ -395,7 +408,8 @@ int j; //
 	for(i=0;i<NumOnRamp;i++){
 		onramp_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
 		onramp_out[cycle_index][i].agg_occ = Mind(90.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0 ));
-
+        onramp_queue_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd( controller_onramp_queue_detector_data[onrampCTidx[i]].agg_vol ,0));
+		onramp_queue_out[cycle_index][i].agg_occ = Mind(90.0, Maxd(controller_onramp_queue_detector_data[onrampCTidx[i]].agg_occ,0 ));
 	}
 
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
@@ -424,28 +438,98 @@ int j; //
 		  }
 	  }
 
+   
+// replace bad flow data by upstream data
+//if flow < 100 do upstream downstrean interpolation flow data
+    for(i=0;i<SecSize;i++){   
+        if( (i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) && (mainline_out[cycle_index][i+1].agg_vol>100.0) )
+		{ // case for first VDS is bad, but second one is good 
+	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol;
+            mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed; 
+		    mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;   
+            mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density; 
+		}else if ((i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) )
+		{ // case for first VDS is bad
+		    mainline_out[cycle_index][i].agg_vol = 8000.0; // these are free flow parameters
+            mainline_out[cycle_index][i].agg_speed = 100.0; 
+		    mainline_out[cycle_index][i].agg_occ = 11.0;   
+            mainline_out[cycle_index][i].agg_density = 30.0; 
+	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol>100.0) && (mainline_out[cycle_index][i+1].agg_vol<100.0))
+	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
+	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
+            mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i-1].agg_speed ; 
+		    mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i-1].agg_occ;   
+            mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i-1].agg_density;
+	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol<100.0) && (mainline_out[cycle_index][i+1].agg_vol>100.0))
+	    { // case for VDS i and VDS i-1 are bad, but VDS i+1 is good 
+	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol;
+            mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed ; 
+		    mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;   
+            mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density;
+	    }
+		else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol>100.0) &&  (mainline_out[cycle_index][i+1].agg_vol>100.0) && (i!=(SecSize-1)))
+	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
+           mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
+           mainline_out[cycle_index][i].agg_speed = 0.5*(mainline_out[cycle_index][i-1].agg_speed+mainline_out[cycle_index][i+1].agg_speed);
+		   mainline_out[cycle_index][i].agg_occ = 0.5*(mainline_out[cycle_index][i-1].agg_occ+mainline_out[cycle_index][i+1].agg_occ);
+		   mainline_out[cycle_index][i].agg_density = 0.5*(mainline_out[cycle_index][i-1].agg_density+mainline_out[cycle_index][i+1].agg_density);
+	    }else //if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol<100.0)) // case for last VDS is bad, but VDS i-1 are good
+	    {
+ 			mainline_out[cycle_index][SecSize-1].agg_vol = 8000.0; // these are free flow parameters
+			mainline_out[cycle_index][SecSize-1].agg_speed = 100.0; 
+		    mainline_out[cycle_index][SecSize-1].agg_occ = 11.0;   
+            mainline_out[cycle_index][SecSize-1].agg_density = 30.0; 
+	    }
+    }
+
+// average the historical data from data buffer
+// moving average filter for mainline
+   for(i=0; i<SecSize; i++){
+		for(j=0; j<NUM_CYCLE_BUFFS; j++)
+	  {
+         temp_ary_vol[j]= mainline_out[j][i].agg_vol;
+		 temp_ary_speed[j]= mainline_out[j][i].agg_speed;
+		 temp_ary_occ[j]= mainline_out[j][i].agg_occ;
+		 temp_ary_density[j]= mainline_out[j][i].agg_density;
+	  }
+	   mainline_out_f[i].agg_vol = mean_array(temp_ary_vol,NUM_CYCLE_BUFFS);
+	   mainline_out_f[i].agg_speed = mean_array(temp_ary_speed,NUM_CYCLE_BUFFS);
+       mainline_out_f[i].agg_occ = mean_array(temp_ary_occ,NUM_CYCLE_BUFFS);
+	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
+   }
+
+
+ 
 // moving average filter for on-ramp off-ramp
    for(i=0; i<NumOnRamp; i++){
+	  current_most_upstream_flow  = mainline_out_f[1].agg_vol;
       // Use historical data only
-      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i] , OR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table    
+      ML_flow_ratio = ratio_ML_HIS_FLOW(current_most_upstream_flow, MOST_UPSTREAM_MAINLINE_FLOW_DATA, &controller_data2[13].ts);
+      onramp_out_f[i].agg_vol = ML_flow_ratio*Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i] , OR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table    
       onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table
       offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table
       offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i], FR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table 
-
+      
 	  // register of on-ramp and off-ramp data in previous time step
 	  OR_flow_prev[i] = onramp_out_f[i].agg_vol;   
 	  OR_occupancy_prev[i] = onramp_out_f[i].agg_occ;
 	  FR_flow_prev[i] =  offramp_out_f[i].agg_vol;
 	  FR_occupancy_prev[i] = offramp_out_f[i].agg_occ;
-/*
+ 
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
 	     temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
 		 temp_ary_OR_occ[j] = onramp_out[j][i].agg_occ;   
+		 temp_ary_OR_queue_detector_vol[j] = onramp_queue_out[j][i].agg_vol;
+		 temp_ary_OR_queue_detector_occ[j] = onramp_queue_out[j][i].agg_occ;
 		 temp_ary_FR_vol[j] = offramp_out[j][i].agg_vol;   
-		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;   
+		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;
+		
 	  }
-*/   
+
+	  onramp_queue_out_f[i].agg_vol = mean_array(temp_ary_OR_queue_detector_vol,NUM_CYCLE_BUFFS); 
+	  onramp_queue_out_f[i].agg_occ = mean_array(temp_ary_OR_queue_detector_occ,NUM_CYCLE_BUFFS);
+   
 /* disable all the on-ramp off-ramp measurement 
       // fill out zero on-ramp off-ramp data by look up table
  	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>50.0){ // the threshold is in hourly flow rate
@@ -473,125 +557,6 @@ int j; //
 	  }
 */ 
     }
-   
-// replace bad flow data by upstream data
-//if flow < 100 do upstream downstrean interpolation flow data
-    for(i=0;i<SecSize;i++){   
-        if( (i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) && (mainline_out[cycle_index][i+1].agg_vol>100.0) )
-		{ // case for first VDS is bad, but second one is good 
-	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol;
-            //mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed; 
-		    //mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;   
-            //mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density; 
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) )
-		{ // case for first VDS is bad
-		    mainline_out[cycle_index][i].agg_vol = 600.0; // these are free flow parameters
-            //mainline_out[cycle_index][i].agg_speed = 80.0; 
-		    //mainline_out[cycle_index][i].agg_occ = 5.0;   
-            //mainline_out[cycle_index][i].agg_density = 100.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol>100.0) && (mainline_out[cycle_index][i+1].agg_vol<100.0))
-	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
-	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
-            //mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i-1].agg_speed ; 
-		    //mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i-1].agg_occ;   
-            //mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i-1].agg_density;
-	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i].agg_vol>100.0) &&  (mainline_out[cycle_index][i+1].agg_vol>100.0) && (i!=(SecSize-1)))
-	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
-           mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
-           //mainline_out[cycle_index][i].agg_speed = 0.5*(mainline_out[cycle_index][i-1].agg_speed+mainline_out[cycle_index][i+1].agg_speed);
-		   //mainline_out[cycle_index][i].agg_occ = 0.5*(mainline_out[cycle_index][i-1].agg_occ+mainline_out[cycle_index][i+1].agg_occ);
-		   //mainline_out[cycle_index][i].agg_density = 0.5*(mainline_out[cycle_index][i-1].agg_density+mainline_out[cycle_index][i+1].agg_density);
-	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol<100.0)) // case for last VDS is bad, but VDS i-1 are good
-	    {
- 			mainline_out[cycle_index][SecSize-1].agg_vol = 600.0; // these are free flow parameters
-			//mainline_out[cycle_index][SecSize-1].agg_speed = 80.0; 
-		    //mainline_out[cycle_index][SecSize-1].agg_occ = 5.0;   
-            //mainline_out[cycle_index][SecSize-1].agg_density = 100.0; 
-	    }
-    }
-
-// replace bad speed data by upstream data
-//if speed < 5.0 do upstream downstrean interpolation flow data
-	 for(i=0;i<SecSize;i++){  
-        if( (i==0) && (mainline_out[cycle_index][i].agg_speed<5.0) && (mainline_out[cycle_index][i+1].agg_speed>5.0) )
-		{ // case for first VDS is bad, but second one is good 
-	        mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed;  
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_speed<5.0) )
-		{ // case for first VDS is bad
-            mainline_out[cycle_index][i].agg_speed = 80.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_speed<5.0) &&  (mainline_out[cycle_index][i-1].agg_speed>5.0) && (mainline_out[cycle_index][i+1].agg_speed<5.0))
-	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
-            mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i-1].agg_speed ; 
-	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_speed<5.0) &&  (mainline_out[cycle_index][i].agg_speed>5.0) &&  (mainline_out[cycle_index][i+1].agg_speed>5.0) && (i!=(SecSize-1)))
-	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
-           mainline_out[cycle_index][i].agg_speed = 0.5*(mainline_out[cycle_index][i-1].agg_speed+mainline_out[cycle_index][i+1].agg_speed);
-	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_speed<5.0)) // case for last VDS is bad, but VDS i-1 are good
-	    {
-			mainline_out[cycle_index][SecSize-1].agg_speed = 80.0; 
-	    }
-	 }
-
-
-//replace bad occupancy data by upstream data
-//if occupancy < 5 do upstream downstrean interpolation flow data
-	  for(i=0;i<SecSize;i++){  
-        if( (i==0) && (mainline_out[cycle_index][i].agg_occ<5.0) && (mainline_out[cycle_index][i+1].agg_occ>5.0) )
-		{ // case for first VDS is bad, but second one is good 
-	         mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;    
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_occ<5.0) )
-		{ // case for first VDS is bad
-            mainline_out[cycle_index][i].agg_occ = 5.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_occ<5.0) &&  (mainline_out[cycle_index][i-1].agg_occ>5.0) && (mainline_out[cycle_index][i+1].agg_occ<5.0))
-	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
-	        mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i-1].agg_occ;   
-        }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_occ<5.0) &&  (mainline_out[cycle_index][i].agg_occ>5.0) &&  (mainline_out[cycle_index][i+1].agg_occ>5.0) && (i!=(SecSize-1)))
-	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
-            mainline_out[cycle_index][i].agg_occ = 0.5*(mainline_out[cycle_index][i-1].agg_occ+mainline_out[cycle_index][i+1].agg_occ);
-	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_occ<5.0)) // case for last VDS is bad, but VDS i-1 are good
-	    {
-			mainline_out[cycle_index][SecSize-1].agg_occ = 5.0; 
-	    }
-	  }
-
-// replace bad density data by upstream data
-//if density < 5.0 do upstream downstrean interpolation flow data
-	   for(i=0;i<SecSize;i++){  
-        if( (i==0) && (mainline_out[cycle_index][i].agg_density<5.0) && (mainline_out[cycle_index][i+1].agg_density>5.0) )
-		{ // case for first VDS is bad, but second one is good 
-	        mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density; 
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_density<5.0) )
-		{ // case for first VDS is bad
-		    mainline_out[cycle_index][i].agg_density = 100.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_density<5.0) &&  (mainline_out[cycle_index][i-1].agg_density>5.0) && (mainline_out[cycle_index][i+1].agg_density<5.0))
-	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
-	        mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i-1].agg_density;
-	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_density<5.0) &&  (mainline_out[cycle_index][i].agg_density>5.0) &&  (mainline_out[cycle_index][i+1].agg_density>5.0) && (i!=(SecSize-1)))
-	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
-           mainline_out[cycle_index][i].agg_density = 0.5*(mainline_out[cycle_index][i-1].agg_density+mainline_out[cycle_index][i+1].agg_density);
-	    }else if ( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_density<5.0)) // case for last VDS is bad, but VDS i-1 are good
-	    {
- 			mainline_out[cycle_index][SecSize-1].agg_density = 100.0; 
-	    }
-	   }
-
-// average the historical data from data buffer
-// moving average filter for mainline
-   for(i=0; i<SecSize; i++){
-		for(j=0; j<NUM_CYCLE_BUFFS; j++)
-	  {
-         temp_ary_vol[j]= mainline_out[j][i].agg_vol;
-		 temp_ary_speed[j]= mainline_out[j][i].agg_speed;
-		 temp_ary_occ[j]= mainline_out[j][i].agg_occ;
-		 temp_ary_density[j]= mainline_out[j][i].agg_density;
-	  }
-	   mainline_out_f[i].agg_vol = mean_array(temp_ary_vol,NUM_CYCLE_BUFFS);
-	   mainline_out_f[i].agg_speed = mean_array(temp_ary_speed,NUM_CYCLE_BUFFS);
-       mainline_out_f[i].agg_occ = mean_array(temp_ary_occ,NUM_CYCLE_BUFFS);
-	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
-   }
-
-
-
 
 /*###################################################################################################################
 ###################################################################################################################*/
@@ -627,6 +592,8 @@ int j; //
 				//fprintf(st_file_out,"FR %d ", i);//
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol); //52,56,60,64,68,72,76,80,84,88,92 
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ); //53,57,61,65,69,73,77,81,85,89,93 
+				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);
+				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);
 				//fprintf(st_file_out,"\n");//
 		}
 		
