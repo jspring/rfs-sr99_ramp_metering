@@ -938,7 +938,7 @@ float ratio_ML_HIS_FLOW(float current_most_upstream_flow, float MOST_UPSTREAM_MA
     t_0 = mind(t_0,288);
 	t_0 = maxd(0,t_0);
      
-	ML_flow = MOST_UPSTREAM_MAINLINE_FLOW_DATA[t_0][1]; 
+	ML_flow = MOST_UPSTREAM_MAINLINE_FLOW_DATA[t_0][1]*12; 
 	
 	// flow change rate limiter 
 	if( abs(current_most_upstream_flow-ML_flow) > 0 ){
