@@ -215,7 +215,7 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, flow_temp[i]);
 	printf("num_lane %d mean_flow %f var_flow %f flow %4.2f\n", num_lane, mean_flow, var_flow, flow);
-	return mind(MAX_OR_RAMP_FLOW_PER_LANE,flow); 
+	return mind(num_lane * MAX_OR_RAMP_FLOW_PER_LANE,flow); 
 }
 
 float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence){
@@ -665,7 +665,40 @@ float mean_speed_aggregation_mainline(db_urms_status_t *controller_data, float m
 	printf("num_lane %d mean_speed %f var_speed %f speed %4.2f\n", num_lane, mean_speed, var_speed, speed);
 	return mind(MAX_MEAN_SPEED, speed); // speed is in km/hr
 }
+float flow_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
+	float onramp_demand = 0.0;
+	int i; //  lane number index
+	int j; //  queue loop number index
+    int num_lane = controller_data->num_meter;
 
+	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
+ 	for(i=0; i < controller_data->num_meter; i++) {
+	    for(j=0; j < MAX_QUEUE_LOOPS; j++) {
+ 		if(controller_data2->queue_stat[i][j].stat == 1){
+			onramp_demand += (float)controller_data2->queue_stat[i][j].vol;  //queue detector flow
+		}else if(controller_data2->queue_stat[i][j].stat == 5){
+ 			onramp_demand  = NAN_ERROR; 
+ 		}else{
+
+        }
+	    }
+	}
+	}
+	// check Nan 
+	if(isnan(onramp_demand)){
+		onramp_demand  = NAN_ERROR;
+	}else{
+	    onramp_demand  = onramp_demand*120; // convert 30 second data into hour data
+	}
+	onramp_demand = maxd(onramp_demand,MIN_OR_RAMP_FLOW_PER_LANE); 
+
+	return mind(MAX_OR_RAMP_FLOW_PER_LANE*num_lane,onramp_demand);
+}
+
+float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
+	float occ_onramp_queue = 0.0;
+   	return occ_onramp_queue;
+}
 
 float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
 	float average_vehicle_length = 4.5; // average vehicle length 4.5 meters
@@ -777,17 +810,259 @@ float butt_2(float in_dat)
 }
 
 
-float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]){
+
+
+float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev ,float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
-	timestamp_t ts;
-    get_current_timestamp(&ts);
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_0 = 0;
+	float t_convert = 0.0; 
+	float OR_flow = 0.0;
+    
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	t_convert = mind(t_convert,288);
+	t_convert = maxd(0,t_convert);
+    
+	t_0 = floor(t_convert);
+    t_0 = mind(t_0,288);
+	t_0 = maxd(0,t_0);
+     
+	OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx]; 
+	
+	// flow change rate limiter 
+	if( (OR_flow - OR_flow_prev  < -300) || (OR_flow - OR_flow_prev  > 300)  || (OR_flow <0) ){
+	   OR_flow = OR_flow_prev;
+	}
+    return OR_flow;
+}
+
+float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_0 = 0;
+	float t_convert = 0.0; 
+	float OR_occ = 0.0;
+    
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	t_convert = mind(t_convert,288);
+	t_convert = maxd(0,t_convert);
+    
+	t_0 = floor(t_convert);
+    t_0 = mind(t_0,288);
+	t_0 = maxd(0,t_0);
+     
+	OR_occ = OR_HIS_OCC_DAT[t_0][OR_idx];
+	  
+    // occupancy change rate limiter 
+	if( (OR_occ - OR_occupancy_prev  < -30) || (OR_occ - OR_occupancy_prev  > 30)  || (OR_occ <0) ){
+	   OR_occ = OR_occupancy_prev;
+	}
+	return OR_occ;
+}
+
+
+
+float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_0 = 0;
+	float t_convert = 0.0; 
+	float FR_flow = 0.0;
+    
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
+	t_convert = mind(t_convert,288);
+	t_convert = maxd(0,t_convert);
+    
+	t_0 = floor(t_convert);
+    t_0 = mind(t_0,288);
+	t_0 = maxd(0,t_0);
+    
+	FR_flow = FR_HIS_FLOW_DAT[t_0][FR_idx];
+	
+	// flow change rate limiter 
+	if( (FR_flow - FR_flow_prev  < -300) || (FR_flow - FR_flow_prev  > 300)  || (FR_flow <0) ){
+	   FR_flow = FR_flow_prev;
+	}
+
+    return FR_flow;
+}
+
+
+float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_0 = 0;
+	float t_convert = 0.0; 
+	float FR_occ = 0.0;
+    
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
+	t_convert = mind(t_convert,288);
+	t_convert = maxd(0,t_convert);
+    
+	t_0 = floor(t_convert);
+    t_0 = mind(t_0,288);
+	t_0 = maxd(0,t_0);
+
+    FR_occ = FR_HIS_OCC_DAT[t_0][FR_idx];
+	
+	// occupancy change rate limiter 
+	if( (FR_occ - FR_occupancy_prev  < -30) || (FR_occ - FR_occupancy_prev  > 30)  || (FR_occ <0) ){
+	   FR_occ = FR_occupancy_prev;
+	}
+	return FR_occ;
+}
+
+float ratio_ML_HIS_FLOW(float current_most_upstream_flow, float MOST_UPSTREAM_MAINLINE_FLOW_DATA[NUM_5MIN_INTERVALS][2], timestamp_t *ts){
+	//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_0 = 0;
+	float t_convert = 0.0; 
+	float ML_flow = 0.0;
+    float ratio = 0.0;
+
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	t_convert = mind(t_convert,288);
+	t_convert = maxd(0,t_convert);
+    
+	t_0 = floor(t_convert);
+    t_0 = mind(t_0,288);
+	t_0 = maxd(0,t_0);
+     
+	ML_flow = MOST_UPSTREAM_MAINLINE_FLOW_DATA[t_0][1]*12; 
+	
+	// flow change rate limiter 
+	if( abs(current_most_upstream_flow-ML_flow) > 0 ){
+		ratio = current_most_upstream_flow/ML_flow;
+	}else{
+	    ratio = 1;
+	}
+    return ratio;
+}
+
+
+/*
+float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev ,float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_in_sec = 0.0;
+	int i;
+	double temp, dec;
+	float OR_flow = 0.0;
+    
+    t_in_sec = (3600*ts->hour) + (60*ts->min) + (ts->sec);
+	temp = t_in_sec / 300.0;
+
+    dec = modf(temp, &i);
+
+    OR_flow = OR_HIS_FLOW_DAT[i][OR_idx];
+
+	// flow change rate limiter 
+	if( (OR_flow - OR_flow_prev  < -300) || (OR_flow - OR_flow_prev  > 300)  || (OR_flow <0) ){
+	   OR_flow = OR_flow_prev;
+	}
+    return OR_flow;
+}
+
+float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+    int t_in_sec = 0.0;
+	int i;
+	double temp, dec;
+	float OR_occ = 0.0;
+    
+    t_in_sec = (3600*ts->hour) + (60*ts->min) + (ts->sec);
+	temp = t_in_sec / 300.0;
+
+    dec = modf(temp, &i);
+
+    OR_occ = OR_HIS_OCC_DAT[i][OR_idx];
+
+    // occupancy change rate limiter 
+	if( (OR_occ - OR_occupancy_prev  < -30) || (OR_occ - OR_occupancy_prev  > 30)  || (OR_occ <0) ){
+	   OR_occ = OR_occupancy_prev;
+	}
+	return OR_occ;
+}
+
+
+
+float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
+
+	int t_in_sec = 0.0;
+	int i;
+	double temp, dec;
+	float FR_flow = 0.0;
+    
+    t_in_sec = (3600*ts->hour) + (60*ts->min) + (ts->sec);
+	temp = t_in_sec / 300.0;
+
+    dec = modf(temp, &i);
+
+    FR_flow = FR_HIS_FLOW_DAT[i][FR_idx];
+	// flow change rate limiter 
+	if( (FR_flow - FR_flow_prev  < -300) || (FR_flow - FR_flow_prev  > 300)  || (FR_flow <0) ){
+	   FR_flow = FR_flow_prev;
+	}
+
+    return FR_flow;
+}
+
+
+float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//  get_current_timestamp(&ts);
+
+	int t_in_sec = 0.0;
+	int i;
+	double temp, dec;
+	float FR_occ = 0.0;
+    
+    t_in_sec = (3600*ts->hour) + (60*ts->min) + (ts->sec);
+	temp = t_in_sec / 300.0;
+
+    dec = modf(temp, &i);
+
+    FR_occ = FR_HIS_OCC_DAT[i][FR_idx];
+	
+	// occupancy change rate limiter 
+	if( (FR_occ - FR_occupancy_prev  < -30) || (FR_occ - FR_occupancy_prev  > 30)  || (FR_occ <0) ){
+	   FR_occ = FR_occupancy_prev;
+	}
+	return FR_occ;
+}
+*/
+
+/*
+float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev ,float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
+//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
 
 	int t_0 = 0;
 	int t_1 = 0;
 	float t_convert = 0.0; 
 	float OR_flow = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5.0) + (ts.sec/300.0) ;
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -805,20 +1080,25 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
 	else{
 	    OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx];
 	} 
+	
+	// flow change rate limiter 
+	if( (OR_flow - OR_flow_prev  < -300) || (OR_flow - OR_flow_prev  > 300)  || (OR_flow <0) ){
+	   OR_flow = OR_flow_prev;
+	}
     return OR_flow;
 }
 
-float interp_OR_HIS_OCC(int OR_idx, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]){
+float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
-	timestamp_t ts;
-    get_current_timestamp(&ts);
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
 
 	int t_0 = 0;
 	int t_1 = 0;
 	float t_convert = 0.0; 
 	float OR_occ = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5.0) + (ts.sec/300.0) ;
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -837,22 +1117,26 @@ float interp_OR_HIS_OCC(int OR_idx, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM
 	   OR_occ = OR_HIS_OCC_DAT[t_0][OR_idx];
 	}  
     
+    // occupancy change rate limiter 
+	if( (OR_occ - OR_occupancy_prev  < -30) || (OR_occ - OR_occupancy_prev  > 30)  || (OR_occ <0) ){
+	   OR_occ = OR_occupancy_prev;
+	}
 	return OR_occ;
 }
 
 
 
-float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1]){
+float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
-	timestamp_t ts;
-    get_current_timestamp(&ts);
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
 
 	int t_0 = 0;
 	int t_1 = 0;
 	float t_convert = 0.0; 
 	float FR_flow = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5.0) + (ts.sec/300.0);
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -869,22 +1153,28 @@ float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][N
 	}
 	else{
 		FR_flow = FR_HIS_FLOW_DAT[t_0][FR_idx];
-	}  
+	}
+	
+	// flow change rate limiter 
+	if( (FR_flow - FR_flow_prev  < -300) || (FR_flow - FR_flow_prev  > 300)  || (FR_flow <0) ){
+	   FR_flow = FR_flow_prev;
+	}
+
     return FR_flow;
 }
 
 
-float interp_FR_HIS_OCC(int FR_idx, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1]){
+float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
-	timestamp_t ts;
-    get_current_timestamp(&ts);
+//	timestamp_t ts;
+//    get_current_timestamp(&ts);
 
 	int t_0 = 0;
 	int t_1 = 0;
 	float t_convert = 0.0; 
 	float FR_occ = 0.0;
     
-    t_convert = (12*ts.hour) + (ts.min/5.0) + (ts.sec/300.0);
+    t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
     
@@ -904,5 +1194,10 @@ float interp_FR_HIS_OCC(int FR_idx, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM
 		FR_occ = FR_HIS_OCC_DAT[t_0][FR_idx];
 	}  
 
-    return FR_occ;
+	// occupancy change rate limiter 
+	if( (FR_occ - FR_occupancy_prev  < -30) || (FR_occ - FR_occupancy_prev  > 30)  || (FR_occ <0) ){
+	   FR_occ = FR_occupancy_prev;
+	}
+	return FR_occ;
 }
+*/

@@ -1,12 +1,29 @@
 #!/bin/bash
 
-TIMESTAMP=`ls -tr /big/data/ac_rm_1 | tail -1| sed '{s/\./ /g}'|awk '{print $(NF-1)}'`
+if [[ `date +%H` -lt 1 ]]
+then 
+	FILEDATE=`date -d "yesterday" +%y%m%d`
+else 
+	FILEDATE=`date +%y%m%d`
+fi 
+
+x=1
+while [[ -e "ramp_coord_data_"$FILEDATE"_"$x".tgz" ]]
+do 
+	x=$(($x+1))
+done
+
+FILENAME="ramp_coord_data_"$FILEDATE"_"$x".tgz"
+OUT_DATA_DIRS=`ls -d /home/sr99_ramp_metering/src/Out_Data_$FILEDATE*`
+TIMESTAMP=`ls -tr /big/data/ac_rm_1/*dat | tail -1| sed '{s/\./ /g}'|awk '{print $(NF-1)}'`
+
+echo FILENAME $FILENAME OUT_DATA_DIRS $OUT_DATA_DIRS
 cd /big/data/ac_rm_1
-tar cvzf /big/data/"ac_rm_"$TIMESTAMP".tgz" /big/data/ac_rm_1/* --exclude "*$TIMESTAMP*"
-scp /big/data/"ac_rm_"$TIMESTAMP".tgz" caltrans@128.32.234.154:.
-#for x in `ls | grep -v $TIMESTAMP` 
-#do 
-#	echo $x
-#	rm -f $x
-#done
-#mv /big/data/*tgz /big/data/olddata
+tar cvzf $FILENAME * $OUT_DATA_DIRS --exclude "*$TIMESTAMP*"
+scp $FILENAME caltrans@128.32.234.154:.
+mv  *tgz /big/data/olddata
+for x in `ls | grep -v $TIMESTAMP` 
+do 
+	echo $x
+	rm -f $x
+done

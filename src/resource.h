@@ -50,11 +50,15 @@ extern long int nCr(int n, int r);
 
 extern float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 extern float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confidence *confidence);
+extern float flow_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
 extern float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence);
 
 extern float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
 extern float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
+extern float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
 extern float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence);
+
+
 
 extern float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
 
@@ -68,8 +72,10 @@ extern float turning_ratio_offramp(float FR_flow, float ML_flow);
 
 //extern float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT);
 
-extern float interp_OR_HIS_FLOW(int OR_idx, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]);
-extern float interp_OR_HIS_OCC(int OR_idx, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1]);
+extern float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev, float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts);
+extern float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts);
 
-extern float interp_FR_HIS_FLOW(int FR_idx, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1]);
-extern float interp_FR_HIS_OCC(int FR_idx, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1]);
+extern float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts);
+extern float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts);
+
+extern float ratio_ML_HIS_FLOW(float current_most_upstream_flow, float MOST_UPSTREAM_MAINLINE_FLOW_DATA[NUM_5MIN_INTERVALS][2], timestamp_t *ts);
