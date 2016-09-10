@@ -13,12 +13,12 @@
 #include <string.h>
 
 #include "parameters.h"
-#include "look_up_table.h"
 
 #define NRANSI
 
 #include "nrutil2.h"
 #include "resource.h"
+#include "look_up_table.h"
 #include "rm_algo.h"
 #include "clt_vars.h"
 
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
     
 //	get_current_timestamp(&ts); // get current time step
-	print_timestamp(dbg_st_file_out, &controller_data2[13].ts); // print out current time step to file
+	print_timestamp(dbg_st_file_out, &controller_data2[13].ts); // #1 print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
 		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
@@ -297,11 +297,11 @@ int main(int argc, char *argv[])
         density_prev[i] = controller_mainline_data[i].agg_density;
 
         //fprintf(dbg_st_file_out,"C%d ", i); //controller index 
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); 
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); 
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); 
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); 
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); //2
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); //4
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); //5
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);//6
         //fprintf(dbg_st_file_out,"\n");
         
 		// assign off-ramp data to array
@@ -313,9 +313,9 @@ int main(int argc, char *argv[])
 			printf("Confidence for controller %s offramp %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][2].num_good_vals/confidence[i][2].num_total_vals, (float)confidence[i][2].num_total_vals, (float)confidence[i][2].num_good_vals);
 		
 		//fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
-        fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); 
-		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_occ); 
-		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].turning_ratio);
+        fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); //7
+		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_occ); //8
+		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].turning_ratio);//9
 	    //}
 
         //fprintf(dbg_st_file_out,"\n");
@@ -334,10 +334,10 @@ int main(int argc, char *argv[])
 			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
  
 		//fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
-		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); 
-        fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);
-		fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_vol); 
-        fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_occ);
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); //10
+        fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);//11
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_vol); //12
+        fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_occ);//13
 
 		//}
 		//fprintf(dbg_st_file_out,"\n");
@@ -604,7 +604,6 @@ int j; //
 		}
 		
 		fprintf(st_file_out,"\n");
-printf("Got to 1\n");		
 		det_data_4_contr(time);		
 		get_meas(time);				
 		update_q_R();
@@ -619,7 +618,6 @@ printf("Got to 1\n");
 				fprintf(cal_opt_f,"%lf\n", opt_r[i][1]);
 		}
 		
-printf("Got to 2\n");		
 		ln_rm_distrib();
 	
 		if (use_CRM == 1)
@@ -632,7 +630,6 @@ printf("Got to 2\n");
 			Set_Hybrid_Meter(time,time2,timeSta);  // upstream use default; downstream 11 onramps use CRM
 		else;
 
-printf("Got to 3\n");		
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
