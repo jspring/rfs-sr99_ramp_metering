@@ -1,6 +1,5 @@
 #define	NUM_5MIN_INTERVALS	288
 #define	NUM_ONRAMPS_PLUS_1	17
-#define	NUM_OFFRAMPS_PLUS_1	12
 
 // add most upstream mainline flow vector here
 const float MOST_UPSTREAM_MAINLINE_FLOW_DATA[NUM_5MIN_INTERVALS][2] = {
