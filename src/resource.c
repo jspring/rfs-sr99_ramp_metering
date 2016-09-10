@@ -160,15 +160,15 @@ float flow_aggregation_onramp(db_urms_status_t *controller_data, struct confiden
 		float mean_flow = 0.0;
 		float var_flow = 0.0;
         int num_lane = controller_data->num_meter;
-		float flow_temp [MAX_MAINLINES];
-        memset(flow_temp, 0, sizeof(float) * MAX_MAINLINES); 
+		float flow_temp [MAX_METERED_LANES];
+        memset(flow_temp, 0, sizeof(float) * MAX_METERED_LANES); 
 
 
 		confidence->num_total_vals = num_lane;
 	    confidence->num_good_vals = num_lane;
 		
 	// this loop get data from data base
-	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
+	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= MAX_METERED_LANES) ) {
 	    for(i=0 ; i< controller_data->num_meter;i++) {
  		if(controller_data->metered_lane_stat[i].passage_stat == 2){ 
 			if((float)controller_data->metered_lane_stat[i].passage_vol>= 0 && (float)controller_data->metered_lane_stat[i].passage_vol <= MAX_30_SEC_FLOW){ // if flow is in the range
@@ -226,8 +226,8 @@ float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confid
 		float var_flow = 0.0;
 		int num_lane = 1;
         num_lane = controller_data->num_addl_det;
-		float flow_temp [MAX_MAINLINES];
-        memset(flow_temp, 0, sizeof(float) * MAX_MAINLINES); 
+		float flow_temp [MAX_OFFRAMPS];
+        memset(flow_temp, 0, sizeof(float) * MAX_OFFRAMPS); 
 
 	 	confidence->num_total_vals = num_lane;
 	    confidence->num_good_vals = num_lane;
@@ -291,7 +291,7 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 	confidence->num_total_vals = num_lane;
 	confidence->num_good_vals = num_lane;
 
-	if( (controller_data->num_main > 0) && (controller_data->num_main <= 8) ) {
+	if( (controller_data->num_main > 0) && (controller_data->num_main <= MAX_MAINLINES) ) {
 	    for(i=0 ; i < controller_data->num_main; i++) {
 			lead_occ = 0.1 * ( ((controller_data->mainline_stat[i].lead_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].lead_occ_lsb) & 0xFF) );
             trail_occ = 0.1 * ( ((controller_data->mainline_stat[i].trail_occ_msb << 8) & 0xFF00) + ((controller_data->mainline_stat[i].trail_occ_lsb) & 0xFF) );
