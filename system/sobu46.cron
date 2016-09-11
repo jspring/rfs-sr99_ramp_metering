@@ -1,8 +1,0 @@
-#!/bin/sh
-
-ps -elf |grep -v grep | grep 'forwarding-local'
-
-if [[ $? -ne 0 ]]
-then
-	/root/netcat.sobu46-forwarding-local-port-4455-to-port-4444.sh &
-fi

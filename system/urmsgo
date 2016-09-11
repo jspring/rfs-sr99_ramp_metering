@@ -17,7 +17,7 @@ INTERVAL=$5
 
 if [[ q$INTERVAL == 'q' ]]
 then
-        INTERVAL=15000
+        INTERVAL=30000
 fi
 
 #if [[ $3 == "control" ]]

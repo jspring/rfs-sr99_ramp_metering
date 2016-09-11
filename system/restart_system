@@ -2,8 +2,8 @@
 
 if [[ z`ps -ef | grep db_slv | grep -v grep` == 'z' ]]
 then
-	echo "Starting urmsgo_all 15000"
-	/home/sr99_ramp_metering/system/urmsgo_all 15000
+	echo "Starting urmsgo_all 30000"
+	/home/sr99_ramp_metering/system/urmsgo_all 30000
 	exit 1
 fi
 
@@ -36,7 +36,7 @@ echo PORT11 $PORT INDEX $INDEX >>$RESTART_LOGFILE
 		if [[ m`ps -ef | grep wrfiles_rm | grep $x | grep -v grep` == 'm' ]]
 		then 
        		 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP" >>$RESTART_LOGFILE
-			/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 15000 -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+			/home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 30000 -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
 			sleep 5
 		fi
 
@@ -73,7 +73,7 @@ echo PORT3 $PORT
 		then 
 			echo $x urms process not running. Attempting restart.... >>$RESTART_LOGFILE
 			echo CONTROLLER_IP $CONTROLLER_IP URMS_STATUS_DBNUM $URMS_STATUS_DBNUM PORT $PORT >>$RESTART_LOGFILE
-			/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 15000 -n -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+			/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -n -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 			sleep 5
 		fi
 		PORT=$PORT2
