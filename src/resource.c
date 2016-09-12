@@ -841,7 +841,7 @@ extern float butt_2_ML_density(float density, int ML_idx);
 */
 
 
-float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev ,float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
+float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev , const float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
 //	timestamp_t ts;
 //    get_current_timestamp(&ts);
@@ -867,7 +867,7 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev ,float OR_HIS_FLOW_DAT[N
 	return OR_flow;
 }
 
-float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
+float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, const float OR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
 //	timestamp_t ts;
 //    get_current_timestamp(&ts);
@@ -895,7 +895,7 @@ float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, float OR_HIS_OCC_DA
 
 
 
-float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
+float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, const float FR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
 //	timestamp_t ts;
 //    get_current_timestamp(&ts);
@@ -923,7 +923,7 @@ float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLOW_DAT[N
 }
 
 
-float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
+float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, const float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
 //	timestamp_t ts;
 //    get_current_timestamp(&ts);
@@ -949,7 +949,7 @@ float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DA
 	return FR_occ;
 }
 
-float ratio_ML_HIS_FLOW(float current_most_upstream_flow, float MOST_UPSTREAM_MAINLINE_FLOW_DATA[NUM_5MIN_INTERVALS][2], timestamp_t *ts){
+float ratio_ML_HIS_FLOW(float current_most_upstream_flow, const float MOST_UPSTREAM_MAINLINE_FLOW_DATA[NUM_5MIN_INTERVALS][2], timestamp_t *ts){
 	//float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){
 //	timestamp_t ts;
 //    get_current_timestamp(&ts);
