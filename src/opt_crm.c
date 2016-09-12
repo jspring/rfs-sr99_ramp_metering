@@ -586,6 +586,15 @@ int j; //
  
     }
 
+// Butterworth filter
+    for(i=0; i<SecSize; i++){
+	   mainline_out_f[i].agg_vol = butt_2_ML_flow(mainline_out_f[i].agg_vol, i);
+	   mainline_out_f[i].agg_speed = butt_2_ML_speed(mainline_out_f[i].agg_speed, i);
+       //mainline_out_f[i].agg_occ = butt_2_flow(mainline_out_f[i].agg_occ, i);
+	   //mainline_out_f[i].agg_density = butt_2_flow(mainline_out_f[i].agg_density, i);
+   }
+
+
 /*###################################################################################################################
 ###################################################################################################################*/
 

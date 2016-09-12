@@ -79,3 +79,8 @@ extern float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, float FR_HIS_FLO
 extern float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, float FR_HIS_OCC_DAT[NUM_5MIN_INTERVALS][NUM_OFFRAMPS_PLUS_1], timestamp_t *ts);
 
 extern float ratio_ML_HIS_FLOW(float current_most_upstream_flow, float MOST_UPSTREAM_MAINLINE_FLOW_DATA[NUM_5MIN_INTERVALS][2], timestamp_t *ts);
+
+extern float butt_2_ML_flow(float flow, int ML_idx);
+extern float butt_2_ML_speed(float speed, int ML_idx);
+extern float butt_2_ML_occ(float occ, int ML_idx);
+extern float butt_2_ML_density(float density, int ML_idx);

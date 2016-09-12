@@ -796,8 +796,7 @@ float turning_ratio_offramp = 0.0;
 	return mind(100,turning_ratio_offramp);
 }
 
-float butt_2(float in_dat)
-{
+float butt_2(float in_dat){
    float x[2]={0.0,0.0}, out_dat=0.0;
    static float x_old[2]={0.0,0.0};
    
@@ -809,7 +808,37 @@ float butt_2(float in_dat)
    return out_dat;
 }
 
+float butt_2_ML_flow(float in_dat, int index){
+   // 12 is section size
+   float x[2][12]={{0}}, out_dat=0.0;
+   static float x_old_flow[2][12]={{0}};
+   
+   x[0][index]=0.2779 * x_old_flow[0][index] - 0.4152 * x_old_flow[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old_flow[0][index] + 0.8651 * x_old_flow[1][index] + 0.1908*in_dat;  
+   out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
+   x_old_flow[0][index]=x[0][index];
+   x_old_flow[1][index]=x[1][index];
+   return out_dat;
+}
 
+
+float butt_2_ML_speed(float in_dat, int index){
+   // 12 is section size
+   float x[2][12]={{0}}, out_dat=0.0;
+   static float x_old_speed[2][12]={{0}};
+   
+   x[0][index]=0.2779 * x_old_speed[0][index] - 0.4152 * x_old_speed[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old_speed[0][index] + 0.8651 * x_old_speed[1][index] + 0.1908*in_dat;  
+   out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
+   x_old_speed[0][index]=x[0][index];
+   x_old_speed[1][index]=x[1][index];
+   return out_dat;
+}
+
+/*
+extern float butt_2_ML_occ(float occ, int ML_idx);
+extern float butt_2_ML_density(float density, int ML_idx);
+*/
 
 
 float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev ,float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
