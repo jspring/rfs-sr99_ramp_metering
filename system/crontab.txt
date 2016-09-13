@@ -20,6 +20,7 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-*/5 * * * * /home/sr99_ramp_metering/system/gd
-* 2 * * * /home/sr99_ramp_metering/system/make_daily_zipfile.sh
-
+59 23 * * * /home/sr99_ramp_metering/system/stopurms
+*/10 * * * * /home/sr99_ramp_metering/system/restart_system
+0 2 * * * /usr/sbin/ntpdate 10.32.222.3
+0 3 * * * /home/sr99_ramp_metering/system/ssh2pems-2.sh
