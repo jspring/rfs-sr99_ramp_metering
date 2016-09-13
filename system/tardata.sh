@@ -7,6 +7,7 @@ else
 	FILEDATE=`date +%y%m%d`
 fi 
 
+cd /big/data/ac_rm_1/olddata
 x=1
 while [[ -e "ramp_coord_data_"$FILEDATE"_"$x".tgz" ]]
 do 
