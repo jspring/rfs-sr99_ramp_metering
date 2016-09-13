@@ -835,11 +835,31 @@ float butt_2_ML_speed(float in_dat, int index){
    return out_dat;
 }
 
-/*
-extern float butt_2_ML_occ(float occ, int ML_idx);
-extern float butt_2_ML_density(float density, int ML_idx);
-*/
+float butt_2_ML_occupancy(float in_dat, int index){
+   // 12 is section size
+   float x[2][12]={{0}}, out_dat=0.0;
+   static float x_old_occupancy[2][12]={{0}};
+   
+   x[0][index]=0.2779 * x_old_occupancy[0][index] - 0.4152 * x_old_occupancy[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old_occupancy[0][index] + 0.8651 * x_old_occupancy[1][index] + 0.1908*in_dat;  
+   out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
+   x_old_occupancy[0][index]=x[0][index];
+   x_old_occupancy[1][index]=x[1][index];
+   return out_dat;
+}
 
+float butt_2_ML_density(float in_dat, int index){
+   // 12 is section size
+   float x[2][12]={{0}}, out_dat=0.0;
+   static float x_old_density[2][12]={{0}};
+   
+   x[0][index]=0.2779 * x_old_density[0][index] - 0.4152 * x_old_density[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old_density[0][index] + 0.8651 * x_old_density[1][index] + 0.1908*in_dat;  
+   out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
+   x_old_density[0][index]=x[0][index];
+   x_old_density[1][index]=x[1][index];
+   return out_dat;
+}
 
 float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev , const float OR_HIS_FLOW_DAT[NUM_5MIN_INTERVALS][NUM_ONRAMPS_PLUS_1], timestamp_t *ts){
 //float interp_OR_HIS_FLOW(int OR_idx, float *OR_HIS_FLOW_DAT){

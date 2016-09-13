@@ -82,5 +82,5 @@ extern float ratio_ML_HIS_FLOW(float current_most_upstream_flow, const float MOS
 
 extern float butt_2_ML_flow(float flow, int ML_idx);
 extern float butt_2_ML_speed(float speed, int ML_idx);
-extern float butt_2_ML_occ(float occ, int ML_idx);
+extern float butt_2_ML_occupancy(float occ, int ML_idx);
 extern float butt_2_ML_density(float density, int ML_idx);
