@@ -7,7 +7,7 @@ else
 	FILEDATE=`date +%y%m%d`
 fi 
 
-cd /big/data/ac_rm_1/olddata
+cd /big/data/olddata
 x=1
 while [[ -e "ramp_coord_data_"$FILEDATE"_"$x".tgz" ]]
 do 
@@ -21,7 +21,7 @@ TIMESTAMP=`ls -tr /big/data/ac_rm_1/*dat | tail -1| sed '{s/\./ /g}'|awk '{print
 echo FILENAME $FILENAME OUT_DATA_DIRS $OUT_DATA_DIRS
 cd /big/data/ac_rm_1
 tar cvzf $FILENAME * $OUT_DATA_DIRS --exclude "*$TIMESTAMP*"
-scp $FILENAME caltrans@128.32.234.154:.
+scp $FILENAME jspring@128.32.234.154:public_html
 mv  *tgz /big/data/olddata
 for x in `ls | grep -v $TIMESTAMP` 
 do 
