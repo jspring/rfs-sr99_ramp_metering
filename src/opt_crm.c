@@ -177,6 +177,21 @@ int main(int argc, char *argv[])
     int FR_flow_zero_counter[NumOnRamp] = {0};
     int FR_occ_zero_counter[NumOnRamp] = {0};
 
+//	Example: metering_rates[0...10][1] = Calvine_EB_Metering_Rate...12th_St_Metering_Rate;
+	short metering_rates[11][2] = {
+		{4600,0},	//Calvine EB
+		{4800,0},	//Calvine WB
+		{5200,0},	//Mack Rd EB
+		{5400,0},	//Mack Rd WB
+		{6200,0},	//Florin Rd EB
+		{6400,0},	//Florin Rd WB
+		{6800,0},	//47th EB
+		{7000,0},	//47th WB
+		{7400,0},	//Fruitridge EB
+		{7600,0},	//Fruitridge WB
+		{8000,0}	//12th St
+	};
+
 	while ((option = getopt(argc, argv, "di:")) != EOF) {
 		switch(option) {
 			case 'd':
@@ -197,6 +212,7 @@ int main(int argc, char *argv[])
 	memset(controller_data3, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status3_t)));//See warning at top of file
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
+
 
 	//Initialize database with triggered variables only if not using replay
 	if ( (interval == 0) && ((pclt = db_list_init(argv[0], hostname, domain, xport,
