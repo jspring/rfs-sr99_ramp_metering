@@ -10,7 +10,7 @@ fi
 
 INDEX=0
 LASTSTARTTIME=0
-for x in `cat /home/jspring/bin/sr99_controller_ip_and_port_list.txt`
+for x in `cat /home/sr99_ramp_metering/system/sr99_controller_ip_and_port_list.txt`
 do
 	OUTFILE=/big/data/ac_rm_1/"a_"$x".9999_"$DATE"_9999.dat"
 	if [[ -e $OUTFILE ]]
