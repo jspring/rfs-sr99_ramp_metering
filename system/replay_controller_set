@@ -9,6 +9,11 @@ then
 	exit 1
 fi
 
+if [[ q$INTERVAL == 'q' ]]
+then
+	INTERVAL=500
+fi
+
 MATCHSTR=`echo $A_FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
 MYPATH=`echo $A_FILE | sed '{s/a_10/ &/g}'| awk '{print $1}'`
 TIMESTAMP=`date +%y%m%d_%H%M%S`
