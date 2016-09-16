@@ -77,4 +77,4 @@ cd /home/sr99_ramp_metering/src
 mkdir Out_Data_$TIMESTAMP
 rm Out_Data
 ln -s Out_Data_$TIMESTAMP Out_Data
-./lnx/opt_crm -i $INTERVAL >/dev/null &
+./lnx/opt_crm -i $INTERVAL >/big/data/ac_rm_1/opt_crm_$TIMESTAMP.txt &
