@@ -24,31 +24,8 @@
 
 char str[len_str];
 
-FILE *dbg_f, *dmd_f, *vsl_crm_f, *cal_opt_f, *pp, *st_file, *st_file_out, *dbg_st_file_out;
-//static float delta_t=0.0;
+FILE *dbg_f, *dmd_f, *local_rm_f, *cal_opt_f, *pp, *st_file, *st_file_out, *Ln_RM_rt_f, *dbg_st_file_out;
 
-//int optControl(float,float,float);
-int Init();
-int Init_sim_data_io();
-//int optMeter(float,float,float);
-//int save_data(float);
-//int finish_data_saving();
-int opt_metering(void);
-int Set_Opt_Meter(float time,float time2,float timeSta);
-float Mind(float a,float b);
-int Finish_sim_data_io();
-
-/*
-int syst_init()
-{		
-	Init();  
-	Init_sim_data_io();
-	//init_data_saving();
-	//init_metering();  // added on 08/30/13
-
-	return 0;
-}
-*/
 
 static int sig_list[] =
 {
@@ -69,7 +46,7 @@ static void sig_hand(int code)
                 longjmp(exit_env, code);
 }
 
-const char *usage = "-i <loop interval>";
+const char *usage = "-i <loop interval> -r (run in replay mode)";
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
@@ -109,12 +86,13 @@ const char *controller_strings[] = {
 
 int main(int argc, char *argv[])
 {
-//	timestamp_t ts;
+	timestamp_t ts;
+	timestamp_t *pts = &ts;
 	float time = 0, time2 = 0,timeSta = 0;
 //	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
-//	db_urms_t urms_ctl[NUM_CONTROLLER_VARS/6];
+	db_urms_t urms_ctl[NumOnRamp] = {{0}};
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/6];  //See warning at top of file
@@ -177,20 +155,32 @@ int main(int argc, char *argv[])
     int FR_flow_zero_counter[NumOnRamp] = {0};
     int FR_occ_zero_counter[NumOnRamp] = {0};
 
-//	Example: metering_rates[0...10][1] = Calvine_EB_Metering_Rate...12th_St_Metering_Rate;
-	short metering_rates[11][2] = {
-		{4600,0},	//Calvine EB
-		{4800,0},	//Calvine WB
-		{5200,0},	//Mack Rd EB
-		{5400,0},	//Mack Rd WB
-		{6200,0},	//Florin Rd EB
-		{6400,0},	//Florin Rd WB
-		{6800,0},	//47th EB
-		{7000,0},	//47th WB
-		{7400,0},	//Fruitridge EB
-		{7600,0},	//Fruitridge WB
-		{8000,0}	//12th St
+//	Example: metering_rates[0...10] = Calvine_EB_Metering_Rate...12th_St_Metering_Rate;
+	short metering_controller_db_vars[11] = {
+		4602,	//Calvine EB
+		4802,	//Calvine WB
+		5202,	//Mack Rd EB
+		5402,	//Mack Rd WB
+		6202,	//Florin Rd EB
+		6402,	//Florin Rd WB
+		6802,	//47th EB
+		7002,	//47th WB
+		7402,	//Fruitridge EB
+		7602,	//Fruitridge WB
+		8002,	//12th St
 	};
+	int counter = 0;
+
+	for(i=0; i<NumOnRamp; i++) {
+		urms_ctl[i].lane_1_action = URMS_ACTION_REST_IN_GREEN;
+		urms_ctl[i].lane_1_plan = 0;
+		urms_ctl[i].lane_2_action = URMS_ACTION_FIXED_RATE;
+		urms_ctl[i].lane_2_plan = 0;
+		urms_ctl[i].lane_3_action = URMS_ACTION_FIXED_RATE;
+		urms_ctl[i].lane_3_plan = 0;
+		urms_ctl[i].lane_4_action = URMS_ACTION_REST_IN_GREEN;
+		urms_ctl[i].lane_4_plan = 0;
+	}
 
 	while ((option = getopt(argc, argv, "di:")) != EOF) {
 		switch(option) {
@@ -200,13 +190,15 @@ int main(int argc, char *argv[])
 			case 'i':
 				interval = atoi(optarg);
 				break;
+			case 'r':
+				pts = &controller_data2[20].ts;
+				break;
 			default:
 				printf("\nUsage: %s %s\n", argv[0], usage);
 				exit(EXIT_FAILURE);
 				break;
 		}
 	}
-
 	memset(controller_data, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status_t)));//See warning at top of file
 	memset(controller_data2, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status2_t)));//See warning at top of file
 	memset(controller_data3, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status3_t)));//See warning at top of file
@@ -279,8 +271,8 @@ int main(int argc, char *argv[])
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
     
-//	get_current_timestamp(&ts); // get current time step
-	print_timestamp(dbg_st_file_out, &controller_data2[13].ts); // #1 print out current time step to file
+	get_current_timestamp(&ts); // get current time step
+	print_timestamp(dbg_st_file_out, pts); // #1 print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
 		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
@@ -359,6 +351,7 @@ int main(int argc, char *argv[])
 		//fprintf(dbg_st_file_out,"\n");
 	}
 	fprintf(dbg_st_file_out,"\n");
+
     
 //** This part aggregate data for each section
 // controller index for each mainline section
@@ -532,11 +525,11 @@ int j; //
 	  
 	  current_most_upstream_flow = mainline_out_f[1].agg_vol;
       // Use historical data only
-      ML_flow_ratio = ratio_ML_HIS_FLOW(current_most_upstream_flow, MOST_UPSTREAM_MAINLINE_FLOW_DATA, &controller_data2[13].ts);
-      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i] , OR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table    
-      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table
-      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, &controller_data2[13].ts),50)); // interpolate missing value from table
-      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i], FR_HIS_OCC_DATA, &controller_data2[13].ts),5)); // interpolate missing value from table 
+      ML_flow_ratio = ratio_ML_HIS_FLOW(current_most_upstream_flow, MOST_UPSTREAM_MAINLINE_FLOW_DATA, pts);
+      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i] , OR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table    
+      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table
+      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table
+      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i], FR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table 
       
 	  
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
@@ -558,7 +551,7 @@ int j; //
 		  	   onramp_out_f[i].agg_vol = OR_flow_prev[i];
 		  } 
 	  }else{
-	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i], OR_HIS_FLOW_DATA, &controller_data2[13].ts); // interpolate missing value from table    
+	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i], OR_HIS_FLOW_DATA, pts); // interpolate missing value from table    
 	  }
 
 	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)>1.0){
@@ -568,7 +561,7 @@ int j; //
 		      onramp_out_f[i].agg_occ = OR_occupancy_prev[i];
 		  }
 	  }else{
-         onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, &controller_data2[13].ts); // interpolate missing value from table
+         onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, pts); // interpolate missing value from table
 	  }
         
 	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)>50.0){
@@ -578,7 +571,7 @@ int j; //
              offramp_out_f[i].agg_vol = FR_flow_prev[i];
 		  } 
 	  }else{
-          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] , FR_HIS_FLOW_DATA, &controller_data2[13].ts); // interpolate missing value from table
+          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] , FR_HIS_FLOW_DATA, pts); // interpolate missing value from table
 	  }
 
 	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)>1.0){
@@ -588,7 +581,7 @@ int j; //
               offramp_out_f[i].agg_occ = FR_occupancy_prev[i]; 
 		  }
 	  }else{
-           offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i],  FR_HIS_OCC_DATA, &controller_data2[13].ts); // interpolate missing value from table 
+           offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i],  FR_HIS_OCC_DATA, pts); // interpolate missing value from table 
 	  }
      */ 
 	  onramp_queue_out_f[i].agg_vol = mean_array(temp_ary_OR_queue_detector_vol,NUM_CYCLE_BUFFS); 
@@ -614,7 +607,7 @@ int j; //
 /*###################################################################################################################
 ###################################################################################################################*/
 
-		print_timestamp(st_file_out, &controller_data2[13].ts);//1
+		print_timestamp(st_file_out, pts);//1
 		for(i=0;i<SecSize;i++)
 		{
 			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out_f[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
@@ -651,31 +644,60 @@ int j; //
 		}
 		
 		fprintf(st_file_out,"\n");
-		det_data_4_contr(time);		
-		get_meas(time);				
+		
+		
+		
+		/*************************************************
+		   
+		      XYLu code start from here
+		
+		**************************************************/
+		
+		det_data_4_contr(time);	
+		get_meas(time);		
 		update_q_R();
 		opt_metering();
 		
-		fprintf(cal_opt_f,"%lf ", time);
+		fprintf(cal_opt_f,"%lf ", time);   // Output calculated Opt RM rt
 		for (i=0;i<NumOnRamp;i++)
-		{
-			if (i<NumOnRamp-1)
-				fprintf(cal_opt_f,"%lf ",opt_r[i][0]);
-			else
-				fprintf(cal_opt_f,"%lf\n", opt_r[i][1]);
+		{				
+			total_rt[i]=opt_r[i][0];							
+			fprintf(cal_opt_f,"%lf ", total_rt[i]);				
 		}
+		fprintf(cal_opt_f,"\n");
+						
+		Set_Default_Meter(time,time2,timeSta); 		
 		
-		ln_rm_distrib();
-	
-		if (use_CRM == 1)
-			Set_Default_Meter(time,time2,timeSta); 
-		else if (use_CRM == 2)	
-			Set_Opt_Meter(time,time2,timeSta);     // original Opt RM strategy fro all 16 onramps
-		else if (use_CRM == 3)
-			Set_Coord_ALINEA(time,time2,timeSta);
-		else if (use_CRM == 4)
-			Set_Hybrid_Meter(time,time2,timeSta);  // upstream use default; downstream 11 onramps use CRM
-		else;
+		Set_Opt_Meter();
+		
+		
+
+//FOR TEST PURPOSES ONLY###############################
+//counter++;
+//FOR TEST PURPOSES ONLY###############################
+		for (i=0;i<NumOnRamp;i++)               // Lane-wise RM rate
+		{
+			if( (controller_data2[13].ts.hour >= 6) && (controller_data2[13].ts.hour < 7) ) {
+				// for Hour 1
+				urms_ctl[i].lane_2_release_rate = ln_LRRM_rt[i][0];
+				urms_ctl[i].lane_3_release_rate = ln_LRRM_rt[i][0];
+			}
+			else{
+				// from hour 2
+				urms_ctl[i].lane_2_release_rate = ln_RM_rt[i][0];
+				urms_ctl[i].lane_3_release_rate = ln_RM_rt[i][0];
+//FOR TEST PURPOSES ONLY###############################
+//				urms_ctl[i].lane_2_release_rate = 250+i+counter;
+//				urms_ctl[i].lane_3_release_rate = 200+i+counter;
+//printf("Controller db var %d lane 2 rate %d lane 3 rate %d\n",
+//	metering_controller_db_vars[i],
+//	urms_ctl[i].lane_2_release_rate,
+//	urms_ctl[i].lane_2_release_rate
+//);
+//FOR TEST PURPOSES ONLY###############################
+			}
+			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
+		}
 
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
@@ -689,33 +711,22 @@ int j; //
 	return 0;
 }
 
+
+
 int Init_sim_data_io()
 {	
-	//st_file=fopen("In_Data/state_var.txt","r");	
+	st_file=fopen("In_Data/state_var.txt","r");	
 	
 	dbg_f=fopen("Out_Data/dbg_file.txt","w");
 	
-	//dmd_f=fopen("Out_Data/dmd_file.txt","w");
-	
-    vsl_crm_f=fopen("Out_Data/crm_RT_rate.txt","w");
+	local_rm_f=fopen("Out_Data/local_rm_rate.txt","w");
     
     cal_opt_f=fopen("Out_Data/cal_opt_RT_rt.txt","w");
     
-    st_file_out=fopen("Out_Data/state_var_out.txt","w");
-
-    dbg_st_file_out=fopen("Out_Data/dbg_state_var_out.txt","w");
-
-    if(st_file_out == NULL) {
-	perror("st_file_out fopen");
-	exit(1);
-    }
+    st_file_out=fopen("Out_Data/state_var_out.txt","w");	
+    dbg_st_file_out =fopen("Out_Data/dbg_state_var_out.txt","w");	
     
-    if(dbg_st_file_out == NULL) {
-	perror("dbg_st_file_out fopen");
-	exit(1);
-    }
-
-	//sec_outfile=fopen("Out_Data/section.txt","w");
+    Ln_RM_rt_f=fopen("Out_Data/lanewise_rt.txt","w");	
 	
 	pp=fopen("Out_Data/coeff.txt","w");
 		
@@ -723,15 +734,16 @@ int Init_sim_data_io()
 	return 1;
 }
 
+/***************************************************
+
+   Subrutines of XYLu needs updating  from here;   09_15_16
+   
+****************************************************/
 
 int Init()  // A major function; Called by AAPI.cxx: the top function for intialization of the whole system
 {
-	int i; //j;
-//	int id;
-//	int ori=0, dest=0;	
-//	float tmp_buff=0.0;
-//	errno_t err;
-
+	int i; 
+	
 	// Memory set for variables
 	for(i=0;i<SecSize;i++)
 	{
@@ -751,7 +763,7 @@ int Init()  // A major function; Called by AAPI.cxx: the top function for intial
 	memset(&pre_w,0,sizeof(pre_w));
 	memset(&pre_rho,0,sizeof(pre_rho));
 	memset(&up_rho,0,sizeof(up_rho));
-	memset(&ln_metering_rate,0,sizeof(ln_metering_rate));
+	memset(&ln_RM_rt,0,sizeof(ln_RM_rt));
 	memset(&dmd,0,sizeof(dmd));
 	memset(&s,0,sizeof(s));
 	memset(&qc,0,sizeof(qc));
@@ -779,42 +791,33 @@ int Init()  // A major function; Called by AAPI.cxx: the top function for intial
 	for(i=0;i<NumOnRamp;i++)
 	{
 		dmd[i]=0.0;
-		dyna_min_r[i]=200.0;
+		dyna_min_r[i]=300.0*N_OnRamp_Ln[i];
 		dyna_max_r[i]=dyna_min_r[i]+rm_band;	
 		Ramp_rt[i]=max_RM_rt;   // only used in Set_Coord_ALINEA
-		Q_o[i]=max_RM_rt*N_OnRamp_Ln[i];
-		Q_min[i]=min_RM_rt*N_OnRamp_Ln[i];
-		//opt_r[i][0]=max_RM_rt*N_OnRamp_Ln[i];
+		//Q_o[i]=max_RM_rt*N_OnRamp_Ln[i];   // changed on 09_15_16
+		
+		if(N_OnRamp_Ln[i] == 1)
+			Q_o[i]=max_RM_rt;
+		else if (N_OnRamp_Ln[i] == 2)
+			Q_o[i]=max_RM_rt*(1.0+Onramp_HOV_Util);
+		else
+			Q_o[i]=max_RM_rt*(N_OnRamp_Ln[i]-1+Onramp_HOV_Util);
+		Q_min[i]=min_RM_rt*N_OnRamp_Ln[i];		
 		a_w[i]=6.5;
 		onrampL[i]=onrampL[i]/1609.0;		
-	}
-	//T=30/120.0;
+	}	
 	
 	for(i=0; i<SecSize;i++)
 		L[i]=L[i]/1609.0;
-	// read system parameters
-
-	
-	//InitRealtimeDetection();	// mempry allocation; for detection measure
-	//InitRealtimeDetection_s();	// memory allocation; for control detection, almost the same as InitRealtimeDetection(), just has less detector and not save data
-    //InitDataProfile_s();	//for control history data
-	//InitRealTimeSection();	//for section measure
-	//Init_L();               // read Aimsun solid line length (similar to section length)
-	//Init_lambda();        // use constant composite one
-	//get_onramp_length();
-	
 	
 	u[NumOnRamp]=104;   // Dim Ok	
 	ControlOn=0;
 	StateOn=0;
 	StateOff=0;
 	
-
-	//init qc
 	for(i=0;i<SecSize;i++)
 		qc[i]=Q_ln*lambda[i];
 	
-
 	return 1;
 }
 
@@ -950,497 +953,158 @@ int get_meas(float T)
 
 
 
-int ln_rm_distrib()
+int Set_Opt_Meter()
 {
-	int i,j;
-	float tt_flw;
+	int i;
+	//float tt_flw;
 //	char str[len_str];
 
 	for (i=0;i<NumOnRamp;i++)
 	{
-		tt_flw=0.0;
-		for(j=0;j<max_onramp_ln;j++)
+		if (N_OnRamp_Ln[i] == 1)
 		{
-			if (detection_onramp[i]->detId_ln[j]>0)
-				tt_flw+=detection_onramp[i]->ln_flow[j];
+			ln_RM_rt[i][0]=total_rt[i];
+			if (ln_RM_rt[i][0] > max_Ln_RM_rt[i])
+				ln_RM_rt[i][0] = max_Ln_RM_rt[i];
+			if (ln_RM_rt[i][0] < min_Ln_RM_rt[i])
+				ln_RM_rt[i][0] = min_Ln_RM_rt[i];
 		}
-		for(j=0;j<max_onramp_ln;j++)
+		else if (N_OnRamp_Ln[i] == 2)
 		{
-			if (detection_onramp[i]->detId_ln[j]>0)
-			{
-				ln_metering_rate[i][j]=((detection_onramp[i]->ln_flow[j])/Maxd(tt_flw,1.0))*opt_r[i][0];
-				
-			}
-			else
-				ln_metering_rate[i][j]=0.0;			
-			
+			//ln_RM_rt[i][0]=(1.0-Onramp_HOV_Util)*total_rt[i]; // 15% goes to HOV lane	
+			ln_RM_rt[i][0]=total_rt[i]-Onramp_HOV_Util*max_RM_rt;  
+			if (ln_RM_rt[i][0] > max_Ln_RM_rt[i])
+				ln_RM_rt[i][0] = max_Ln_RM_rt[i];
+			if (ln_RM_rt[i][0] < min_Ln_RM_rt[i])
+				ln_RM_rt[i][0] = min_Ln_RM_rt[i];
 		}
-		
+		else //if (N_OnRamp_Ln[i] == 3)
+		{				
+			ln_RM_rt[i][0]=0.5*(total_rt[i]-Onramp_HOV_Util*max_RM_rt);  
+			ln_RM_rt[i][1]=0.5*(total_rt[i]-Onramp_HOV_Util*max_RM_rt);  
+			if (ln_RM_rt[i][0] > max_Ln_RM_rt[i])
+				ln_RM_rt[i][0] = max_Ln_RM_rt[i];
+			if (ln_RM_rt[i][0] < min_Ln_RM_rt[i])
+				ln_RM_rt[i][0] = min_Ln_RM_rt[i];
+			if (ln_RM_rt[i][1] > max_Ln_RM_rt[i])
+				ln_RM_rt[i][1] = max_Ln_RM_rt[i];
+			if (ln_RM_rt[i][1] < min_Ln_RM_rt[i])
+				ln_RM_rt[i][1] = min_Ln_RM_rt[i];
+		}	
 	}
-	fprintf(vsl_crm_f, "\n");	
+	
+		for (i=0;i<NumOnRamp;i++)
+		{
+			//if (N_OnRamp_Ln[i] == 1)
+				fprintf(Ln_RM_rt_f,"%lf ",ln_RM_rt[i][0]);
+			//else
+			//{
+			//	for (j=0;j<N_OnRamp_Ln[i]-1;j++)
+			//		fprintf(Ln_RM_rt_f,"%lf ",ln_RM_rt[i][j]);
+			//}
+		}
+		fprintf(Ln_RM_rt_f,"\n");	
+		
 
 	return 1;
 }
 
 /**************************************************
 
-	Should apply to all 16 onramps
+	Should apply to downstream 11 onrampsonly
 
 ***************************************************/
 
-/*******************************************************
-	Upstream 5 meters using default local responsive;
-	downstream 11 meters are coordinated
-********************************************************/
-
-
-int Set_Hybrid_Meter(float time,float time2,float timeSta)
+int Set_Default_Meter(float time,float time2,float timeSta) // this implemenmtation is correct 03_05_14; changed from 11 onarmps to 16 onramps 11_28_14
 {
-//	AKIPrintString("metering");
-	int i,j;
-//	int k, tmp_err, tmp_err1, tmp_err2, tmp_err3, tmp_err4;
-//	float flow=0.0;
-//	float amax=0.0;
-//	float amin=0.0;
-	float new_rate=0.0;
-//	char str[len_str];
 
-//	tmp_err=0; tmp_err1=0; tmp_err2=0; tmp_err3=0; tmp_err4=0; 
+	int i,j,tmp_err, tmp_err1;
 	
-	
-	
-	if(ISUPDATE2>=0)  // set every step
-	{
-	
-		////////////////////////////////////////////////////////
-		// Coorfdinated Opt Metering for downstream 11 Onramps
-		////////////////////////////////////////////////////////
 
-		for(i=0;i<NumOnRamp;i++)  
-		{
-			#ifdef DYNAMIC_BOUNBDS		
-			if (detection_s[i+1]->data[Np-1].density < 30)  
-				dyna_min_r[i]=700.0;
-			else if (detection_s[i+1]->data[Np-1].density < 45)
-				dyna_min_r[i]=675.0;
-			else if (detection_s[i+1]->data[Np-1].density < 60)
-				dyna_min_r[i]=650.0;
-			else if (detection_s[i+1]->data[Np-1].density < 75)
-				dyna_min_r[i]=625.0;
-			else if (detection_s[i+1]->data[Np-1].density < 90)
-				dyna_min_r[i]=600.0;
-			else if (detection_s[i+1]->data[Np-1].density < 105)
-				dyna_min_r[i]=575.0;
-			else if (detection_s[i+1]->data[Np-1].density < 120)
-				dyna_min_r[i]=550.0;
-			else if (detection_s[i+1]->data[Np-1].density < 135)
-				dyna_min_r[i]=525.0;
-			else 
-				dyna_min_r[i]=500.0;
-			/*if (detection_s[i+1]->data[Np-1].density < 20) 
-				dyna_min_r[i]=900.0;
-			else if (detection_s[i+1]->data[Np-1].density < 30)  
-				dyna_min_r[i]=850.0;
-			else if (detection_s[i+1]->data[Np-1].density < 45)
-				dyna_min_r[i]=800.0;
-			else if (detection_s[i+1]->data[Np-1].density < 60)
-				dyna_min_r[i]=750.0;
-			else if (detection_s[i+1]->data[Np-1].density < 75)
-				dyna_min_r[i]=600.0;
-			else if (detection_s[i+1]->data[Np-1].density < 90)
-				dyna_min_r[i]=500.0;
-			else if (detection_s[i+1]->data[Np-1].density < 105)
-				dyna_min_r[i]=400.0;
-			else if (detection_s[i+1]->data[Np-1].density < 120)
-				dyna_min_r[i]=350.0;
-			else if (detection_s[i+1]->data[Np-1].density < 135)
-				dyna_min_r[i]=325.0;
-			else 
-				dyna_min_r[i]=300.0;
-			*/
-		
-			//dyna_min_r[i]=dyna_min_r[i]*1.25;
-			dyna_min_r[i]=dyna_min_r[i]*1.1;	
-			dyna_max_r[i]=dyna_min_r[i]+rm_band;
-			if (dyna_max_r[i]>max_RM_rt)
-				dyna_max_r[i]=max_RM_rt;
-			#endif			
-			fprintf(dbg_f,"ds=%10.2f; Occ=%10.2f ", detection_s[i]->data[Np-1].density, (detection_s[i]->data[Np-1].occupancy));
-			
-			for (j=0;j<max_onramp_ln;j++)
-			{				
-				if(ln_meteringId[i+5][j]>0)    //Shuld be   "i+5"
-				{
-						//tmp_err=ECIGetParametersFlowMeteringById(ln_meteringId[i+5][j],timeSta,&amax,&flow,&amin);  // removed on 12_03_15
-						new_rate=ln_metering_rate[i][j];
-
-						// further modify RM rate
-											
-						/*if (i==(5-5) || i==(7-5)) // 
-						{
-							dyna_min_r[i]=dyna_min_r[i]*(1.0-0.35);
-							dyn2_max_r[i]=dyna_max_r[i]*(1.0-0.35);
-							new_rate=new_rate*(1.0-0.35);
-						}
-						if (i==(6-5) || i==(8-5) || i==(11-5)) // 7: Calvine WB: 
-						{
-							dyna_min_r[i]=dyna_min_r[i]*(1.0+0.25);
-							dyna_max_r[i]=dyna_max_r[i]*(1.0+0.25);
-							new_rate=new_rate*(1.0+0.25); 
-						}	*/		
-
-						if (dyna_max_r[i]>max_RM_rt)                            // added on 01_08_14
-							dyna_max_r[i]=max_RM_rt;						
-										
-						if (new_rate <= dyna_min_r[i])
-						{
-															
-							if (j<2)
-								actual_r[i+5][j]=dyna_min_r[i];	
-							else
-								actual_r[i+5][j]=max_RM_rt;  //HOV
-						}
-						else if(new_rate>dyna_min_r[i]  && new_rate<=dyna_max_r[i])	
-						{							
-							
-							if (j<2)
-								actual_r[i+5][j]=new_rate;
-							else
-								actual_r[i+5][j]=max_RM_rt;  //HOV
-						}
-						else
-						{										
-							
-							if (j<2)
-								actual_r[i+5][j]=dyna_max_r[i];
-							else
-								actual_r[i+5][j]=max_RM_rt;  //HOV
-						}
-																				
-				} //ln_meteringId
-				else
-					actual_r[i+5][j]=0.0;
-				
-				
-			} // for j-loop end
-
-			fprintf(dbg_f,"\n");							
-		}  // i-llop end downstream
-
-		
-
-		// Activate downstream metering only with queue over-write
-		for(i=0;i<NumOnRamp;i++) 
-		{
-			for (j=0;j<max_onramp_ln;j++)
-			{				
-				if(ln_meteringId[i+5][j]>0)
-				{
-					if (actual_r[i+5][j]>max_RM_rt)
-						actual_r[i+5][j]=max_RM_rt;
-				}
-				else
-					actual_r[i+5][j]=0.0;
-
-				if(ln_meteringId[i+5][j]>0)
-				{
-				//	tmp_err1=ECIChangeParametersFlowMeteringById(ln_meteringId[i+5][j],timeSta,max_RM_rt,actual_r[i+5][j],dyna_min_r[i]); // removed on 12_03_15				 
-
-					// Queue flush for all onramps				
-				//	if( (AKIDetGetTimeOccupedAggregatedbyId(OnRamp_Ln_AdvanceDetEndId[i][j],0)> RELEASE_OCC)  )  // 80.0 is too high							
-				//		release_cycle[i+5][j]=0;	 // removed on_12_03_15		
-					if (release_cycle[i+5][j]<= RM_RELEASE_CYCLE)
-					{															
-						//tmp_err4=ECIChangeParametersFlowMeteringById(ln_meteringId[i+5][j],timeSta,max_RM_rt,max_RM_rt,dyna_min_r[i]);	 // removed on 12_03_15														
-						actual_r[i+5][j]=max_RM_rt;
-						release_cycle[i+5][j]++;
-					}
-				}
-			}  // for j-loop
-			ISUPDATE2=0;
-		}  // for i-loop end
-
-		// Output time and RM rate
-		fprintf(vsl_crm_f,"%10.2f\t", timeSta);
-		for(i=0;i<NumOnRamp+5;i++)
-			fprintf(vsl_crm_f,"%10.2f\t", (float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]));
-		fprintf(vsl_crm_f,"\n");
-			
-	} // if ISUPDATE2 loop 
-	else
-		ISUPDATE2++;	
-	return 1;
-}
-
-
-// This is not used anymore, 11_27_14
-int Set_Opt_Meter(float time,float time2,float timeSta)
-{
-//	AKIPrintString("metering");
-	int i,j; 
-//	int tmp_err, tmp_err1, tmp_err2, tmp_err3, tmp_err4;
-//	float flow=0.0;
-//	float amax=0.0;
-//	float amin=0.0;
-//	float tmp_occ=0.0;
-	static float new_rate=0.0;	
-//	char str[len_str];
-	//static int release_cycle=0;
-
-//	tmp_err=0; tmp_err1=0; tmp_err2=0; tmp_err3=0; tmp_err4=0;
-
+	tmp_err=0; tmp_err1=0; 
 	if(ISUPDATE2>=0)  // set every step
 	{
 		for(i=0;i<NumOnRamp;i++)
-		{
-			//for (j=0;j<max_onramp_ln;j++)
-			//	Green[i][j]=0;
-
-			#ifdef DYNAMIC_BOUNBDS
-			#ifndef USE_FIELD_BOUND
-			if (detection_s[i+1]->data[Np-1].density < 30)  
-				dyna_min_r[i]=700.0;
-			else if (detection_s[i+1]->data[Np-1].density < 45)
-				dyna_min_r[i]=675.0;
-			else if (detection_s[i+1]->data[Np-1].density < 60)
-				dyna_min_r[i]=650.0;
-			else if (detection_s[i+1]->data[Np-1].density < 75)
-				dyna_min_r[i]=625.0;
-			else if (detection_s[i+1]->data[Np-1].density < 90)
-				dyna_min_r[i]=600.0;
-			else if (detection_s[i+1]->data[Np-1].density < 105)
-				dyna_min_r[i]=575.0;
-			else if (detection_s[i+1]->data[Np-1].density < 120)
-				dyna_min_r[i]=550.0;
-			else if (detection_s[i+1]->data[Np-1].density < 135)
-				dyna_min_r[i]=525.0;
-			else //if (detection_s[i+1]->data[Np-1].density < 150)
-				dyna_min_r[i]=500.0;
-			//else
-			//	dyna_min_r[i]=100.0;
-
-			dyna_min_r[i]=dyna_min_r[i]*1.25;
-			#endif
-			#ifdef USE_FIELD_BOUND
-				tmp_err=ECIGetParametersFlowMeteringById(ln_meteringId[i][0],timeSta,&amax,&flow,&amin);
-				dyna_min_r[i]=amin;
-			#endif
-
-			
-			dyna_max_r[i]=dyna_min_r[i]+rm_band;
-			//if (dyna_max_r[i]>max_RM_rt)                            // added on 01_08_14
-			//	dyna_max_r[i]=max_RM_rt;
-
-			#endif
-			
-			//fprintf(dbg_f,"%10.2f %10.2f ", detection_s[i]->data[Np-1].density, (detection_s[i]->data[Np-1].occupancy));
-			//fprintf(dbg_f,"%10.2f ", detection_onramp[i]->data[Np-1].occupancy);
-		}
-		//fprintf(dbg_f,"\n");
-
-		for(i=0;i<NumOnRamp;i++)
 		{	
-			for (j=0;j<max_onramp_ln;j++)
+			for (j=0;j<N_interv-1;j++)
 			{
-				
-				if(ln_meteringId[i][j]>0)
-				{
-					//	tmp_err=ECIGetParametersFlowMeteringById(ln_meteringId[i][j],timeSta,&amax,&flow,&amin);  // removed o n 12_03_15
-						new_rate=ln_metering_rate[i][j];
-
-						// further modify RM rate
-						/*if (i==5 || i==7) // run multi-day and reps on 2/11~2/12
-						{
-							dyna_min_r[i]=dyna_min_r[i]*(1.0-0.25);
-							dyna_max_r[i]=dyna_max_r[i]*(1.0-0.25);
-							new_rate=new_rate*(1.0-0.25);
-						}
-						if (i==6) // 7: Calvine WB: 
-						{
-							dyna_min_r[i]=dyna_min_r[i]*(1.0+0.1);
-							dyna_max_r[i]=dyna_max_r[i]*(1.0+0.1);
-							new_rate=new_rate*(1.0+0.1); 
-						}*/
-					#ifndef USE_FIELD_BOUND
-						if (i==5 || i==7) // 
-						{
-							dyna_min_r[i]=dyna_min_r[i]*(1.0-0.35);
-							dyna_max_r[i]=dyna_max_r[i]*(1.0-0.35);
-							new_rate=new_rate*(1.0-0.35);
-						}
-						if (i==6 || i==8 || i==11) // 7: Calvine WB: 
-						{
-							dyna_min_r[i]=dyna_min_r[i]*(1.0+0.25);
-							dyna_max_r[i]=dyna_max_r[i]*(1.0+0.25);
-							new_rate=new_rate*(1.0+0.25); 
-						}				
-
-						if (dyna_max_r[i]>max_RM_rt)                            // added on 01_08_14
-							dyna_max_r[i]=max_RM_rt;
-					#endif	
-					
-					//#ifdef DYNAMIC_BOUNBDS
-						if (new_rate < dyna_min_r[i])
-						{
-						//	tmp_err3=ECIChangeParametersFlowMeteringById(ln_meteringId[i][j],timeSta,dyna_max_r[i],dyna_min_r[i],dyna_min_r[i]);	// removed on 12_03_15							
-							if (j<2)
-								actual_r[i][j]=dyna_min_r[i];	
-							else
-								actual_r[i][j]=max_RM_rt;  //HOV
-						}
-						else if(new_rate<=dyna_max_r[i] && new_rate>=dyna_min_r[i])	
-						{							
-							//tmp_err1=ECIChangeParametersFlowMeteringById(ln_meteringId[i][j],timeSta,dyna_max_r[i],new_rate,dyna_min_r[i]);	 // removed on 12_03_15
-							if (j<2)
-								actual_r[i][j]=new_rate;
-							else
-								actual_r[i][j]=max_RM_rt;  //HOV
-						}
-						else
-						{										
-							//tmp_err2=ECIChangeParametersFlowMeteringById(ln_meteringId[i][j],timeSta,dyna_max_r[i],dyna_max_r[i],dyna_min_r[i]);	// removed on 12_03_15
-							if (j<2)
-								actual_r[i][j]=dyna_max_r[i];
-							else
-								actual_r[i][j]=max_RM_rt;  //HOV
-						}
-						// Queue flush				
-					//	if( (AKIDetGetTimeOccupedAggregatedbyId(OnRamp_Ln_AdvanceDetEndId[i][j],0)> RELEASE_OCC)  )  // 80.0 is too high							
-					//		release_cycle[i][j]=0;		 //// removed on 12_03_15	
-						if (release_cycle[i][j]<= 2)
-							{															
-							//	tmp_err4=ECIChangeParametersFlowMeteringById(ln_meteringId[i][j],timeSta,max_RM_rt,max_RM_rt,dyna_min_r[i]);	// removed on 12_03_15										
-				
-								actual_r[i][j]=max_RM_rt;
-								release_cycle[i][j]++;
-							}														
-																											
-				} //ln_meteringId
+				if (o[i]<=SR99_RM_occ_tbl[0][i+5])				
+					total_field_rt[i]=SR99_RM_rate_tbl[0][i+5];														
+				else if (o[i]>SR99_RM_occ_tbl[j][i+5] && o[i]<=SR99_RM_occ_tbl[j+1][i+5])					
+					total_field_rt[i]=SR99_RM_rate_tbl[j-1][i+5];																
 				else
-					actual_r[i][j]=0.0;
-			} // for j-loop end
-
-			//opt_r[i][0]=(float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]);
-		}// for i-loop end	
-		fprintf(vsl_crm_f, "\n");
-		ISUPDATE2=0;
-
-		fprintf(vsl_crm_f,"%10.2f\t", timeSta);
-		for(i=0;i<NumOnRamp;i++)
-			 fprintf(vsl_crm_f,"%10.2f\t", (float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]));
-		fprintf(vsl_crm_f,"\n");
-	} // if ISUPDATE2 loop 
-	else
-		ISUPDATE2++;
-	
-	return 1;
-}
-
-int Set_Coord_ALINEA(float time,float time2,float timeSta)
-{
-//	AKIPrintString("metering");
-	int i,j;
-//	int tmp_err, tmp_err1; // tmp_err2;
-//	float flow=0.0;
-//	float amax=0.0;
-	float amin=0.0;
-	float corridor_mean_occ=0.0, tmp_occ=0.0;
-	//int tmp_deno=0;
-//	char str[len_str];
-	//static int release_cycle=0;
-
-//	tmp_err=0; tmp_err1=0; 
-	if(ISUPDATE2>=0)  // set every step
-	{
-		for(i=0;i<NumOnRamp+5;i++)
-		{	
-			
-			for (j=0;j<max_mainline_ln;j++)
-			{
-				if (Mainline_Ln_Det_Id_All[i][j]>0)
-				{					
-				//	RM_occ[i]+=AKIDetGetTimeOccupedAggregatedbyId(Mainline_Ln_Det_Id_All[i][j],0);  // removed on 12_03_15																
-				}
-			}
-			RM_occ[i]=RM_occ[i]/N_Mainline_Ln_RM_All[i];
-			//fprintf(dbg_f,"%10.2f ", RM_occ[i]);
-			//fprintf(dbg_f,"%10.2f %10.2f ", SR99_RM_rate_tbl[0][i], SR99_RM_occ_tbl[0][i]);
-		}
-		corridor_mean_occ=0.0;
-		for(i=0;i<NumOnRamp;i++)
-			corridor_mean_occ+=RM_occ[i];
-		corridor_mean_occ=Maxd(corridor_mean_occ/NumOnRamp, 30.0);
-		
-		for(i=0;i<NumOnRamp+5;i++)
-		{	
-			Ramp_rt[i]=0.0;
-			for (j=0;j<max_onramp_ln;j++)
-			{
-				if (ln_meteringId[i][j]>0)
 				{
-				//	tmp_err=ECIGetParametersFlowMeteringById(ln_meteringId[i][j],timeSta,&amax,&flow,&amin);   // removed on 12_03_15
-					if (j<2)
-					{
-						tmp_occ=corridor_mean_occ*(1+(8.0-i)*0.025);  // Upstream operate at higher OCC
-						if (RM_occ[i] <= tmp_occ)
-							Ramp_rt[i]+=Gain_Up*(tmp_occ-RM_occ[i]);
-						if (RM_occ[i] > tmp_occ)
-							Ramp_rt[i]+=Gain_Dn*(tmp_occ-RM_occ[i]);
-
-						//actual_r[i][j]=(AKIDetGetTimeOccupedAggregatedbyId(Mainline_Ln_Det_Id[i][j],0)/Maxd(RM_occ[i],1.0))*Ramp_rt[i];
-						actual_r[i][j]=Ramp_rt[i]*1.35;
-						
-					}
-					else  // HOV lane														
-						actual_r[i][j]=max_RM_rt;							
-				}
-				else
-					actual_r[i][j]=0.0;
-
-				
+					total_field_rt[i]=SR99_RM_rate_tbl[j+1][i+5];	
+					//if (j<N_interv-2)
+					//	total_rt[i]=SR99_RM_rate_tbl[j+1][i+5];	
+					//else				
+					//	total_rt[i]=SR99_RM_rate_tbl[N_interv-1][i+5];	
+				}				
 			} // for j-loop
-			
-			if (actual_r[i][j]>max_RM_rt)
-				actual_r[i][j]=max_RM_rt;
-			if (actual_r[i][j]<amin)
-				actual_r[i][j]=amin;
+						
 		} // for i-loop
-		//fprintf(dbg_f,"\n");
-
+		
+		
 		for(i=0;i<NumOnRamp;i++)
-		{	
-			for (j=0;j<max_onramp_ln;j++)
-			{				
-				if(ln_meteringId[i][j]>0)
-				{
-				//	tmp_err1=ECIChangeParametersFlowMeteringById(ln_meteringId[i][j],timeSta,max_RM_rt,actual_r[i][j],amin); // removed on 12_03_15
-
-				// Queue flush				
-				//	if( (AKIDetGetTimeOccupedAggregatedbyId(OnRamp_Ln_AdvanceDetEndId[i][j],0)> RELEASE_OCC)  )  // 80.0 is too high	// Removed on 12_03_15						
-						release_cycle[i][j]=0;			
-					if (release_cycle[i][j]<= 2)
-					{															
-					//	tmp_err2=ECIChangeParametersFlowMeteringById(ln_meteringId[i][j],timeSta,max_RM_rt,max_RM_rt,dyna_min_r[i]);	// removed on 12_03_15														
-						actual_r[i][j]=max_RM_rt;
-						release_cycle[i][j]++;
-					}	
-				}
-			} // for j-loop end
-			//opt_r[i][0]=(float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]);
+		{				
+			if (total_field_rt[i]>max_RM_rt)
+				total_field_rt[i]=max_RM_rt;	
+			if (total_field_rt[i]<min_RM_rt)
+				total_field_rt[i]=min_RM_rt;	
+			
+			if (N_OnRamp_Ln[i] > 1)			
+				total_field_rt[i]=(N_OnRamp_Ln[i]-1)*(total_field_rt[i])+Onramp_HOV_Util*max_RM_rt;							
 		}// for i-loop end	
-		fprintf(vsl_crm_f, "\n");
+		
 		ISUPDATE2=0;
 
-		fprintf(vsl_crm_f,"%10.2f\t", timeSta);
+		fprintf(local_rm_f,"%10.2f\t", timeSta);
 		for(i=0;i<NumOnRamp;i++)
-			 fprintf(vsl_crm_f,"%10.2f\t", (float)(actual_r[i][0]+actual_r[i][1]+actual_r[i][2]));
-		fprintf(vsl_crm_f,"\n");
+			 fprintf(local_rm_f,"%10.2f\t", (float)(total_field_rt[i]));
+		fprintf(local_rm_f,"\n");
+		
+		
+	for (i=0;i<NumOnRamp;i++)
+	{
+		if (N_OnRamp_Ln[i] == 1)
+		{
+			ln_LRRM_rt[i][0]=total_field_rt[i];
+			if (ln_LRRM_rt[i][0] > max_Ln_RM_rt[i])
+				ln_LRRM_rt[i][0] = max_Ln_RM_rt[i];
+			if (ln_LRRM_rt[i][0] < min_Ln_RM_rt[i])
+				ln_LRRM_rt[i][0] = min_Ln_RM_rt[i];
+		}
+		else if (N_OnRamp_Ln[i] == 2)
+		{
+			//ln_LRRM_rt[i][0]=(1.0-Onramp_HOV_Util)*total_field_rt[i]; // 15% goes to HOV lane	
+			ln_LRRM_rt[i][0]=total_field_rt[i]-Onramp_HOV_Util*max_RM_rt;  
+			if (ln_LRRM_rt[i][0] > max_Ln_RM_rt[i])
+				ln_LRRM_rt[i][0] = max_Ln_RM_rt[i];
+			if (ln_LRRM_rt[i][0] < min_Ln_RM_rt[i])
+				ln_LRRM_rt[i][0] = min_Ln_RM_rt[i];
+		}
+		else //if (N_OnRamp_Ln[i] == 3)
+		{				
+			ln_LRRM_rt[i][0]=0.5*(total_field_rt[i]-Onramp_HOV_Util*max_RM_rt);  
+			ln_LRRM_rt[i][1]=0.5*(total_field_rt[i]-Onramp_HOV_Util*max_RM_rt);  
+			if (ln_LRRM_rt[i][0] > max_Ln_RM_rt[i])
+				ln_LRRM_rt[i][0] = max_Ln_RM_rt[i];
+			if (ln_LRRM_rt[i][0] < min_Ln_RM_rt[i])
+				ln_LRRM_rt[i][0] = min_Ln_RM_rt[i];
+			if (ln_LRRM_rt[i][1] > max_Ln_RM_rt[i])
+				ln_LRRM_rt[i][1] = max_Ln_RM_rt[i];
+			if (ln_LRRM_rt[i][1] < min_Ln_RM_rt[i])
+				ln_LRRM_rt[i][1] = min_Ln_RM_rt[i];
+		}	
+	}
 
 	} // if ISUPDATE2 loop 
 	else
 		ISUPDATE2++;	
 	return 1;
 }
+
+
 
 /*******************************************
                OptSolver
@@ -1448,7 +1112,7 @@ int Set_Coord_ALINEA(float time,float time2,float timeSta)
 
 int set_coef(float c[MP][NP],float Qm)
 {
-	char str[len_str];
+	
 
 	float w_const[SecSize][Np]={{0.0}}; 					// Used to construct b_u; 
 	float p_const[SecSize][Np]={{0.0}};					// Used to construct b_u; 	
@@ -1457,7 +1121,7 @@ int set_coef(float c[MP][NP],float Qm)
 	float b_u[M1]={0.0};
 	float b_l[M2]={0.0};   // upper bound of r
 
-	int m = 0,i = 0,j = 0;
+	int m,i,j;
 	static unsigned short memset_sw=1;
 	
 	if (memset_sw==1)
@@ -1548,7 +1212,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	// Assign f to Matrix c
 	for(j=0;j<2*NumOnRamp;j++)	
-		c[0][j+1]=f[i];			
+		c[0][j+1]=f[j];			
 	
 	// Assign Upper &  lower Bounds to Matrix c
 	for(i=1;i<=M1;i++)
@@ -1610,7 +1274,8 @@ int set_coef(float c[MP][NP],float Qm)
 		for (m=1;m<NP;m++)
 			c[i][m]=-c[i][m];
 	}
-/*
+	
+#ifdef COEFF_DATA
 	sprintf(str,"up_rho:");
 	fprintf(pp,"%s\n",str);	
 	for(m=0;m<Np;m++)
@@ -1647,12 +1312,12 @@ int set_coef(float c[MP][NP],float Qm)
 	fprintf(pp,"\n");
 
 	//sprintf(str,"Q_o:");
-//	fprintf(pp,"Q_o=:\n");
-//	for(m=0;m<NumOnRamp;m++)
-//	{
-//		fprintf(pp,"%lf ",Q_o[m]);		
-//	}
-//	fprintf(pp,"\n") 
+	/*fprintf(pp,"Q_o=:\n");
+	for(m=0;m<NumOnRamp;m++)
+	{
+		fprintf(pp,"%lf ",Q_o[m]);		
+	}
+	fprintf(pp,"\n") */
 	
 
 	sprintf(str,"Onramp Length:");
@@ -1743,11 +1408,11 @@ int set_coef(float c[MP][NP],float Qm)
 	
 
 
-//sprintf(str,"M1 & M2:");
-//	fprintf(pp,"%s\n",str);
-//	fprintf(pp,"%i %i ",M1, M2); //b_l[m]);		
-//	fprintf(pp,"\n");	
-//
+/*sprintf(str,"M1 & M2:");
+	fprintf(pp,"%s\n",str);
+	fprintf(pp,"%i %i ",M1, M2); //b_l[m]);		
+	fprintf(pp,"\n");	
+*/
 	sprintf(str,"c:");
 	fprintf(pp,"%s\n",str);
 	for(m=0;m<MP;m++)
@@ -1758,7 +1423,7 @@ int set_coef(float c[MP][NP],float Qm)
 		}
 		fprintf(pp,"\n");		
 	}
-*/
+#endif
 	
 	return 0;
 }
@@ -1821,14 +1486,12 @@ int Finish_sim_data_io()
 {
 	fflush(dbg_f);
 	fclose(dbg_f);
-	//fflush(dmd_f);
-	//fclose(dmd_f);
-	fflush(vsl_crm_f);
-	fclose(vsl_crm_f);
+	fflush(local_rm_f);
+	fclose(local_rm_f);	
 	fflush(cal_opt_f);
 	fclose(cal_opt_f);
-	//fflush(det_outfile);
-	//fclose(det_outfile);
+	fflush(Ln_RM_rt_f);
+	fclose(Ln_RM_rt_f);
 	//fflush(sec_outfile);
 	//fclose(sec_outfile);
 	if (use_CRM == 2)
@@ -1836,18 +1499,15 @@ int Finish_sim_data_io()
 		fflush(pp);
 		fclose(pp);
 	}
-	//fclose(st_file);
+	fclose(st_file);
 	fflush(st_file_out);
 	fclose(st_file_out);
-    
-	fflush(dbg_st_file_out);
-	fclose(dbg_st_file_out);
+
 
 	return 1;
 }
 
 
-//			    detection_s[i]->data[Np-1].flow=Mind(12000.0, Maxd(mainline_out[i].agg_vol, 200.0*(1.0+0.5*rand()/RAND_MAX)));
 float Mind(float a,float b)
 {
 	if(a<=b)
