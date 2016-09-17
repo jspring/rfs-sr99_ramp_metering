@@ -171,14 +171,20 @@ int main(int argc, char *argv[])
 	};
 	int counter = 0;
 
+	// Initialization for urms_ctl
+	// Set lane 1 (HOV, not metered) and lane 4 (nonexistent) action
+	// to SKIP and metering rate to 2000 VPH
+	// Set regular lanes 2 & 3 to fixed rate and all plans to 0.
 	for(i=0; i<NumOnRamp; i++) {
-		urms_ctl[i].lane_1_action = URMS_ACTION_REST_IN_GREEN;
+		urms_ctl[i].lane_1_action = URMS_ACTION_SKIP;
+		urms_ctl[i].lane_1_release_rate = 2000;
 		urms_ctl[i].lane_1_plan = 0;
 		urms_ctl[i].lane_2_action = URMS_ACTION_FIXED_RATE;
 		urms_ctl[i].lane_2_plan = 0;
 		urms_ctl[i].lane_3_action = URMS_ACTION_FIXED_RATE;
 		urms_ctl[i].lane_3_plan = 0;
-		urms_ctl[i].lane_4_action = URMS_ACTION_REST_IN_GREEN;
+		urms_ctl[i].lane_4_action = URMS_ACTION_SKIP;
+		urms_ctl[i].lane_4_release_rate = 2000;
 		urms_ctl[i].lane_4_plan = 0;
 	}
 
