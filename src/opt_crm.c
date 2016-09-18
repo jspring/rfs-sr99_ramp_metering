@@ -231,6 +231,12 @@ int main(int argc, char *argv[])
 	}
 
 	if(( exitsig = setjmp(exit_env)) != 0) {
+		urms_ctl[0].lane_1_action = URMS_ACTION_SKIP;
+		urms_ctl[0].lane_2_action = URMS_ACTION_SKIP;
+		urms_ctl[0].lane_3_action = URMS_ACTION_SKIP;
+		urms_ctl[0].lane_4_action = URMS_ACTION_SKIP;
+		for(i=0; i<11; i++)
+			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[0]); 
 		db_list_done(pclt, NULL, 0, NULL, 0);
 		exit(EXIT_SUCCESS);
 	} else
