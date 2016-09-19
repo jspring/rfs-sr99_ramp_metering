@@ -145,7 +145,7 @@ const int ln_meteringId[16][max_onramp_ln]={{21044,21045,21046},{19780,0,0},{197
 	static float L[SecSize]={555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
 	const float Q[SecSize]={2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
 	//const float min_Ln_RM_rt[NumOnRamp]={480,600,681,240,500,700,480,480,480,575,800}; // field lower bound
-	const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,130,400,550,380,380,380,475,550}; // field lower bound
+	const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,400,550,380,380,380,475,550}; // field lower bound
 	const float max_Ln_RM_rt[NumOnRamp]=  {1000,750,910,900,900,990,900,900,750,920,1080}; // field upper bound
 	
 	// for downstream 11 onramps only
