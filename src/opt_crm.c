@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 //	double tmp0, tmp1, tmp2, tmp3, tmp4;
 	static int init_sw=1;
 	int i;
+	int min_index;
 	db_urms_t urms_ctl[NumOnRamp] = {{0}};
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/6];  //See warning at top of file
@@ -686,17 +687,20 @@ int j; //
 //FOR TEST PURPOSES ONLY###############################
 //counter++;
 //FOR TEST PURPOSES ONLY###############################
-		for (i=0;i<NumOnRamp;i++)               // Lane-wise RM rate
+		if( (pts->hour >= 15) && (pts->hour < 18) )
+			min_index = 2;
+		else
+			min_index = 0;
+
+		for (i=min_index;i<NumOnRamp;i++)               // Lane-wise RM rate
 		{
-			if( (pts->hour >= 6) && (pts->hour < 7) ) {
-				// for Hour 1
-				urms_ctl[i].lane_1_release_rate = ln_LRRM_rt[i][0];
-				urms_ctl[i].lane_2_release_rate = ln_LRRM_rt[i][0];
-			}
-			else{
-				// from hour 2
-				urms_ctl[i].lane_1_release_rate = ln_RM_rt[i][0];
-				urms_ctl[i].lane_2_release_rate = ln_RM_rt[i][0];
+			urms_ctl[i].lane_1_action = URMS_ACTION_FIXED_RATE;
+			urms_ctl[i].lane_2_action = URMS_ACTION_FIXED_RATE;
+			urms_ctl[i].lane_3_action = URMS_ACTION_FIXED_RATE;
+
+			urms_ctl[i].lane_1_release_rate = ln_RM_rt[i][0];
+			urms_ctl[i].lane_2_release_rate = ln_RM_rt[i][0];
+			urms_ctl[i].lane_3_release_rate = ln_RM_rt[i][0];
 //FOR TEST PURPOSES ONLY###############################
 //				urms_ctl[i].lane_1_release_rate = 450+i;
 //				urms_ctl[i].lane_2_release_rate = 400+i;
@@ -720,7 +724,6 @@ int j; //
 //FOR TEST PURPOSES ONLY###############################
 			}
 			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
-		}
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
