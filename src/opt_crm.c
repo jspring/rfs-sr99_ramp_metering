@@ -173,19 +173,18 @@ int main(int argc, char *argv[])
 
 	// Initialization for urms_ctl
 	// Set lane 1 (HOV, not metered) and lane 4 (nonexistent) action
-	// to SKIP and metering rate to 2000 VPH
+	// to SKIP and metering rate to 1100 VPH
 	// Set regular lanes 2 & 3 to fixed rate and all plans to 0.
 	for(i=0; i<NumOnRamp; i++) {
-		urms_ctl[i].lane_1_action = URMS_ACTION_SKIP;
-		urms_ctl[i].lane_1_release_rate = 2000;
-		urms_ctl[i].lane_1_plan = 0;
+		urms_ctl[i].lane_1_action = URMS_ACTION_FIXED_RATE;
+		urms_ctl[i].lane_1_plan = 1;
 		urms_ctl[i].lane_2_action = URMS_ACTION_FIXED_RATE;
-		urms_ctl[i].lane_2_plan = 0;
+		urms_ctl[i].lane_2_plan = 1;
 		urms_ctl[i].lane_3_action = URMS_ACTION_FIXED_RATE;
-		urms_ctl[i].lane_3_plan = 0;
+		urms_ctl[i].lane_3_plan = 1;
 		urms_ctl[i].lane_4_action = URMS_ACTION_SKIP;
-		urms_ctl[i].lane_4_release_rate = 2000;
-		urms_ctl[i].lane_4_plan = 0;
+		urms_ctl[i].lane_4_release_rate = 1100;
+		urms_ctl[i].lane_4_plan = 1;
 	}
 
 	while ((option = getopt(argc, argv, "di:")) != EOF) {
@@ -689,28 +688,39 @@ int j; //
 //FOR TEST PURPOSES ONLY###############################
 		for (i=0;i<NumOnRamp;i++)               // Lane-wise RM rate
 		{
-			if( (controller_data2[13].ts.hour >= 6) && (controller_data2[13].ts.hour < 7) ) {
+			if( (pts->hour >= 6) && (pts->hour < 7) ) {
 				// for Hour 1
+				urms_ctl[i].lane_1_release_rate = ln_LRRM_rt[i][0];
 				urms_ctl[i].lane_2_release_rate = ln_LRRM_rt[i][0];
-				urms_ctl[i].lane_3_release_rate = ln_LRRM_rt[i][0];
 			}
 			else{
 				// from hour 2
+				urms_ctl[i].lane_1_release_rate = ln_RM_rt[i][0];
 				urms_ctl[i].lane_2_release_rate = ln_RM_rt[i][0];
-				urms_ctl[i].lane_3_release_rate = ln_RM_rt[i][0];
 //FOR TEST PURPOSES ONLY###############################
-//				urms_ctl[i].lane_2_release_rate = 250+i+counter;
-//				urms_ctl[i].lane_3_release_rate = 200+i+counter;
-//printf("Controller db var %d lane 2 rate %d lane 3 rate %d\n",
+//				urms_ctl[i].lane_1_release_rate = 450+i;
+//				urms_ctl[i].lane_2_release_rate = 400+i;
+//				urms_ctl[i].lane_3_release_rate = 350+i;
+//				urms_ctl[i].lane_4_release_rate = 300+i;
+//				urms_ctl[i].lane_1_action = URMS_ACTION_SKIP;
+//				urms_ctl[i].lane_2_action = URMS_ACTION_SKIP;
+//				urms_ctl[i].lane_3_action = URMS_ACTION_SKIP;
+//				urms_ctl[i].lane_4_action = URMS_ACTION_SKIP;
+//				urms_ctl[i].lane_1_plan = 1;
+//				urms_ctl[i].lane_2_plan = 1;
+//				urms_ctl[i].lane_3_plan = 1;
+//				urms_ctl[i].lane_4_plan = 1;
+//printf("Controller db var %d lane 1 rate %d lane 2 rate %d lane 3 rate %d\n",
 //	metering_controller_db_vars[i],
+//	urms_ctl[i].lane_1_release_rate,
 //	urms_ctl[i].lane_2_release_rate,
-//	urms_ctl[i].lane_2_release_rate
+//	urms_ctl[i].lane_3_release_rate,
+//	urms_ctl[i].lane_4_release_rate
 //);
 //FOR TEST PURPOSES ONLY###############################
 			}
 			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
 		}
-
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
