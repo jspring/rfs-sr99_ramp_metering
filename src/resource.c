@@ -870,20 +870,25 @@ float interp_OR_HIS_FLOW(int OR_idx, float OR_flow_prev , const float OR_HIS_FLO
 	float t_convert = 0.0; 
 	float OR_flow = 0.0;
 	
-	t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	//t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	t_convert = (ts->hour)*3600.0 + (ts->min)*60.0 + (ts->sec) ;
+	t_convert = t_convert/300.0;
+
+	printf("interp_FR_HIS_FLOW: t_convert orig %f ", t_convert);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
 	
 	t_0 = floor(t_convert);
 	t_0 = mind(t_0,288);
 	t_0 = maxd(0,t_0);
+	printf("t_convert final %f t_0 %d\n", t_convert, t_0);
 	 
-	OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx]; 
+	OR_flow = OR_HIS_FLOW_DAT[t_0][OR_idx];    // get data from lookup table
 	
 	// flow change rate limiter 
-	if( (OR_flow - OR_flow_prev  < -300) || (OR_flow - OR_flow_prev  > 300)  || (OR_flow <0) ){
-	   OR_flow = OR_flow_prev;
-	}
+	//if( (OR_flow - OR_flow_prev  < -300) || (OR_flow - OR_flow_prev  > 300)  || (OR_flow <0) ){
+	//   OR_flow = OR_flow_prev;
+	//}
 	return OR_flow;
 }
 
@@ -896,20 +901,24 @@ float interp_OR_HIS_OCC(int OR_idx, float OR_occupancy_prev, const float OR_HIS_
 	float t_convert = 0.0; 
 	float OR_occ = 0.0;
 	
-	t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	//t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
+	t_convert = (ts->hour)*3600.0 + (ts->min)*60.0 + (ts->sec) ;
+	t_convert = t_convert/300.0;
+	printf("interp_OR_HIS_OCC: t_convert orig %f ", t_convert);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
 	
 	t_0 = floor(t_convert);
 	t_0 = mind(t_0,288);
 	t_0 = maxd(0,t_0);
+	printf("t_convert final %f t_0 %d\n", t_convert, t_0);
 	 
 	OR_occ = OR_HIS_OCC_DAT[t_0][OR_idx];
 	  
 	// occupancy change rate limiter 
-	if( (OR_occ - OR_occupancy_prev  < -30) || (OR_occ - OR_occupancy_prev  > 30)  || (OR_occ <0) ){
-	   OR_occ = OR_occupancy_prev;
-	}
+	//if( (OR_occ - OR_occupancy_prev  < -30) || (OR_occ - OR_occupancy_prev  > 30)  || (OR_occ <0) ){
+	//   OR_occ = OR_occupancy_prev;
+	//}
 	return OR_occ;
 }
 
@@ -924,20 +933,24 @@ float interp_FR_HIS_FLOW(int FR_idx, float FR_flow_prev, const float FR_HIS_FLOW
 	float t_convert = 0.0; 
 	float FR_flow = 0.0;
 	
-	t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
+	//t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
+	t_convert = (ts->hour)*3600.0 + (ts->min)*60.0 + (ts->sec) ;
+	t_convert = t_convert/300.0;
+	printf("interp_FR_HIS_FLOW: t_convert orig %f ", t_convert);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
 	
 	t_0 = floor(t_convert);
 	t_0 = mind(t_0,288);
 	t_0 = maxd(0,t_0);
+	printf("t_convert final %f t_0 %d\n", t_convert, t_0);
 	
 	FR_flow = FR_HIS_FLOW_DAT[t_0][FR_idx];
 	
 	// flow change rate limiter 
-	if( (FR_flow - FR_flow_prev  < -300) || (FR_flow - FR_flow_prev  > 300)  || (FR_flow <0) ){
-	   FR_flow = FR_flow_prev;
-	}
+	//if( (FR_flow - FR_flow_prev  < -300) || (FR_flow - FR_flow_prev  > 300)  || (FR_flow <0) ){
+	//   FR_flow = FR_flow_prev;
+	//}
 
 	return FR_flow;
 }
@@ -952,20 +965,24 @@ float interp_FR_HIS_OCC(int FR_idx, float FR_occupancy_prev, const float FR_HIS_
 	float t_convert = 0.0; 
 	float FR_occ = 0.0;
 	
-	t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
+	//t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0);
+	t_convert = (ts->hour)*3600.0 + (ts->min)*60.0 + (ts->sec) ;
+	t_convert = t_convert/300.0;
+	printf("interp_FR_HIS_OCC: t_convert orig %f ", t_convert);
 	t_convert = mind(t_convert,288);
 	t_convert = maxd(0,t_convert);
 	
 	t_0 = floor(t_convert);
 	t_0 = mind(t_0,288);
 	t_0 = maxd(0,t_0);
+	printf("t_convert final %f t_0 %d\n", t_convert, t_0);
 
 	FR_occ = FR_HIS_OCC_DAT[t_0][FR_idx];
 	
 	// occupancy change rate limiter 
-	if( (FR_occ - FR_occupancy_prev  < -30) || (FR_occ - FR_occupancy_prev  > 30)  || (FR_occ <0) ){
-	   FR_occ = FR_occupancy_prev;
-	}
+	//if( (FR_occ - FR_occupancy_prev  < -30) || (FR_occ - FR_occupancy_prev  > 30)  || (FR_occ <0) ){
+	//   FR_occ = FR_occupancy_prev;
+	//}
 	return FR_occ;
 }
 
@@ -990,11 +1007,11 @@ float ratio_ML_HIS_FLOW(float current_most_upstream_flow, const float MOST_UPSTR
 	ML_flow = MOST_UPSTREAM_MAINLINE_FLOW_DATA[t_0][1]*12; 
 	
 	// flow change rate limiter 
-	if( abs(current_most_upstream_flow-ML_flow) > 0 ){
-		ratio = current_most_upstream_flow/ML_flow;
-	}else{
-	    ratio = 1;
-	}
+	//if( abs(current_most_upstream_flow-ML_flow) > 0 ){
+	//	ratio = current_most_upstream_flow/ML_flow;
+	//}else{
+	//    ratio = 1;
+	//}
 	return ratio;
 }
 
