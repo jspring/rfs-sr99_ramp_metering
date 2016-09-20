@@ -224,6 +224,9 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 			ac_rm_pre
 		);
 	}
+	struct timespec now;
+        clock_gettime( CLOCK_REALTIME, &now );
+        start_time = now.tv_sec + ((double) now.tv_nsec/ 1000000000L);
 
 	if(( exitsig = setjmp(exit_env)) != 0) {
 		if (f_ac_rm)
