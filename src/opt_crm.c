@@ -46,7 +46,7 @@ static void sig_hand(int code)
                 longjmp(exit_env, code);
 }
 
-const char *usage = "-i <loop interval> -r (run in replay mode)";
+const char *usage = "-i <loop interval, def. 30000 ms> -r (run in replay mode)";
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	db_clt_typ *pclt;
 	char hostname[MAXHOSTNAMELEN+1];
 	posix_timer_typ *ptimer;       /* Timing proxy */
-	int interval = 0;      /// Number of milliseconds between saves. The loop timer is used only in replay
+	int interval = 30000;      /// Number of milliseconds between saves
 	int cycle_index = 0;
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
@@ -150,11 +150,11 @@ int main(int argc, char *argv[])
 	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
 
-	int num_zero_tolerant = 10;
-    int OR_flow_zero_counter[NumOnRamp] = {0};
-    int OR_occ_zero_counter[NumOnRamp] = {0};
-    int FR_flow_zero_counter[NumOnRamp] = {0};
-    int FR_occ_zero_counter[NumOnRamp] = {0};
+	//int num_zero_tolerant = 10;
+    //int OR_flow_zero_counter[NumOnRamp] = {0};
+    //int OR_occ_zero_counter[NumOnRamp] = {0};
+    //int FR_flow_zero_counter[NumOnRamp] = {0};
+    //int FR_occ_zero_counter[NumOnRamp] = {0};
 
 //	Example: metering_rates[0...10] = Calvine_EB_Metering_Rate...12th_St_Metering_Rate;
 	short metering_controller_db_vars[11] = {
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 	int counter = 0;
 
 	// Initialization for urms_ctl
-	// Set lane 1 (HOV, not metered) and lane 4 (nonexistent) action
+	// Set lane 4 (nonexistent) action
 	// to SKIP and metering rate to 1100 VPH
 	// Set regular lanes 2 & 3 to fixed rate and all plans to 0.
 	for(i=0; i<NumOnRamp; i++) {
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 		urms_ctl[i].lane_4_plan = 1;
 	}
 
-	while ((option = getopt(argc, argv, "di:")) != EOF) {
+	while ((option = getopt(argc, argv, "di:r")) != EOF) {
 		switch(option) {
 			case 'd':
 				debug = 1;
@@ -211,21 +211,14 @@ int main(int argc, char *argv[])
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
 
-
-	//Initialize database with triggered variables only if not using replay
-	if ( (interval == 0) && ((pclt = db_list_init(argv[0], hostname, domain, xport,
-		NULL, 0, db_trig_list, NUM_TRIG_VARS)) == NULL)) {
-		printf("Database initialization error in %s.\n", argv[0]);
-		exit(EXIT_FAILURE);
-	}
-	else //Initialize database without triggered variables only if using replay
 	if ( (pclt = db_list_init(argv[0], hostname, domain, xport,
 		NULL, 0, NULL, 0)) == NULL) {
 		printf("Database initialization error in %s.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
+
 	/* Setup a timer for every 'interval' msec. */
-	if ( (interval > 0) && ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL)) {
+	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
 		printf("Unable to initialize wrfiles timer\n");
 		exit(EXIT_FAILURE);
 	}
@@ -260,9 +253,6 @@ int main(int argc, char *argv[])
 //BEGIN MAIN FOR LOOP HERE
 	for(;;)	
 	{
-		/* Now wait for a trigger, but only if we're not timing the infinite loop (i.e. running replay) */
-		if(interval == 0)
-			recv_type= clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
 
 	cycle_index++;
 	cycle_index = cycle_index % NUM_CYCLE_BUFFS;
@@ -275,10 +265,10 @@ int main(int argc, char *argv[])
 /*#################################################################################################################
 ###################################################################################################################*/
 
-//** Cheng-Ju's code here **//
+// Cheng-Ju's code here 
 // 4 off-ramp is missing, total number of off-ramps is 9. After D3 fix those missing off-ramps, OffRampIndex table need to be updated. 
 
-//** This part aggregate data for each URMS2070 controller in the field   
+// This part aggregate data for each URMS2070 controller in the field   
 	//int OnRampIndex [NUM_CONTROLLER_VARS/6] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
 	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
@@ -316,6 +306,7 @@ int main(int argc, char *argv[])
         mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
         density_prev[i] = controller_mainline_data[i].agg_density;
 
+/*#################################################################################################################*/
         //fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); //2
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3
@@ -365,7 +356,7 @@ int main(int argc, char *argv[])
 	fprintf(dbg_st_file_out,"\n");
 
     
-//** This part aggregate data for each section
+// This part aggregate data for each section
 // controller index for each mainline section
 int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1 
                              {8,  -1, -1, -1}, // controller in section 2 
@@ -379,7 +370,7 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
                              {21, 22, -1, -1}, // controller in section 10
 							 {23, -1, -1, -1}, // controller in section 11 
 							 {24, 25, 26, -1}}; // controller in section 12 
-int j; //
+int j; 
 		float temp_num_ct = 0.0; // number of controllers per section
 		float temp_vol = 0.0;
 		float temp_speed = 0.0;
@@ -530,7 +521,6 @@ int j; //
 	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
    }
 
-
  
 // moving average filter for on-ramp off-ramp
    for(i=0; i<NumOnRamp; i++){
@@ -554,48 +544,7 @@ int j; //
 		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;
 		
 	  }
-/*
-	  // fill out zero on-ramp off-ramp data by look up table
- 	  if(mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS)>50.0){ // the threshold is in hourly flow rate
-		  if(abs(OR_flow_prev[i] - mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS))<80){
-		       onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS);
-		  }else{
-		  	   onramp_out_f[i].agg_vol = OR_flow_prev[i];
-		  } 
-	  }else{
-	     onramp_out_f[i].agg_vol = interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i], OR_HIS_FLOW_DATA, pts); // interpolate missing value from table    
-	  }
 
-	  if(mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)>1.0){
-		  if(abs(OR_occupancy_prev[i] - mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS)) < 30 ){ 
-		      onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
-		  }else{
-		      onramp_out_f[i].agg_occ = OR_occupancy_prev[i];
-		  }
-	  }else{
-         onramp_out_f[i].agg_occ = interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, pts); // interpolate missing value from table
-	  }
-        
-	  if(mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)>50.0){
-		  if(abs(FR_flow_prev[i] - mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS)) < 80){
-             offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);
-		  }else{
-             offramp_out_f[i].agg_vol = FR_flow_prev[i];
-		  } 
-	  }else{
-          offramp_out_f[i].agg_vol = interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] , FR_HIS_FLOW_DATA, pts); // interpolate missing value from table
-	  }
-
-	  if(mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)>1.0){
-		  if(abs(FR_occupancy_prev[i] - mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS)) < 30){
-			  offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);
-		  }else{
-              offramp_out_f[i].agg_occ = FR_occupancy_prev[i]; 
-		  }
-	  }else{
-           offramp_out_f[i].agg_occ = interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i],  FR_HIS_OCC_DATA, pts); // interpolate missing value from table 
-	  }
-     */ 
 	  onramp_queue_out_f[i].agg_vol = mean_array(temp_ary_OR_queue_detector_vol,NUM_CYCLE_BUFFS); 
 	  onramp_queue_out_f[i].agg_occ = mean_array(temp_ary_OR_queue_detector_occ,NUM_CYCLE_BUFFS);
 
@@ -626,6 +575,7 @@ int j; //
 			    detection_s[i]->data[Np-1].speed=Mind(100.0, Maxd(mainline_out_f[i].agg_speed, 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].occupancy=Mind(100.0, Maxd((mainline_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX)));
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));
+			    
                 //fprintf(st_file_out,"Sec %d ", i); 
 			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_vol); //2,6,10,14,18,22,26,30,34,38,42,46
                 fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 		//3 ,7,11,15,19,23,27,31,35,39,43,47
@@ -701,6 +651,7 @@ int j; //
 			urms_ctl[i].lane_1_release_rate = ln_RM_rt[i][0];
 			urms_ctl[i].lane_2_release_rate = ln_RM_rt[i][0];
 			urms_ctl[i].lane_3_release_rate = ln_RM_rt[i][0];
+			urms_ctl[i].no_control = 0;
 //FOR TEST PURPOSES ONLY###############################
 //				urms_ctl[i].lane_1_release_rate = 450+i;
 //				urms_ctl[i].lane_2_release_rate = 400+i;
@@ -714,21 +665,28 @@ int j; //
 //				urms_ctl[i].lane_2_plan = 1;
 //				urms_ctl[i].lane_3_plan = 1;
 //				urms_ctl[i].lane_4_plan = 1;
-//printf("Controller db var %d lane 1 rate %d lane 2 rate %d lane 3 rate %d\n",
-//	metering_controller_db_vars[i],
-//	urms_ctl[i].lane_1_release_rate,
-//	urms_ctl[i].lane_2_release_rate,
-//	urms_ctl[i].lane_3_release_rate,
-//	urms_ctl[i].lane_4_release_rate
-//);
+printf("Controller db var %d lane 1 rate %d action %d plan %d lane 2 rate %d action %d plan %d lane 3 rate %d action %d plan %d lane 4 rate %d action %d plan %d\n",
+	metering_controller_db_vars[i],
+	urms_ctl[i].lane_1_release_rate,
+	urms_ctl[i].lane_1_action,
+	urms_ctl[i].lane_1_plan,
+	urms_ctl[i].lane_2_release_rate,
+	urms_ctl[i].lane_2_action,
+	urms_ctl[i].lane_2_plan,
+	urms_ctl[i].lane_3_release_rate,
+	urms_ctl[i].lane_3_action,
+	urms_ctl[i].lane_3_plan,
+	urms_ctl[i].lane_4_release_rate,
+	urms_ctl[i].lane_4_action,
+	urms_ctl[i].lane_4_plan
+);
+			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
 //FOR TEST PURPOSES ONLY###############################
 			}
-			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
-		if(interval > 0)
-			TIMER_WAIT(ptimer);	
+		TIMER_WAIT(ptimer);	
 	} 
 	
 	Finish_sim_data_io();
