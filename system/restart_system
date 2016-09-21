@@ -72,8 +72,17 @@ echo PORT3 $PORT
 #		if [[ q`ps -ef | grep urms | grep $x | grep -v grep` == 'q' ]]
 		then 
 			echo $x urms process not running. Attempting restart.... >>$RESTART_LOGFILE
-			echo CONTROLLER_IP $CONTROLLER_IP URMS_STATUS_DBNUM $URMS_STATUS_DBNUM PORT $PORT >>$RESTART_LOGFILE
-			/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -n -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+
+			cat /home/sr99_ramp_metering/system/urmsgo_all | grep $CONTROLLER_IP | grep control
+			if [[ $? == 0 ]]
+			then			
+				/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				CONTROL=under_control
+			else
+				/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				CONTROL=no_control
+			fi
+			echo CONTROLLER_IP $CONTROLLER_IP URMS_STATUS_DBNUM $URMS_STATUS_DBNUM PORT $PORT $CONTROL >>$RESTART_LOGFILE
 			sleep 5
 		fi
 		PORT=$PORT2
