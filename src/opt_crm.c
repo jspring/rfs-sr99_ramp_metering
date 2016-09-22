@@ -46,7 +46,7 @@ static void sig_hand(int code)
                 longjmp(exit_env, code);
 }
 
-const char *usage = "-i <loop interval, def. 30000 ms> -r (run in replay mode)";
+const char *usage = "-i <loop interval> -r (run in replay mode)";
 
 #define NUM_ONRAMPS	16   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
@@ -88,8 +88,7 @@ int main(int argc, char *argv[])
 {
 	timestamp_t ts;
 	timestamp_t *pts = &ts;
-	float time = 0, time2 = 0,timeSta = 0;
-//	double tmp0, tmp1, tmp2, tmp3, tmp4;
+	float time = 0, time2 = 0,timeSta = 0, tmp=0.0;
 	static int init_sw=1;
 	int i;
 	int min_index;
@@ -216,9 +215,8 @@ int main(int argc, char *argv[])
 		printf("Database initialization error in %s.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
-
 	/* Setup a timer for every 'interval' msec. */
-	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
+	if ( ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL)) {
 		printf("Unable to initialize wrfiles timer\n");
 		exit(EXIT_FAILURE);
 	}
@@ -265,7 +263,7 @@ int main(int argc, char *argv[])
 /*#################################################################################################################
 ###################################################################################################################*/
 
-// Cheng-Ju's code here 
+// Cheng-Ju's code here
 // 4 off-ramp is missing, total number of off-ramps is 9. After D3 fix those missing off-ramps, OffRampIndex table need to be updated. 
 
 // This part aggregate data for each URMS2070 controller in the field   
@@ -306,7 +304,6 @@ int main(int argc, char *argv[])
         mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
         density_prev[i] = controller_mainline_data[i].agg_density;
 
-/*#################################################################################################################*/
         //fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); //2
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3
@@ -370,7 +367,7 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
                              {21, 22, -1, -1}, // controller in section 10
 							 {23, -1, -1, -1}, // controller in section 11 
 							 {24, 25, 26, -1}}; // controller in section 12 
-int j; 
+int j;
 		float temp_num_ct = 0.0; // number of controllers per section
 		float temp_vol = 0.0;
 		float temp_speed = 0.0;
@@ -603,6 +600,16 @@ int j;
 				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);
 				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);
 				//fprintf(st_file_out,"\n");//
+				
+				if ( (i > 0) && (i!=10))
+				{						
+				
+					if ( ((detection_s[i]->data[Np-1].occupancy)-(8.0+(11-i)*2.0)) > 0.0)
+						tmp=((detection_s[i]->data[Np-1].occupancy)-(8.0+(11-i)*2.0))/8.0;						
+					if (tmp> 0.35)
+						tmp=0.35;
+					detection_onramp[i]->data[Np-1].flow=(detection_onramp[i]->data[Np-1].flow)*(1.0-tmp);							
+				}
 		}
 		
 		fprintf(st_file_out,"\n");
@@ -686,7 +693,7 @@ printf("Controller db var %d lane 1 rate %d action %d plan %d lane 2 rate %d act
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
-		TIMER_WAIT(ptimer);	
+			TIMER_WAIT(ptimer);	
 	} 
 	
 	Finish_sim_data_io();
