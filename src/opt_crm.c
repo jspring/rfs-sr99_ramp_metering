@@ -601,13 +601,25 @@ int j;
 				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);
 				//fprintf(st_file_out,"\n");//
 				
-				if ( (i > 0) && (i!=10))
-				{						
-				
-					if ( ((detection_s[i]->data[Np-1].occupancy)-(8.0+(11-i)*2.0)) > 0.0)
-						tmp=((detection_s[i]->data[Np-1].occupancy)-(8.0+(11-i)*2.0))/8.0;						
-					if (tmp> 0.35)
-						tmp=0.35;
+				if (i!=10)
+				{					
+					if ( (Maxd((detection_s[i]->data[Np-1].occupancy), (detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0)) > 0.0)
+						tmp=(Maxd((detection_s[i]->data[Np-1].occupancy),(detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0))/8.0;
+					if ((i<=2) || (i==4) || (i==7))	
+					{
+						if (tmp> 0.65)
+							tmp=0.65;
+					}
+					else if (i==9)
+					{					
+						if (tmp> 0.25)
+							tmp=0.25;
+					}
+					else
+					{					
+						if (tmp> 0.45)
+							tmp=0.45;
+					}
 					detection_onramp[i]->data[Np-1].flow=(detection_onramp[i]->data[Np-1].flow)*(1.0-tmp);							
 				}
 		}
