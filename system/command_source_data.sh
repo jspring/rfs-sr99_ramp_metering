@@ -15,5 +15,5 @@ echo $MATCHSTR
 for THIS_PATH in `ls $MYPATH*$MATCHSTR.dat`
 do
 #	echo `cat $THIS_PATH | awk '{print $57,$65,$251}' | uniq -c | wc | awk '{print $1}'` `wc $THIS_PATH | awk '{print $1,$4}'` 
-	echo `cat $THIS_PATH | awk '{print $57,$65,$251}' | uniq -c` `wc $THIS_PATH | awk '{print $1,$4}'` 
+	echo `cat $THIS_PATH | awk '{print $49,$57,$65,$251}' | uniq -c` `wc $THIS_PATH | awk '{print $1,$4}'` 
 done
