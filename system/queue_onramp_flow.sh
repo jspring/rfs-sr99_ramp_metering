@@ -4,16 +4,7 @@ A_FILE=$1
 
 if [[ q$A_FILE == 'q' ]]
 then
-	echo
-	echo "Usage: $0 <one filename in set>"
-	echo "Prints out the number of changes (i.e. number of different lines) in occupancy"
-	echo "for queue detectors for all the lanes on all the controllers:"
-	echo "Column 1: number of different lines in the data file"
-	echo "Column 2: total number of lines in data file"
-	echo "Column 3: file name"
-	echo
-
-	exit 1
+        A_FILE=`ls -t /big/data/ac_rm_1/a_10* | head  -1`
 fi
 
 MATCHSTR=`echo $A_FILE | sed '{s/\./ /g}' | awk '{print $(NF-1)}'`
