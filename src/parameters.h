@@ -146,7 +146,8 @@ const int ln_meteringId[16][max_onramp_ln]={{21044,21045,21046},{19780,0,0},{197
 	const float Q[SecSize]={2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
 	//const float min_Ln_RM_rt[NumOnRamp]={480,600,681,240,500,700,480,480,480,575,800}; // field lower bound
 	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,400,550,380,380,380,475,550}; // revised lower bound; used Day_1
-	const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,350,500,380,350,380,420,550}; // revised lower bound
+	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,350,500,380,350,380,420,550}; // revised lower bound; 9/27/16
+	const float min_Ln_RM_rt[NumOnRamp]=  {350,380,480,240,350,470,350,350,380,420,550};   // revised lower bound; 9/28/16
 	//const float max_Ln_RM_rt[NumOnRamp]={1000,750,910,900,900,990,900,900,750,920,1080}; // field upper bound;   used Day_1
 	const float max_Ln_RM_rt[NumOnRamp]=  {1000,750,910,800,800,850,900,850,750,850,1080}; // revised lower bound
 										 
