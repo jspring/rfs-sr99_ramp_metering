@@ -90,14 +90,12 @@ int main(int argc, char *argv[])
 	timestamp_t *pts = &ts;
 	float time = 0, time2 = 0,timeSta = 0, tmp=0.0;
 	static int init_sw=1;
-	int i;
+	int i, j;
 	int min_index;
 	db_urms_t urms_ctl[NumOnRamp] = {{0}};
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/6];  //See warning at top of file
-	trig_info_typ trig_info;
-	int recv_type;
 
 	int option;
 	int exitsig;
@@ -367,7 +365,7 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
                              {21, 22, -1, -1}, // controller in section 10
 							 {23, -1, -1, -1}, // controller in section 11 
 							 {24, 25, 26, -1}}; // controller in section 12 
-int j;
+
 		float temp_num_ct = 0.0; // number of controllers per section
 		float temp_vol = 0.0;
 		float temp_speed = 0.0;
@@ -600,6 +598,17 @@ int j;
 				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);
 				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);
 				//fprintf(st_file_out,"\n");//
+				
+				max_occ_2_dwn[i]=detection_s[i]->data[Np-1].occupancy;	
+				max_occ_all_dwn[i]=detection_s[i]->data[Np-1].occupancy;		
+				for (j=i+1;j<=i+2;j++)
+				{
+					if (j < NumOnRamp+1)
+						max_occ_2_dwn[i]=Maxd(max_occ_2_dwn[i], (detection_s[j]->data[Np-1].occupancy));
+				}
+				for (j=i+1;j<NumOnRamp+1;j++)				
+					max_occ_all_dwn[i]=Maxd(max_occ_all_dwn[i], (detection_s[j]->data[Np-1].occupancy));			
+			
 				
 				if (i!=10)
 				{					
@@ -1004,13 +1013,12 @@ int Set_Opt_Meter()
 	
 		for (i=0;i<NumOnRamp;i++)
 		{
-			//if (N_OnRamp_Ln[i] == 1)
-				fprintf(Ln_RM_rt_f,"%lf ",ln_RM_rt[i][0]);
-			//else
-			//{
-			//	for (j=0;j<N_OnRamp_Ln[i]-1;j++)
-			//		fprintf(Ln_RM_rt_f,"%lf ",ln_RM_rt[i][j]);
-			//}
+			if (max_occ_2_dwn[i] < Occ_Cr)
+				ln_RM_rt[i][0]=0.8*max_Ln_RM_rt[i];
+			if (max_occ_all_dwn[i] < Occ_Cr)
+				ln_RM_rt[i][0]=max_Ln_RM_rt[i];
+				
+			fprintf(Ln_RM_rt_f,"%lf ",ln_RM_rt[i][0]);			
 		}
 		fprintf(Ln_RM_rt_f,"\n");	
 		
