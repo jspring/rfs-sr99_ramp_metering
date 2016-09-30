@@ -605,22 +605,27 @@ int j;
 				{					
 					if ( (Maxd((detection_s[i]->data[Np-1].occupancy), (detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0)) > 0.0)
 						tmp=(Maxd((detection_s[i]->data[Np-1].occupancy),(detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0))/8.0;
-					if ((i<=2) || (i==4) || (i==7))	
+					if ((i==0) || (i==1) )	
 					{
 						if (tmp> 0.65)
 							tmp=0.65;
 					}
-					else if (i==9)
+					else if ((i==2) || (i==4))
 					{					
-						if (tmp> 0.25)
-							tmp=0.25;
+						if (tmp> 0.7)
+							tmp=0.7;
+					}
+					else if ((i==8) || (i==9))
+					{					
+						if (tmp> 0.55)
+							tmp=0.55;
 					}
 					else
 					{					
 						if (tmp> 0.45)
 							tmp=0.45;
 					}
-					detection_onramp[i]->data[Np-1].flow=(detection_onramp[i]->data[Np-1].flow)*(1.0-tmp);							
+					detection_onramp[i]->data[Np-1].flow=(detection_onramp[i]->data[Np-1].flow)*(1.0-tmp);					
 				}
 		}
 		
@@ -666,10 +671,12 @@ int j;
 			urms_ctl[i].lane_1_action = URMS_ACTION_FIXED_RATE;
 			urms_ctl[i].lane_2_action = URMS_ACTION_FIXED_RATE;
 			urms_ctl[i].lane_3_action = URMS_ACTION_FIXED_RATE;
+			urms_ctl[i].lane_4_action = URMS_ACTION_SKIP;
 
 			urms_ctl[i].lane_1_release_rate = ln_RM_rt[i][0];
 			urms_ctl[i].lane_2_release_rate = ln_RM_rt[i][0];
 			urms_ctl[i].lane_3_release_rate = ln_RM_rt[i][0];
+			urms_ctl[i].lane_4_release_rate = ln_RM_rt[i][0];
 			urms_ctl[i].no_control = 0;
 //FOR TEST PURPOSES ONLY###############################
 //				urms_ctl[i].lane_1_release_rate = 450+i;
