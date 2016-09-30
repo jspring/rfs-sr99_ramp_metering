@@ -27,6 +27,7 @@
 //#define SWITCHING_METERING  1
 #define Gain_Up				8.0
 #define Gain_Dn				4.0
+#define Occ_Cr				12.0
 
 //#define CellSize 15
 #define ALLvehType          0
@@ -111,6 +112,8 @@ static float Q_min[NumOnRamp]={0.0};  // Total Onramp minimum RM rate
 static float ss[NumOnRamp][Np]={{0.0}};
 static float dd[NumOnRamp][Np]={{0.0}};     // onramp dmd
 static float pre_w[NumOnRamp]={0};
+static float max_occ_all_dwn[NumOnRamp]={0};
+static float max_occ_2_dwn[NumOnRamp]={0};
 
 static float q_main[SecSize]={0.0};     // mainline flow of all cells   
 static float u2[SecSize]={0};           // speed to feed into the model
