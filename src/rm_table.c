@@ -344,6 +344,18 @@ data_log_column_spec_t file_spec[] =
 
         {"%hhu ",   &db_urms_status.metered_lane_stat[3].demand_stat, BASE_CHAR, REPLAY_USE},	//###260
         {"%hhu ",   &db_urms_status.metered_lane_stat[3].passage_stat, BASE_CHAR, REPLAY_USE},	//###261
+
+        {"%hhx ",   &db_urms_status.metered_lane_stat[0].metered_lane_rate_msb, BASE_CHAR, REPLAY_USE},	//###262
+        {"%hhx ",   &db_urms_status.metered_lane_stat[0].metered_lane_rate_lsb, BASE_CHAR, REPLAY_USE},	//###263
+
+        {"%hhx ",   &db_urms_status.metered_lane_stat[1].metered_lane_rate_msb, BASE_CHAR, REPLAY_USE},	//###264
+        {"%hhx ",   &db_urms_status.metered_lane_stat[1].metered_lane_rate_lsb, BASE_CHAR, REPLAY_USE},	//###265
+
+        {"%hhx ",   &db_urms_status.metered_lane_stat[2].metered_lane_rate_msb, BASE_CHAR, REPLAY_USE},	//###266
+        {"%hhx ",   &db_urms_status.metered_lane_stat[2].metered_lane_rate_lsb, BASE_CHAR, REPLAY_USE},	//###267
+
+        {"%hhx ",   &db_urms_status.metered_lane_stat[3].metered_lane_rate_msb, BASE_CHAR, REPLAY_USE},	//###268
+        {"%hhx ",   &db_urms_status.metered_lane_stat[3].metered_lane_rate_lsb, BASE_CHAR, REPLAY_USE},	//###269
 };
 
 #define NUM_FILE_COLUMNS sizeof(file_spec)/sizeof(data_log_column_spec_t)
