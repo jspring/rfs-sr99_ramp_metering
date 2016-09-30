@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
 		 
 		float_temp = mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev[i], &confidence[i][0]);
 		if(float_temp < 0){
-			printf("Error %f in calculating mean speed for controller %s\n", float_temp, controller_strings[i_status.metered_lane_stat[0]);
+			printf("Error %f in calculating mean speed for controller %s\n", float_temp, controller_strings[i]);
 			float_temp = mean_speed_prev[i];
 		}
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 1.0, float_temp) );
