@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
 		 
 		float_temp = mean_speed_aggregation_mainline(&controller_data[i], mean_speed_prev[i], &confidence[i][0]);
 		if(float_temp < 0){
-			printf("Error %f in calculating mean speed for controller %s\n", float_temp, controller_strings[i]);
+			printf("Error %f in calculating mean speed for controller %s\n", float_temp, controller_strings[i_status.metered_lane_stat[0]);
 			float_temp = mean_speed_prev[i];
 		}
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 1.0, float_temp) );
@@ -605,25 +605,25 @@ int j;
 				{					
 					if ( (Maxd((detection_s[i]->data[Np-1].occupancy), (detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0)) > 0.0)
 						tmp=(Maxd((detection_s[i]->data[Np-1].occupancy),(detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0))/8.0;
-					if ((i==0) || (i==1) )	
+					if (i < 4 )	
 					{
 						if (tmp> 0.65)
 							tmp=0.65;
 					}
-					else if ((i==2) || (i==4))
+					else if (i==4)
 					{					
 						if (tmp> 0.7)
 							tmp=0.7;
 					}
-					else if ((i==8) || (i==9))
+					else if ((i==6) || (i==7))
 					{					
-						if (tmp> 0.55)
-							tmp=0.55;
+						if (tmp> 0.25)
+							tmp=0.25;
 					}
 					else
 					{					
-						if (tmp> 0.45)
-							tmp=0.45;
+						if (tmp> 0.35) 
+							tmp=0.35;
 					}
 					detection_onramp[i]->data[Np-1].flow=(detection_onramp[i]->data[Np-1].flow)*(1.0-tmp);					
 				}
