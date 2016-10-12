@@ -12,7 +12,8 @@ MYPATH=`echo $A_FILE | sed '{s/a_10/ &/g}'| awk '{print $1}'`
 
 echo $MATCHSTR
 
-for THIS_PATH in `ls $MYPATH*$MATCHSTR.dat`
+for x in `cat /home/sr99_ramp_metering/system/control_ips_and_ports.txt` 
 do
+        THIS_PATH=`ls $MYPATH"a_"$x.$MATCHSTR".dat"`
 	echo `cat $THIS_PATH | awk '{print $47,$55,$63,$152,$157,$162,$167,$172,$177,$182,$187,$192,$197,$202,$207,$212,$217,$222,$227,$249}' | uniq -c | wc | awk '{print $1}'` `wc $THIS_PATH | awk '{print $1,$4}'` 
 done
