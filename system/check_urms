@@ -8,45 +8,86 @@ fi
 
 TIMESTAMP=`date +%m%Y%d_%H%M%S`
 
-for x in `cat /home/sr99_ramp_metering/system/urmsgo_all | grep urmsgo | awk '{print $2}'`
+for x in `cat /home/sr99_ramp_metering/system/urmsgo_all | grep urmsgo`
 do 
-	CONTROLLER_IP=$x
-	URMS_STATUS_DBNUM=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $3}'`
-	PORT=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $4}'`
+	echo $x
+	CONTROLLER_IP=`echo $x | awk '{print $2}'`
+	DBNUM=`echo $x | awk '{print $3}'`
+	PORT=`echo $x | awk '{print $4}'`
+	CONTROL=`echo $x | awk '{print $7}'`
+	ps -ef | grep -v grep | grep urms | grep $CONTROLLER_IP | grep $PORT
+	if [[ $? -eq 0 ]]
+	then	
+		echo Controller IP $CONTROLLER_IP dbnum $DBNUM port $PORT is not running
+	else
+		echo Controller IP $CONTROLLER_IP dbnum $DBNUM port $PORT is running
+	fi
+done
+exit
+
+	# Determine if this controller was started up under our control
+	CONTROL=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $7}'`
+	if [[ $CONTROL == "control" ]]
+	then
+		CONTROL=''
+	else
+		CONTROL="-n"
+	fi
+
+	# The loop interval is not known from urmsgo_all, so look a a running urms program for it's interval argument
+	ps -ef | grep urms | grep -v grep
+	if [[ $? -eq 0 ]]
+	then	
+		INTERVAL=`ps -ef | grep urms | grep -v grep | grep "\-i" | head -1`
+		INTERVAL=`echo $INTERVAL | awk '{ for(i=0; i<NF; i++) if($i == "-i") print($(i+1))}'`
+	else
+		INTERVAL=10000
+	fi
+
+	# Sometimes, two controllers have the same IP address. So using the IP address will give two results.
+	# Do further checks with more than one controller in mind.
+	PORT0=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $4}'`
+	PORT1=`echo $PORT0 | awk '{print $2}'`
+	URMS_STATUS_DBNUM0=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $3}'`
+	URMS_STATUS_DBNUM1=`echo $URMS_STATUS_DBNUM0 | awk '{print $2}'`
 	NUM_CONTROLLERS=1
 
-	URMS_STATUS_DBNUM2=`echo $URMS_STATUS_DBNUM | awk '{print $2}'`
-
-	if [[ q$URMS_STATUS_DBNUM2 != 'q' ]]
+	if [[ q$URMS_STATUS_DBNUM1 != 'q' ]]
 	then
-		PORT2=`echo $PORT | awk '{print $2}'`
-		PORT=`echo $PORT | awk '{print $1}'`
-		URMS_STATUS_DBNUM=`echo $URMS_STATUS_DBNUM | awk '{print $1}'`
 		NUM_CONTROLLERS=2
 	fi
 
-#	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX=$(($INDEX-1)) ))
 	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX-- ))
 	do
+		if [[ $INDEX -eq 2 ]]
+		then
+			PORT=$PORT1
+			URMS_STATUS_DBNUM=$URMS_STATUS_DBNUM1
+		else
+			PORT=$PORT0
+			URMS_STATUS_DBNUM=$URMS_STATUS_DBNUM0
+		fi
 
-		#Check good data in log file, and kill urms if it's all the same (except for the timestamp)
-		for FILE in `ls -tr /big/data/ac_rm_1/*.dat |tail -28 | grep $CONTROLLER_IP | grep $PORT`
-		do
-			NOW=`date +%s`
-			OPEN=`stat $FILE -c %X`
-			DIFF=$(($NOW - $OPEN))
-			if [[ $DIFF -gt 90 ]] #In 90 seconds, there should be 3 raw data calculations, as well as numerous updates of the "seconds" column
-			then
-				NUMDIFF=`cat $FILE | cut -d ' ' -f 2- | uniq -c| wc | awk '{print $1}'`
-				if [[ $NUMDIFF -lt 3 ]]
-				then 
-					echo $CONTROLLER_IP $PORT no good
-					netstat -an | grep $CONTROLLER_IP:$PORT
-				fi
-			fi
-		done
+#		#Check good data in log file, and kill urms if it's all the same (except for the timestamp)
+#		for FILE in `ls -tr /big/data/ac_rm_1/*.dat |tail -28 | grep $CONTROLLER_IP | grep $PORT`
+#		do
+#			NOW=`date +%s`
+#			OPEN=`stat $FILE -c %X`
+#			DIFF=$(($NOW - $OPEN))
+#			if [[ $DIFF -gt 90 ]] #In 90 seconds, there should be 3 raw data calculations, as well as numerous updates of the "seconds" column
+#			then
+#				NUMDIFF=`cat $FILE | cut -d ' ' -f 2- | uniq -c| wc | awk '{print $1}'`
+#				if [[ $NUMDIFF -lt 3 ]]
+#				then 
+#					echo $CONTROLLER_IP $PORT no good
+#					netstat -an | grep $CONTROLLER_IP:$PORT
+#					echo "/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -n -d $URMS_STATUS_DBNUM -p $PORT"
+#
+#				fi
+#			fi
+#		done
 
 		PORT=$PORT2
 		URMS_STATUS_DBNUM=$URMS_STATUS_DBNUM2
 	done
-done
+#done
