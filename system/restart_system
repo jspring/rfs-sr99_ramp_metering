@@ -93,5 +93,5 @@ done
 if [[ z`ps -ef | grep opt_crm | grep -v grep` == 'z' ]]
 then
 	cd /home/sr99_ramp_metering/src
-	./lnx/opt_crm -i $INTERVAL >/dev/null &
+	./lnx/opt_crm -i $INTERVAL >/big/data/ac_rm_1/opt_crm_$TIMESTAMP.txt &
 fi
