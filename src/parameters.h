@@ -12,8 +12,8 @@
 //#define DBG_COEFF
 
 	
-#define NumOnRamp           11	   // the number of onramp; SR99
-#define SecSize             12                // one more than NumOnRam
+#define NumOnRamp           16	   // the number of onramp; SR99;;                 Original: 11
+#define SecSize             17                // one more than NumOnRam            Original: 12
 #define use_CRM				2           // 1: default; 2: Opt CRM; 3: Coord ALINEA;  4: Hybrid
 
 #define VSL_Update_Step		2           // twice of time length for detection; .g if detection is 60s; VSL will be updated every 120s
@@ -53,7 +53,7 @@ const float T=30/3600.0;  // 30s RM control time interval in [hr]
 #define Gama 0.004
 #define QM 7200
 //static int ISUPDATE=3;         // for VSL update
-static int ISUPDATE2=1;
+//static int ISUPDATE2=1;
 #define Compliance_Level 0.3   // VSL compliance level: 1.0 is full level
 #define	exp_flt 0.85           // sensor measure exp filter gain
 
@@ -127,43 +127,37 @@ static float up_rho[Np]={0};
 unsigned int replication=0;
 //static int detectorNum=0,sectionNum=0,nodeNum=0,centroidNum=0;  // moved from data_save.h and readdetectordata.h; 05_29_13
 
-static float dyna_min_r[NumOnRamp]={0.0};
-static float dyna_max_r[NumOnRamp]={0.0};
-static float Ramp_rt[NumOnRamp]={0.0,0.0,0.0};
-static float RM_occ[NumOnRamp]={0.0,0.0,0.0};
-//static float RM_occ_All[NumOnRamp+5]={0.0,0.0,0.0};
-static float ln_RM_rt[NumOnRamp][max_onramp_ln]={{0.0,0.0,0.0},{0.0,0.0,0.0}};
-static float ln_LRRM_rt[NumOnRamp][max_onramp_ln]={{0.0,0.0,0.0},{0.0,0.0,0.0}};   // local responsive RM
-const int ln_meteringId[16][max_onramp_ln]={{21044,21045,21046},{19780,0,0},{19782,0,0},{19789,0,0},{21063,21062,21060},
-                       {19892,0,19796},{21080,21081,21082},{19924,0,19801},{19936,0,19804},{19811,0,0},{19968,0,19815},
-                       {19959,0,19819},{19948,0,19823},{19827,0,0},{19831,0,0},{19836,0,0}};
-
-
-
-	static int release_cycle[NumOnRamp][max_onramp_ln]={{0,0,0}};
-//	static float actual_r[NumOnRamp][max_onramp_ln]={{0.0,0.0,0.0}};
-	static float total_rt[NumOnRamp]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-	static float total_field_rt[NumOnRamp]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+static float dyna_min_r[NumOnRamp];
+static float dyna_max_r[NumOnRamp];
+static float Ramp_rt[NumOnRamp];
+static float RM_occ[NumOnRamp];
+static float ln_CRM_rt[NumOnRamp][max_onramp_ln];     // for CRM
+static float ln_LRRM_rt[NumOnRamp][max_onramp_ln];   // fot LRRM
+static int release_cycle[NumOnRamp][max_onramp_ln];
+static float total_rt[NumOnRamp];   // for CRM
+static float total_LRRM_rt[NumOnRamp]; // for LRRM
 	
-	static float L[SecSize]={555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
-	const float Q[SecSize]={2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
+	static float L[SecSize]={1500.0, 1200.0, 300.0,2000.0, 300.0, 555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
+	const float Q[SecSize]={2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
 	//const float min_Ln_RM_rt[NumOnRamp]={480,600,681,240,500,700,480,480,480,575,800}; // field lower bound
 	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,400,550,380,380,380,475,550}; // revised lower bound; used Day_1
 	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,350,500,380,350,380,420,550}; // revised lower bound; 9/27/16
-	const float min_Ln_RM_rt[NumOnRamp]=  {350,380,480,240,350,400,350,320,330,420,550};   // revised lower bound; 9/28/16
+	const float min_Ln_RM_rt[NumOnRamp]=  {200, 400, 400, 400, 400, 350,380,480,240,350,400,350,320,330,420,550};   // revised lower bound; 9/28/16
 	//const float max_Ln_RM_rt[NumOnRamp]={1000,750,910,900,900,990,900,900,750,920,1080}; // field upper bound;   used Day_1
 	//const float max_Ln_RM_rt[NumOnRamp]=  {1000,750,910,800,800,850,900,850,750,850,1080}; // revised lower bound
-	const float max_Ln_RM_rt[NumOnRamp]=  {750,750,800,800,800,850,900,850,750,850,1080}; // revised lower bound  9/28/16
+	const float max_Ln_RM_rt[NumOnRamp]=  {750,750,750,750,750,750,750,800,800,800,850,900,850,750,850,1080}; // revised lower bound  9/28/16
 										  
 	
 	// for downstream 11 onramps only
-	const int N_OnRamp_Ln[NumOnRamp]={2,3,2,2,1,2,2,2,1,1,1};  // from upstream to downstream
-	const int N_OffRamp_Ln[NumOnRamp]={1,1,0,0,1,1,1,1,1,1,2};  // from upstream to downstream
-	const int OnRamp_Ln_Id[NumOnRamp][max_onramp_ln]={{19884,0,17256},{19904,19896,17264},{19916,0,17324},{19928,0,17336},
-	                     {17392,0,0},{19964,0,17510},{19955,0,16705},{19940,0,16731},{16785,0,0},{16571,0,0},{16853,0,0}};
+	const int N_OnRamp_Ln[NumOnRamp]={3,1,1,2,3,2,3,2,2,1,2,2,2,1,1,1};  // from upstream to downstream
+	//const int N_OffRamp_Ln[NumOnRamp]={2,1,0,3,0,1,1,0,0,1,1,1,1,1,1,2};  // from upstream to downstream
+	const int N_OffRamp_Ln[NumOnRamp]={0,1,0,2,0,1,0,2,0,1,1,1,1,1,1,1};  // from upstream to downstream
+	
+#ifdef SIM_ONLY		
+	const int OnRamp_Ln_Id[NumOnRamp][max_onramp_ln]={{19884,0,17256},{19904,19896,17264},{19916,0,17324},{19928,0,17336},                     {17392,0,0},{19964,0,17510},{19955,0,16705},{19940,0,16731},{16785,0,0},{16571,0,0},{16853,0,0}};
 
 	const int CellDetectionId[SecSize]={19791,19795,19798,19800,19803,19810,19814,19818,19822,19826,19830,19834};  // 10_24_13; most downstream not detected
-	
+
 	//for all 16 onramps
 	const int N_Mainline_Ln_RM_All[(NumOnRamp+5)]={3,3,3,3,3,3,4,3,4,4,4,4,4,4,4,5};
 	const int N_OnRamp_Ln_All[(NumOnRamp+5)]={3,1,1,2,3,2,3,2,2,1,2,2,2,1,1,1};
@@ -174,9 +168,8 @@ const int ln_meteringId[16][max_onramp_ln]={{21044,21045,21046},{19780,0,0},{197
 				{18302,18304,18306,0,18300},{18275,18277,18279,0,18273},{18266,18268,18270,0,18264},{18512,18514,18516,0,18510},
 				{18228,18230,18232,0,18226},{18192,18194,18196,0,18190},{18201,18203,18205,0,18199},{18535,18537,18539,18541,18533}}; // all 16 Sections
 	
-	
 //for measuremnt only
-static float onrampL[NumOnRamp]={379.2,453.6,587.6,831.7,284.8,615.9,334.6,470.7,402.7,522.7,272.3};
+
 const int OnRampDetectionEndId[NumOnRamp]={19797,20139,19802,19806,19812,19816,20140,19824,19828,19832,19835}; // single detector after meter
 
 const int OnRamp_Ln_AdvanceDetEndId[NumOnRamp][max_onramp_ln]={{19886,0,18424},{19906,19898,18425},{19922,0,18689},{19934,0,18691},
@@ -187,14 +180,17 @@ int Green[(NumOnRamp+5)][max_onramp_ln]={{0,0,0},{0,0,0},{0,0,0},{0,0,0},
 									  {0,0,0},{0,0,0},{0,0,0},{0,0,0},
 									  {0,0,0},{0,0,0},{0,0,0},{0,0,0}};
 
-
-
 const int OffRampDetectionId[NumOnRamp]={18423, 0, 18426, 0, 18433, 18435, 18437, 18439,18441,18443,18445}; // OffRamp Matched with OnRamp
 const int offramp_secId[NumOnRamp]=     {17246, 0, 17286, 0, 17384, 17500, 16697, 16727,16751,16565,16833}; // OffRamp Matched with OnRamp
 
-const float lambda[SecSize]={3.0000,4.0000,3.3654,4.0000,4.0000, 4.0000,4.0000,4.2945,4.0000,4.1191,5.0000,4.6147}; // composite ln number
+#endif	// SIM_ONLY
 
-const double SR99_RM_occ_tbl[N_interv][NumOnRamp+5]=
+
+const float lambda[SecSize]={3.0,3.0,3.0,3.0,3.0,3.0000,4.0000,3.3654,4.0000,4.0000, 4.0000,4.0000,4.2945,4.0000,4.1191,5.0000,4.6147}; // composite ln number
+static float onrampL[NumOnRamp]={500.0, 500.0, 500.0, 500.0, 500.0, 379.2,453.6,587.6,831.7,284.8,615.9,334.6,470.7,402.7,522.7,272.3};                                          // used in RT code
+
+
+const double SR99_RM_occ_tbl[N_interv][NumOnRamp]=
    {{ 3.0,      5.0,     5.0,      5.0,    5.0,    4.0,    6.0,   5.0,    5.0,   6.0,  7.0,   8.0,   6.0,   9.0,   7.0,     5.0},
     { 3.9,      5.9,     5.9,      5.7,    5.4,    4.8,    6.9,   6.1,    6.1,   6.3,  7.4,   8.7,   6.9,  10.5,   7.7,     5.9},
     { 4.7,      6.7,     6.8,      6.4,    5.7,    5.6,    7.7,   7.1,    7.1,   6.5,  7.7,   9.4,   7.7,  12.0,   8.5,     6.9},
@@ -210,7 +206,7 @@ const double SR99_RM_occ_tbl[N_interv][NumOnRamp+5]=
     {13.3,     15.3,    15.7,     13.6,    9.3,   13.4,   16.3,  17.7,   17.9,   9.0, 11.3,  16.6,  16.3,  27.0,  16.4,    16.3},
     {14.1,     16.1,    16.6,     14.3,    9.6,   14.2,   17.1,  18.7,   18.9,   9.3, 11.6,  17.3,  17.1,  28.5,  17.2,    17.3},
     {15.0,     17.0,    17.5,     15.0,   10.0,   15.0,   18.0,  19.8,   20.0,   9.5, 12.0,  18.0,  18.0,  30.0,  18.0,    18.2}};
-const double SR99_RM_rate_tbl[N_interv][NumOnRamp+5]=
+const double SR99_RM_rate_tbl[N_interv][NumOnRamp]=
    {{ 700,     800,     900,     900,     700,     1000,    750,   910,   900,   900,   990,  900,  900,    750,   920,    1080},
     { 668,     778,     870,     853,     672,      963,    740,   894,   853,   827,   970,  870,  870,    730,   895,    1060},
     { 635,     755,     840,     806,     643,      926,    729,   878,   806,   843,   949,  840,  840,    711,   870,    1040},
@@ -325,11 +321,11 @@ int get_q_main();
 int update_q_R();
 int get_meas(float);
 int get_state(float);  
-int Set_Default_Meter(float,float,float);
+//int Set_Default_Meter(float tot_LRRM_rt[NumOnRamp], float Ln_rt[NumOnRamp][max_onramp_ln]);
 void simplx(float **, int , int, int, int, int, int *, int*, int *);
 int opt_metering(void);
 //int Set_Hybrid_Meter(float,float,float);
-int Set_Opt_Meter();
+//int Set_Opt_Meter(float tot_rt[NumOnRamp], float Ln_rt[NumOnRamp][max_onramp_ln]);
 //int Set_Coord_ALINEA(float,float,float);
 int Finish_sim_data_out();
 float Mins(float,float);
