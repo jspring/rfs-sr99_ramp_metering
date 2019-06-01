@@ -1,5 +1,14 @@
 #!/bin/bash
 
+INTERVAL=$1
+
+if [[ q$INTERVAL == 'q' ]]
+then 
+	echo $0 needs an interval argument
+	echo e.g. "$0 30000"
+	exit 1
+fi
+
 echo "Executing stopurms"
 /home/sr99_ramp_metering/system/stopurms
 sleep 1
@@ -13,65 +22,65 @@ echo "Starting clt_vars"
 sleep 1
 
 TIMESTAMP=`date +%y%m%d_%H%M%S`
-INTERVAL=$1
+
 
 echo "Starting urmsgo with interval $INTERVAL"
 
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.108	3000	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.96	3000	1004	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.25.113	3200	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.254.25.116	3200	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.25.120	3400	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.101	3400	1002	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.249.46	3600	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.254.25.124	3600	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.42	3800	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.102	3800	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.20	4000	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.104	4000	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.128	4200 	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.103	4200 	1000	$TIMESTAMP $INTERVAL
 #sleep 1
 /home/sr99_ramp_metering/system/urmsgo 10.254.27.67	4400 	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.27.82	4600 	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.254.27.82	4600 	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.27.81	4800 	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.254.27.81	4800 	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.76 	5000	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.105 	5000	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.28.213 	5200	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.254.28.213 	5200	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.28.212 	5400	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.254.28.212 	5400	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.28.211 	5600	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.254.127.2 	5600	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.118 	5800	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.107 	5800	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.52 	6000	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.106 	6000	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.24.156 	6200	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.254.24.156 	6200	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.254.24.157 	6400	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.254.24.157 	6400	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.185 	6600	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.254.26.183 	6600	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.66 	6800	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.110 	6800	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.81 	7000	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.29.248.81 	7000	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.213 	7200	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.108 	7200	1002	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.155 	7400	1002	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.128 	7400	1003	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.155 	7600	1001	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.128 	7600	1002	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.124 	7800	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.130 	7800	1002	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.67 	8000	1000	$TIMESTAMP $INTERVAL control
+/home/sr99_ramp_metering/system/urmsgo 10.254.26.103 	8000	1000	$TIMESTAMP $INTERVAL 
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.157 	8200	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.131 	8200	1000	$TIMESTAMP $INTERVAL
 #sleep 1
-/home/sr99_ramp_metering/system/urmsgo 10.29.248.56 	8400	1000	$TIMESTAMP $INTERVAL
+/home/sr99_ramp_metering/system/urmsgo 10.253.28.134 	8400	1000	$TIMESTAMP $INTERVAL
 
 cd /home/sr99_ramp_metering/src
 mkdir Out_Data_$TIMESTAMP
