@@ -36,11 +36,14 @@ float mind(float a,float b){
 
 float sum_array(float a[], int num_elements){
    int i;
-   float sum=0.0;
+   float sum=0.0, sum_tmp=0.0;
+   
    for (i=0; i<num_elements; i++)
    {
-	 sum = sum + a[i];
+	 sum_tmp = sum_tmp + a[i];
    }
+   sum=sum_tmp;
+   sum_tmp=0.0;
    return(sum);
 }
 
@@ -810,8 +813,8 @@ float butt_2(float in_dat){
 
 float butt_2_ML_flow(float in_dat, int index){
    // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_flow[2][12]={{0}};
+   float x[2][17]={{0}}, out_dat=0.0;
+   static float x_old_flow[2][17]={{0}};
    
    x[0][index]=0.2779 * x_old_flow[0][index] - 0.4152 * x_old_flow[1][index] + 0.5872*in_dat;
    x[1][index]=0.4152 * x_old_flow[0][index] + 0.8651 * x_old_flow[1][index] + 0.1908*in_dat;  
@@ -824,8 +827,8 @@ float butt_2_ML_flow(float in_dat, int index){
 
 float butt_2_ML_speed(float in_dat, int index){
    // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_speed[2][12]={{0}};
+   float x[2][17]={{0}}, out_dat=0.0;
+   static float x_old_speed[2][17]={{0}};
    
    x[0][index]=0.2779 * x_old_speed[0][index] - 0.4152 * x_old_speed[1][index] + 0.5872*in_dat;
    x[1][index]=0.4152 * x_old_speed[0][index] + 0.8651 * x_old_speed[1][index] + 0.1908*in_dat;  
@@ -837,8 +840,8 @@ float butt_2_ML_speed(float in_dat, int index){
 
 float butt_2_ML_occupancy(float in_dat, int index){
    // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_occupancy[2][12]={{0}};
+   float x[2][17]={{0}}, out_dat=0.0;
+   static float x_old_occupancy[2][17]={{0}};
    
    x[0][index]=0.2779 * x_old_occupancy[0][index] - 0.4152 * x_old_occupancy[1][index] + 0.5872*in_dat;
    x[1][index]=0.4152 * x_old_occupancy[0][index] + 0.8651 * x_old_occupancy[1][index] + 0.1908*in_dat;  
@@ -850,8 +853,8 @@ float butt_2_ML_occupancy(float in_dat, int index){
 
 float butt_2_ML_density(float in_dat, int index){
    // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_density[2][12]={{0}};
+   float x[2][17]={{0}}, out_dat=0.0;
+   static float x_old_density[2][17]={{0}};
    
    x[0][index]=0.2779 * x_old_density[0][index] - 0.4152 * x_old_density[1][index] + 0.5872*in_dat;
    x[1][index]=0.4152 * x_old_density[0][index] + 0.8651 * x_old_density[1][index] + 0.1908*in_dat;  
