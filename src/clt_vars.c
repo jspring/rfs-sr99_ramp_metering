@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 		printf("Database initialization error in %s.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
+	printf("NUM_CONTROLLER_VARS %d\n", NUM_CONTROLLER_VARS);
 	for (i = 0; i < NUM_CONTROLLER_VARS; i++){
 		db_clt_write(pclt,
 		db_controller_list[i].id,
