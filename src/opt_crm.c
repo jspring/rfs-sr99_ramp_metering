@@ -51,35 +51,35 @@ const char *usage = "-i <loop interval> -r (run in replay mode)";
 #define NUM_CYCLE_BUFFS  5											               // XYLu: field data buffeed for 5 steps
 //
 const char *controller_strings[] = {												// XYLu: Check upstream 5 section data: mainline, onramps and off-ramps
-
-	"10.253.28.96",		//0, OR1	Elk Grove Blvd                 					// XYLu: This list of IP addresses are just for printing out, not for data polling
-	"10.254.25.116",	//1		Red Fox
-	"10.254.25.122",	//2, OR2, FR1	EB Laguna Blvd
-	"10.254.25.124",	//3, OR3,	WB Laguna Blvd
-	"10.253.28.102",	//4		Laguna Creek 
-	"10.253.28.104",	//5, OR4, FR2	EB Sheldon Rd
-	"10.253.28.103",	//6, OR5	WB Sheldon Rd
-	"10.254.27.67",		//7		Jacinto Rd
-	"10.254.27.82",		//8, OR6, FR3	EB Calvine Rd
-	"10.254.27.81",		//9, OR7	WB Calvine Rd
-	"10.253.28.105",	//10, FR4	Stockton Blvd
-	"10.254.28.213",	//11, OR8	EB Mack Rd
-	"10.254.28.212",	//12, OR9	WB Mack Rd
-	"10.254.28.211",	//13		Tangerine Ave
-	"10.253.28.107",	//14		Pomegranate Ave
-	"10.253.28.106",	//15		Orange Ave
-	"10.254.24.156",	//16, OR10, FR5	EB Florin Rd
-	"10.254.24.157",	//17, OR11	FR6 WB Florin Rd
-	"10.254.26.183",	//18		Turnbridge Dr
-	"10.253.28.110",	//19, OR12	FR7 EB 47th Ave
-	"10.29.248.81",		//20, OR13	FR8 WB 47th Ave
-	"10.253.28.108",	//21, FR9	Martin Luther King Jr. 
-	"10.253.28.128_PORT_1001", //22, OR14,  EB Fruitridge
-	"10.253.28.128_PORT_1002", //23, OR15, FR10	WB Fruitridge
-	"10.253.28.130",	//24		21st Ave UC
-	"10.254.26.103",	//25, OR16	12th Ave
-	"10.253.28.131",	//26, FR12	FR11, 8th Ave POC
-	"10.253.28.134"		//27, 	99 NB to I50 Broadway
+	"10.253.28.96_PORT_10014",		//0, OR1	Stockton Blvd	
+	"10.253.28.96_PORT_10012",		//1, OR2	Elk Grove Blvd
+	"10.254.25.116",	//2		Red Fox
+	"10.254.25.122",	//3, OR3, FR1	EB Laguna Blvd
+	"10.254.25.124",	//4, OR4,	WB Laguna Blvd
+	"10.253.28.102",	//5		Laguna Creek 
+	"10.253.28.104",	//6, OR5, FR2	EB Sheldon Rd
+	"10.253.28.103",	//7, OR6	WB Sheldon Rd
+	"10.254.27.67",		//8		Jacinto Rd
+	"10.254.27.82",		//9, OR7, FR3	EB Calvine Rd
+	"10.254.27.81",		//10, OR8	WB Calvine Rd
+	"10.253.28.105",	//11, FR4	Stockton Blvd
+	"10.254.28.213",	//12, OR9	EB Mack Rd
+	"10.254.28.212",	//13, OR10	WB Mack Rd
+	"10.254.127.2",		//14		Tangerine Ave
+	"10.253.28.107",	//15		Pomegranate Ave
+	"10.253.28.106",	//16		Orange Ave
+	"10.254.24.156",	//17, OR11, FR5	EB Florin Rd
+	"10.254.24.157",	//18, OR12	FR6 WB Florin Rd
+	"10.254.26.183",	//19		Turnbridge Dr
+	"10.253.28.110",	//20, OR13	FR7 EB 47th Ave
+	"10.29.248.81",		//21, OR14	FR8 WB 47th Ave
+	"10.253.28.108",	//22, FR9	Martin Luther King Jr. 
+	"10.253.28.128_PORT_1001", //23, OR15,  EB Fruitridge
+	"10.253.28.128_PORT_1002", //24, OR16, FR10	WB Fruitridge
+	"10.253.28.130",	//25		21st Ave UC
+	"10.254.26.103",	//26, OR17	12th Ave
+	"10.253.28.131",	//27, FR12	FR11, 8th Ave POC
+	"10.253.28.134"		//28, 	99 NB to I50 Broadway
 
 }; //FR6, FR7, FR8, and FR11 are missing
 
@@ -156,11 +156,12 @@ int main(int argc, char *argv[])
 
 //	Example: metering_rates[0...10] = Calvine_EB_Metering_Rate...12th_St_Metering_Rate;     // Add up 5
 	const short metering_controller_db_vars[NumOnRamp] = {                                               // XYLu sequence of EB & WB changed for all onramps with 2-dirs
-		3602,	//Elk Grove	
-		3802,	//Laguna EB
-		4002,	//Laguna WB
-		4202,	//Sheldon EB
-		4402,	//Sheldon WB	
+		2802,	//E Stockton
+		3002,	//Elk Grove	
+		3402,	//Laguna EB
+		3602,	//Laguna WB
+		4002,	//Sheldon EB
+		4202,	//Sheldon WB
 		4602,	//Calvine EB
 		4802,	//Calvine WB
 		5202,	//Mack Rd EB
@@ -211,28 +212,19 @@ int main(int argc, char *argv[])
 	
 	// XYLu: adde 5/21/2019
 	
-	 memset(mainline_out, 0, NUM_CYCLE_BUFFS*SecSize*(sizeof(agg_data_t)));  
-	 memset(onramp_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t))); 
-	 memset(onramp_queue_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t))); 
-	 memset(offramp_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t))); 
-	 memset(mainline_out_f, 0, SecSize*(sizeof(agg_data_t)));   
-	 memset(onramp_out_f, 0, NumOnRamp*(sizeof(agg_data_t)));   
-	 memset(offramp_out_f, 0, NumOnRamp*(sizeof(agg_data_t))); 
-	 memset(onramp_queue_out_f, 0, NumOnRamp*(sizeof(agg_data_t)));  
+	memset(mainline_out, 0, NUM_CYCLE_BUFFS*SecSize*(sizeof(agg_data_t)));
+	 memset(onramp_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t)));
+	 memset(onramp_queue_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t)));
+	 memset(offramp_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t)));
+	 memset(mainline_out_f, 0, SecSize*(sizeof(agg_data_t)));
+	 memset(onramp_out_f, 0, NumOnRamp*(sizeof(agg_data_t)));
+	 memset(offramp_out_f, 0, NumOnRamp*(sizeof(agg_data_t)));
+	 memset(onramp_queue_out_f, 0, NumOnRamp*(sizeof(agg_data_t)));
 	 memset(controller_mainline_data, 0, NUM_CONTROLLERS*(sizeof(agg_data_t)));  
-	 memset(controller_onramp_data, 0, NumOnRamp*(sizeof(agg_data_t)));          
-	 memset(controller_onramp_queue_detector_data, 0, NumOnRamp*(sizeof(agg_data_t))); 
-	 memset(controller_offramp_data, 0, NumOnRamp*(sizeof(agg_data_t)));    
-	 memset(confidence, 0, NUM_CONTROLLERS*3*(sizeof(confidence))); 
-	 memset(ln_CRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
-	 memset(ln_LRRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
-	 memset(dyna_min_r, 0, NumOnRamp*(sizeof(float))); 
-	 memset(dyna_max_r, 0, NumOnRamp*(sizeof(float))); 
-	 memset(Ramp_rt, 0, NumOnRamp*(sizeof(float))); 
-	 memset(RM_occ, 0, NumOnRamp*(sizeof(float))); 
-	 memset(release_cycle, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
-	 memset(total_rt, 0, NumOnRamp*(sizeof(float))); 
-	 memset(total_LRRM_rt, 0, NumOnRamp*(sizeof(float))); 
+	 memset(controller_onramp_data, 0, NumOnRamp*(sizeof(agg_data_t)));
+	 memset(controller_onramp_queue_detector_data, 0, NumOnRamp*(sizeof(agg_data_t)));
+	 memset(controller_offramp_data, 0, NumOnRamp*(sizeof(agg_data_t)));
+	 memset(confidence, 0, NUM_CONTROLLERS*3*(sizeof(struct confidence)));
 
 
 
@@ -409,9 +401,9 @@ for(;;)																			// XYLu:  why here within main()   ???
 	                     {21, 22, -1, -1}, // controller in section 10
 							 {23, -1, -1, -1}, // controller in section 11 
 							 {24, 25, 26, -1}}; // controller in section 12 
-#endif
 
-		const int secCTidx [SecSize][4] = {{0,  -1,  -1, -1}, // controller add up section 1                  // this only affect mainline data, not onramp nor off-ramp
+
+		const int secCTidx [SecSize][4] = {{0,  -1,  -1, -1}, // controller add up section 1            // this only affect mainline data, not onramp nor off-ramp
 							 {0,  1,  -1, -1}, // controller add up section 2                          // the -1 could appear in any of the 4 locations
 							 {1,  2,  -1, -1}, // controller add up section 3
 							 {2,  3,  -1, -1}, // controller add up section 4
@@ -428,6 +420,28 @@ for(;;)																			// XYLu:  why here within main()   ???
 	                     {20, 23, -1, -1}, // controller in section 15
 							 {23, 25, -1, -1}, // controller in section 16 
 							 {25, 26, -1, -1}}; // controller in section 17 	
+#endif
+
+		const int secCTidx [SecSize][4] = {{0,  -1,  -1, -1}, //controller add up section 1 //SecSize=18
+							 {0,  1,  -1, -1}, // controller add up section 2                  // this only affect mainline data, not onramp nor off-ramp
+							 {2,  -1,  -1, -1}, // controller add up section 3                          // the -1 could appear in any of the 4 locations
+							 {4,  -1,  -1, -1}, // controller add up section 4
+							 {5,  6,  -1, -1}, // controller add up section 5
+							 {6,  7,  -1, -1}, // controller add up section 6
+							 {8,  9, -1, -1}, // controller in section 7                                // Add up 5 sections
+	                     	{9,  10, -1, -1}, // controller in section 8                                    // XYLu: may use both 7 &8; prevously: 8 only
+	                     	{10,  12, -1, -1}, // controller in section 9
+	                     	{12,  13, -1, -1}, // controller in section 10
+	                     	{15, 16, 17, -1}, // controller in section 11
+	                     	{17, 18, -1, -1}, // controller in section 12                       
+	                     	{19, 20, -1, -1}, // controller in section 13                                  // DBG only; Problem one for flow only, not for occ, speed and density
+	                     	{20, 21, -1, -1}, // controller in section 14 
+							{21, -1, -1, -1}, // controller in section 15 
+	                     	{24, -1, -1, -1}, // controller in section 16   
+	                     	{24, 26, -1, -1}, // controller in section 17
+							{26, 28, -1, -1}}; // controller in section 18 
+							 
+                           // N. B.   7/21/19: data not available: 3, 14, 22, 23, 25
 
 							 
 		float temp_num_ct = 0.0; // number of controllers per section
@@ -476,8 +490,10 @@ for(;;)																			// XYLu:  why here within main()   ???
 //This part aggregate onramp data for each section												// XYLu: this is RT Onramp data;   Add Up 5
 #ifdef ORIGINAL_IMPL
 	int onrampCTidx[NumOnRamp] = {8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 
-#endif
+
 	static int onrampCTidx[NumOnRamp] = {0, 2, 3, 5, 6, 8, 9, 11, 12, 16, 17, 19, 20, 22, 23, 25}; 	// XYLu: Added up 5
+#endif
+	static int onrampCTidx[NumOnRamp] = {0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 17, 18, 20, 21, 23, 24, 26}; 	// XYLu: Added up 6//NumOnRamp=17
 	
 	for(i=0;i<NumOnRamp;i++)
 	{
@@ -493,8 +509,10 @@ for(;;)																			// XYLu:  why here within main()   ???
 
 #ifdef ORIGINAL_IMPL
 	int offrampCTidx[NumOnRamp] = {8, -1, 9, -1, 16, 17, 19, 20, 22, 23, 26}; // 4 off-ramp is missing, total number of off-ramps is 9
-#endif
+
 	int offrampCTidx[NumOnRamp] = {-1, 2, -1, 5, -1, 8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25};    // XYLu, Added Upstream; Total 16; but only 11 off-ramps
+#endif
+	int offrampCTidx[NumOnRamp] = {-1, -1, 3, -1, 6, -1, 9, -1, 11, -1, -1, 17, 18, 20, 21, 22, 24};    // XYLu, Added Upstream; Total 16; but only 11 off-ramps
 	
 	for(i=0;i<NumOnRamp;i++)
 	{ 
@@ -536,59 +554,6 @@ for(;;)																			// XYLu:  why here within main()   ???
 // replace bad flow data by upstream data
 //if flow < 100 do upstream downstrean interpolation flow data
 
-#ifdef ORIGINAL_IMPL																// XYLu, removed on 5/19/2019
-
-	for(i=0;i<SecSize;i++)
-	{   
-		if( (i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) && (mainline_out[cycle_index][i+1].agg_vol>100.0) )
-		{ // case for first VDS is bad, but second one is good 
-	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol;
-	    mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed; 
-		    mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;   
-	    mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density; 
-		}else if ((i==0) && (mainline_out[cycle_index][i].agg_vol<100.0) )
-		{ // case for first VDS is bad
-		    mainline_out[cycle_index][i].agg_vol = 8000.0; // these are free flow parameters
-	    mainline_out[cycle_index][i].agg_speed = 100.0; 
-		    mainline_out[cycle_index][i].agg_occ = 11.0;   
-	    mainline_out[cycle_index][i].agg_density = 30.0; 
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol>100.0) && (mainline_out[cycle_index][i+1].agg_vol<100.0))
-	    { // case for VDS i and VDS i+1 are bad, but VDS i-1 is good 
-	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i-1].agg_vol;
-	    mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i-1].agg_speed ; 
-		    mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i-1].agg_occ;   
-	    mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i-1].agg_density;
-	    }else if( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol<100.0) && (mainline_out[cycle_index][i+1].agg_vol>100.0))
-	    { // case for VDS i and VDS i-1 are bad, but VDS i+1 is good 
-	        mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol;
-	    mainline_out[cycle_index][i].agg_speed = mainline_out[cycle_index][i+1].agg_speed ; 
-		    mainline_out[cycle_index][i].agg_occ = mainline_out[cycle_index][i+1].agg_occ;   
-	    mainline_out[cycle_index][i].agg_density = mainline_out[cycle_index][i+1].agg_density;
-	    }else if ( (i!=0) && (mainline_out[cycle_index][i].agg_vol<100.0) &&  (mainline_out[cycle_index][i-1].agg_vol>100.0) &&  (mainline_out[cycle_index][i+1].agg_vol>100.0) && (i!=(SecSize-1)))
-	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
-	   mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
-	   mainline_out[cycle_index][i].agg_speed = 0.5*(mainline_out[cycle_index][i-1].agg_speed+mainline_out[cycle_index][i+1].agg_speed);
-		   mainline_out[cycle_index][i].agg_occ = 0.5*(mainline_out[cycle_index][i-1].agg_occ+mainline_out[cycle_index][i+1].agg_occ);
-		   mainline_out[cycle_index][i].agg_density = 0.5*(mainline_out[cycle_index][i-1].agg_density+mainline_out[cycle_index][i+1].agg_density);
-	    }
-		else if (i==4) // force section 5 get updated 
-	    {// case for VDS i is bad, but VDS i-1 and VDS i+1 are good 
-	   mainline_out[cycle_index][i].agg_vol = 0.5*(mainline_out[cycle_index][i-1].agg_vol+mainline_out[cycle_index][i+1].agg_vol);
-	   mainline_out[cycle_index][i].agg_speed = 0.5*(mainline_out[cycle_index][i-1].agg_speed+mainline_out[cycle_index][i+1].agg_speed);
-		   mainline_out[cycle_index][i].agg_occ = 0.5*(mainline_out[cycle_index][i-1].agg_occ+mainline_out[cycle_index][i+1].agg_occ);
-		   mainline_out[cycle_index][i].agg_density = 0.5*(mainline_out[cycle_index][i-1].agg_density+mainline_out[cycle_index][i+1].agg_density);
-		}
-		else if( (i==(SecSize-1)) &&  (mainline_out[cycle_index][SecSize-1].agg_vol<100.0)) 
-	    {// case for last VDS is bad, but VDS i-1 are good
- 			mainline_out[cycle_index][SecSize-1].agg_vol = 8000.0; // these are free flow parameters
-			mainline_out[cycle_index][SecSize-1].agg_speed = 100.0; 
-		    mainline_out[cycle_index][SecSize-1].agg_occ = 11.0;   
-	    mainline_out[cycle_index][SecSize-1].agg_density = 30.0; 
-		}
-	else{
-		}
-	}
-#endif
 
 ////    *************************  Mainline data imputation END
 
@@ -628,7 +593,7 @@ for(;;)																			// XYLu:  why here within main()   ???
 		onramp_out_f[i].agg_occ = mean_array(temp_ary_occ,NUM_CYCLE_BUFFS);	  
 	}
 	
-	for(i=0; i<NumOnRamp; i++)
+	for(i=0; i<NumOnRamp; i++)//NumOnRamp=17
 	{
 		if (offrampCTidx[i] > 0)
 		{
@@ -658,7 +623,11 @@ for(;;)																			// XYLu:  why here within main()   ???
 	offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i], FR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table 
 #endif
 
-	OR_vol_tmp = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1, OR_flow_prev[i] , OR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table    
+	if (NumOnRamp == 0)
+		OR_vol_tmp = onramp_out_f[i].agg_vol; // interpolate missing value from table  
+	else
+		OR_vol_tmp = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i, OR_flow_prev[i] , OR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table  
+	  
 	//OR_occ_tmp = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1, OR_occupancy_prev[i], OR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table
 	onramp_out_f[i].agg_vol = 1.1*Maxd(OR_vol_tmp, onramp_out_f[i].agg_vol);
 	onramp_out_f[i].agg_vol = Mind(1500.0*N_OnRamp_Ln[i], Maxd(onramp_out_f[i].agg_vol,50)); // interpolate missing value from table  
@@ -666,29 +635,29 @@ for(;;)																			// XYLu:  why here within main()   ???
 	//onramp_out_f[i].agg_occ = 1.1*Maxd(OR_occ_tmp, onramp_out_f[i].agg_occ);
 	
 	if (offrampCTidx[i] > 0)                                 //   XYLu, Added on 2019 05 18; to avoid over bound
-	{                             // N_OffRamp_Ln[NumOnRamp]={0,  1,  0, 2,  0, 1,  0,  2,  0,  1,  1,  1,  1,  1, 1,  1};
-		if (offrampCTidx[i] == 2) //                         {-1, 2, -1, 5, -1, 8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25};  // FR IP Index
+	{                             // int offrampCTidx[NumOnRamp] = {-1, -1, 3, -1, 6, -1, 9, -1, 11, -1, -1, 17, 18, 20, 21, 22, 24};    
+		if (offrampCTidx[i] == 3) //                         
 			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(1,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
-		if (offrampCTidx[i] == 5)
+		if (offrampCTidx[i] == 6)
 			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(2,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
-		if (offrampCTidx[i] == 8)
+		if (offrampCTidx[i] == 9)
 			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(3,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
-		if (offrampCTidx[i] == 10)
+		if (offrampCTidx[i] == 11)
 			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(4,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
-		if (offrampCTidx[i] == 16)
-			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(5,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
 		if (offrampCTidx[i] == 17)
+			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(5,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
+		if (offrampCTidx[i] == 18)
 			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(6,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
-		if (offrampCTidx[i] == 19)
-			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(7,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
 		if (offrampCTidx[i] == 20)
-			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(8,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
+			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(7,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
 		if (offrampCTidx[i] == 21)
+			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(8,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
+		if (offrampCTidx[i] == 22)
 			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(9,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
-		if (offrampCTidx[i] == 23)
+		if (offrampCTidx[i] == 24)
 			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(10,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
-		if (offrampCTidx[i] == 25)
-			FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(11,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
+		//if (offrampCTidx[i] == 25)
+		//	FR_vol_tmp = Mind(2000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(11,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),20)); // interpolate missing value from table
 			
 		offramp_out_f[i].agg_vol = Maxd(FR_vol_tmp, offramp_out_f[i].agg_vol); 			
 		//offramp_out_f[i].agg_vol = Mind(1800.0*N_OffRamp_Ln[i], Maxd(offramp_out_f[i].agg_vol,50)); // interpolate missing value from table
@@ -748,12 +717,10 @@ for(;;)																			// XYLu:  why here within main()   ???
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0));
 			    
 	        //fprintf(st_file_out,"Sec %d ", i); 
-			    fprintf(st_file_out,"%f ", mainline_out_f[i].agg_vol); //2,6,10,14,18,22,26,30,34,38,42,46
-	        	fprintf(st_file_out,"%f ", mainline_out_f[i].agg_speed); 		//3 ,7,11,15,19,23,27,31,35,39,43,47
-				fprintf(st_file_out,"%f ", mainline_out_f[i].agg_occ); //4,8,12,16,20,24,28,32,36,40,44,48
-				fprintf(st_file_out,"%f ", mainline_out_f[i].agg_density); //5,9,13,17,21,25,29,33,37,41,45,49
-
-
+			    fprintf(st_file_out,"%f ", mainline_out_f[i].agg_vol);		//2,6,10,14,18,22,26,30,34,38,42,46,50,54,58,62,66,70
+	        	fprintf(st_file_out,"%f ", mainline_out_f[i].agg_speed);		//3,7,11,15,19,23,27,31,35,39,43,47,51,55,59,63,67,71
+				fprintf(st_file_out,"%f ", mainline_out_f[i].agg_occ);		//4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72
+				fprintf(st_file_out,"%f ", mainline_out_f[i].agg_density);	//5,9,13,17,21,25,29,33,37,41,45,49,53,57,61,65,69,73
 		} 
 	
 		//fprintf(st_file_out,"\n");
@@ -763,59 +730,42 @@ for(;;)																			// XYLu:  why here within main()   ???
 				
 				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out_f[i].agg_vol, 100.0));
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0)); 
-				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0));
+				detection_offramp[i]->data[Np-1].flow=0.0; //Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0));   // no need for off-ramp flow.
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0)); 	
 				
 				//fprintf(st_file_out,"OR %d ", i);//
-				fprintf(st_file_out,"%f ", onramp_out_f[i].agg_vol); //50,54,58,62,66,70,74,78,82,86,90  			
-				fprintf(st_file_out,"%f ", onramp_out_f[i].agg_occ); //51,55,59,63,67,71,75,79,83,87,91 
-				//fprintf(st_file_out,"\n");//
-				//fprintf(st_file_out,"FR %d ", i);//
-				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_vol); //52,56,60,64,68,72,76,80,84,88,92 
-				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_occ); //53,57,61,65,69,73,77,81,85,89,93 
-				fprintf(st_file_out,"%f ", onramp_queue_out_f[i].agg_vol);
-				fprintf(st_file_out,"%f ", onramp_queue_out_f[i].agg_occ);
+				fprintf(st_file_out,"%f ", onramp_out_f[i].agg_vol); 		//74,80,86,92,98,104,110,116,122,128,134,140,146,152,158,164,170
+				fprintf(st_file_out,"%f ", onramp_out_f[i].agg_occ); 		//75,81,87,93,99,105,111,117,123,129,135,141,147,153,159,165,171
+				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_vol); 	//76,82,88,94,100,106,112,118,124,130,136,142,148,154,160,166,172
+				fprintf(st_file_out,"%f ", offramp_out_f[i].agg_occ); 	//77,83,89,95,101,107,113,119,125,131,137,143,149,155,161,167,173
+				fprintf(st_file_out,"%f ", onramp_queue_out_f[i].agg_vol); 	//78,84,90,96,102,108,114,120,126,132,138,144,150,156,162,168,174
+				fprintf(st_file_out,"%f ", onramp_queue_out_f[i].agg_occ); 	//79,85,91,97,103,109,115,121,127,133,139,145,151,157,163,169,175
 				//fprintf(st_file_out,"\n");//
 					
 				max_occ_2_dwn[i]=detection_s[i]->data[Np-1].occupancy;	
 				max_occ_all_dwn[i]=detection_s[i]->data[Np-1].occupancy;																//XYLu:  We may not need the following anymore  5/21/2019
 				
-				for (j=i+1;j<=i+2;j++)
-				{
+				/*for (j=i+1;j<=i+2;j++)
+				{					
 					if (j < NumOnRamp+1)
 						max_occ_2_dwn[i]=Maxd(max_occ_2_dwn[i], (detection_s[j]->data[Np-1].occupancy));
+				}*/
+				if (i < NumOnRamp -1)
+				{
+					for (j=i+1;j<i+2;j++)
+						max_occ_2_dwn[i]=Maxd(max_occ_2_dwn[i], (detection_s[j]->data[Np-1].occupancy));
 				}
-				for (j=i+1;j<NumOnRamp+1;j++)				
+				else if (i < NumOnRamp)
+				{
+					for (j=i+1;j<i+1;j++)
+						max_occ_2_dwn[i]=Maxd(max_occ_2_dwn[i], (detection_s[j]->data[Np-1].occupancy));
+				}
+				else
+					max_occ_2_dwn[i]=detection_s[NumOnRamp]->data[Np-1].occupancy;//NumOnRamp=17
+				
+				for (j=i+1;j<NumOnRamp+1;j++)				//NumOnRamp=17
 					max_occ_all_dwn[i]=Maxd(max_occ_all_dwn[i], (detection_s[j]->data[Np-1].occupancy));			
 			
-#ifdef ORIGINAL_IMP	 // modificxation of OR flow				
-				if (i!=10)
-				{					
-					if ( (Maxd((detection_s[i]->data[Np-1].occupancy), (detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0)) > 0.0)
-						tmp=(Maxd((detection_s[i]->data[Np-1].occupancy),(detection_s[i+1]->data[Np-1].occupancy))-(8.0+(11-i)*2.0))/8.0;
-					if (i < 4 )	
-					{
-						if (tmp> 0.65)
-							tmp=0.65;
-					}
-					else if (i==4)
-					{					
-						if (tmp> 0.7)
-							tmp=0.7;
-					}
-					else if ((i==6) || (i==7))
-					{					
-						if (tmp> 0.25)
-							tmp=0.25;
-					}
-					else
-					{					
-						if (tmp> 0.35) 
-							tmp=0.35;
-					}
-					detection_onramp[i]->data[Np-1].flow=(detection_onramp[i]->data[Np-1].flow)*(1.0-tmp);					
-				}
-#endif
 		}
 		
 		fprintf(st_file_out,"\n");
@@ -842,10 +792,6 @@ for(;;)																			// XYLu:  why here within main()   ???
 		}
 		fprintf(cal_opt_f,"\n");
 		
-					
-		//Set_Default_Meter(total_LRRM_rt, Ln_LRRM_rt); 		
-		
-		//Set_Opt_Meter(total_rt, ln_RM_rt);	
 
 		
 /******************************************************************
@@ -889,12 +835,17 @@ for (k=0;k<NumOnRamp;k++)
 				ln_CRM_rt[k][1] = min_Ln_RM_rt[k];
 		}	
 	
-//#ifdef ORIGINAL_IMP	
+
 			if (max_occ_2_dwn[k] < Occ_Cr)
-				ln_CRM_rt[k][0]=0.8*max_Ln_RM_rt[k];
+				ln_CRM_rt[k][0]=0.85*max_Ln_RM_rt[k];
 			if (max_occ_all_dwn[k] < Occ_Cr)
 				ln_CRM_rt[k][0]=max_Ln_RM_rt[k];
-//#endif
+				
+			if (onramp_out_f[k].agg_occ > OnRamp_Occ_Cr)				
+				(ln_CRM_rt[k][0])=(ln_CRM_rt[k][0])*(1.0+ 0.25*(onramp_out_f[k].agg_occ - OnRamp_Occ_Cr)/(100.0-OnRamp_Occ_Cr));
+			if (ln_CRM_rt[k][0]>max_Ln_RM_rt[k])
+				ln_CRM_rt[k][0]=max_Ln_RM_rt[k];
+
 				
 		fprintf(Ln_RM_rt_f,"%10.2f ",ln_CRM_rt[k][0]);			
 	}
@@ -1042,22 +993,40 @@ int Init()  // A major function; Called by AAPI.cxx: the top function for intial
 		q[i]=0.0;
 		o[i]=0.0;
 	}
-	memset(&opt_r,0,sizeof(opt_r));
-	memset(&dd,0,sizeof(dd));
-	memset(&ss,0,sizeof(ss));
-	memset(&pre_w,0,sizeof(pre_w));
-	memset(&pre_rho,0,sizeof(pre_rho));
-	memset(&up_rho,0,sizeof(up_rho));
-	memset(&dmd,0,sizeof(dmd));
-	memset(&s,0,sizeof(s));
-	memset(&qc,0,sizeof(qc));
-	memset(&q_main,0,sizeof(q_main));
-	memset(&Q_o,0,sizeof(Q_o));
-	memset(&Q_min,0,sizeof(Q_min));
-	memset(&(detection_s_0[0]),0,sizeof(detection_s_0[SecSize]));
-	memset(&(detection_onramp_0[0]),0,sizeof(detection_onramp_0[NumOnRamp]));
-	memset(&(detection_offramp_0[0]),0,sizeof(detection_offramp_0[NumOnRamp]));
-	memset(&a_w,0,sizeof(a_w));
+	memset(u,0,SecSize*(sizeof(float))); 
+	memset(v,0,SecSize*(sizeof(float))); 
+	memset(q,0,SecSize*(sizeof(float))); 
+	memset(o,0,SecSize*(sizeof(float))); 
+	memset(qc,0,SecSize*(sizeof(float)));
+	memset(queue,0,SecSize*(sizeof(float))); 
+	memset(s,0,NumOnRamp*(sizeof(float)));
+	memset(R,0,NumOnRamp*(sizeof(float)));
+	memset(dmd,0,NumOnRamp*(sizeof(float)));
+	memset(Q_o,0,NumOnRamp*(sizeof(float)));
+	memset(Q_min,0,NumOnRamp*(sizeof(float)));
+	memset(ss,0,Np*NumOnRamp*(sizeof(float)));
+	memset(dd,0,Np*NumOnRamp*(sizeof(float)));
+	memset(pre_w,0,NumOnRamp*(sizeof(float)));
+	memset(max_occ_all_dwn,0,NumOnRamp*(sizeof(float)));
+	memset(max_occ_2_dwn,0,NumOnRamp*(sizeof(float)));
+	memset(q_main,0,SecSize*(sizeof(float)));
+	memset(u2,0,SecSize*(sizeof(float))); 
+	memset(pre_rho,0,SecSize*(sizeof(float)));
+	memset(opt_r,0,SecSize*(sizeof(float)));
+	memset(up_rho,0,Np*sizeof(float));
+	memset(dyna_min_r, 0, NumOnRamp*(sizeof(float))); 
+	memset(dyna_max_r, 0, NumOnRamp*(sizeof(float))); 
+	memset(Ramp_rt, 0, NumOnRamp*(sizeof(float))); 
+	memset(RM_occ, 0, NumOnRamp*(sizeof(float))); 
+	memset(ln_CRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
+	memset(ln_LRRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
+	memset(release_cycle, 0, NumOnRamp*max_onramp_ln*(sizeof(int))); 
+	memset(total_rt, 0, NumOnRamp*(sizeof(float))); 
+	memset(total_LRRM_rt, 0, NumOnRamp*(sizeof(float))); 
+	memset(detection_s_0,0,SecSize*sizeof(detData));
+	memset(detection_onramp_0,0,NumOnRamp*sizeof(detData));
+	memset(detection_offramp_0,0,NumOnRamp*sizeof(detData));
+	memset(a_w,0,NumOnRamp*sizeof(float));
 	
 	for(i=0; i<SecSize;i++)
 		detection_s[i] = &(detection_s_0[i]);	
@@ -1157,6 +1126,7 @@ int det_data_4_contr(float time) // not used anymore
 	int i,j;
 	
 	//update_queue(time);
+printf("det_data_4_contr: NumOnRamp %d Np %d\n",NumOnRamp, Np);                                   
 	
 	for(i=0;i<NumOnRamp;i++)
 	{
@@ -1230,112 +1200,6 @@ int get_meas(float T)
 	return 1;
 }
 
-#ifdef ORIGINAL_IMPL
-int Set_Opt_Meter(float tot_rt[NumOnRamp], float Ln_rt[NumOnRamp][max_onramp_ln])
-{
-	int k;
-	//float tt_flw;
-//	char str[len_str];
-
-	for (k=0;k<NumOnRamp;k++)
-	{
-		if (N_OnRamp_Ln[k] == 1)
-		{
-			Ln_rt[k][0]=tot_rt[k];
-			if (Ln_rt[k][0] > max_Ln_RM_rt[k])
-				Ln_rt[k][0] = max_Ln_RM_rt[k];
-			if (Ln_rt[k][0] < min_Ln_RM_rt[k])
-				Ln_rt[k][0] = min_Ln_RM_rt[k];
-		}
-		if (N_OnRamp_Ln[k] == 2)
-		{
-			//Ln_rt[k][0]=(1.0-Onramp_HOV_Util)*tot_rt[k]; // 15% goes to HOV lane	
-			Ln_rt[k][0]=tot_rt[k]-Onramp_HOV_Util*max_RM_rt;  
-			if (Ln_rt[k][0] > max_Ln_RM_rt[k])
-				Ln_rt[k][0] = max_Ln_RM_rt[k];
-			if (Ln_rt[k][0] < min_Ln_RM_rt[k])
-				Ln_rt[k][0] = min_Ln_RM_rt[k];
-		}
-		if (N_OnRamp_Ln[k] == 3)
-		{				
-			Ln_rt[k][0]=0.5*(tot_rt[k]-Onramp_HOV_Util*max_RM_rt);  
-			Ln_rt[k][1]=Ln_rt[k][0];                                   //0.5*(tot_rt[k]-Onramp_HOV_Util*max_RM_rt);  
-			if (Ln_rt[k][0] > max_Ln_RM_rt[k])
-				Ln_rt[k][0] = max_Ln_RM_rt[k];
-			if (Ln_rt[k][0] < min_Ln_RM_rt[k])
-				Ln_rt[k][0] = min_Ln_RM_rt[k];
-			if (Ln_rt[k][1] > max_Ln_RM_rt[k])
-				Ln_rt[k][1] = max_Ln_RM_rt[k];
-			if (Ln_rt[k][1] < min_Ln_RM_rt[k])
-				Ln_rt[k][1] = min_Ln_RM_rt[k];
-		}	
-	}
-	
-	
-		for (k=0;k<NumOnRamp;k++)
-		{
-#ifdef ORIGINAL_IMP	
-			if (max_occ_2_dwn[k] < Occ_Cr)
-				Ln_rt[k][0]=0.8*max_Ln_RM_rt[k];
-			if (max_occ_all_dwn[k] < Occ_Cr)
-				Ln_rt[k][0]=max_Ln_RM_rt[k];
-#endif
-				
-			fprintf(Ln_RM_rt_f,"%10.2f ",Ln_rt[k][0]);			
-		}
-		fprintf(Ln_RM_rt_f,"\n");	
-		
-
-	return 1;
-}
-
-
-
-/**************************************************
-
-	Should apply to downstream 11 onrampsonly
-
-***************************************************/
-
-int Set_Default_Meter(float tot_lrrm_rt[NumOnRamp], float ln_lrrm_rt[NumOnRamp][max_onramp_ln]) // this implemenmtation is correct 03_05_14; changed from 11 onarmps to 16 onramps 11_28_14
-{
-
-	int k,j,tmp_err, tmp_err1;
-	
-	tmp_err=0; tmp_err1=0; 
-	
-	for(k=0;k<NumOnRamp;k++)
-	{	
-		for (j=0;j<N_interv-1;j++)
-		{
-				if (o[k]<=SR99_RM_occ_tbl[0][k])				
-					tot_lrrm_rt[k]=SR99_RM_rate_tbl[0][k];														
-				else if (o[k]>SR99_RM_occ_tbl[j][k] && o[k]<=SR99_RM_occ_tbl[j+1][k])					
-					tot_lrrm_rt[k]=SR99_RM_rate_tbl[j-1][k];																
-				else				
-					tot_lrrm_rt[k]=SR99_RM_rate_tbl[j+1][k];							
-		} // for j-loop
-										
-		if (tot_lrrm_rt[k]>max_RM_rt)
-			tot_lrrm_rt[k]=max_RM_rt;	
-		if (tot_lrrm_rt[k]<min_RM_rt)
-			tot_lrrm_rt[k]=min_RM_rt;	
-	
-		ln_lrrm_rt[k][0]=tot_lrrm_rt[k];
-
-		if (ln_lrrm_rt[k][0] > max_Ln_RM_rt[k])
-			ln_lrrm_rt[k][0] = max_Ln_RM_rt[k];
-		if (ln_lrrm_rt[k][0] < min_Ln_RM_rt[k])
-			ln_lrrm_rt[k][0] = min_Ln_RM_rt[k];
-		fprintf(local_rm_f,"%10.2f\t", (float)(tot_lrrm_rt[k]));
-
-	}
-	fprintf(local_rm_f,"\n");
-	
-	return 1;
-}
-
-#endif
 
 /*******************************************
 	       OptSolver
