@@ -65,7 +65,7 @@ const float T=30/3600.0;  // 30s RM control time interval in [hr]
 //#define a_w 6.5			       // default: 6.5;   2.0 and 6.5 are the same in effect (1/7/14); not sure what is this? value=?
 #define len_str 1280           // for using sprintf_s
 #define Omega 20.11             // shockwave back-propagation speed 12.5 mph=20.1km/h
-static float *a_w; //[NumOnRamp]={0.0};
+static float a_w[NumOnRamp]={0.0};
 
 #define vsl_gain   15.0        // 20.0 fro I-80;    17=>10; 15.0
 #define vsl_p_gain 2.0         // 2.0
@@ -96,61 +96,67 @@ static int StateOn=0;
 static int StateOff=0;
 //static int count=1;
 
-static float *u; //[SecSize]={0};    // For all cells
-float *alpha; //[SecSize]={0};
-float *beta_c; //[SecSize]={0};
-static float *q; //[SecSize]={0.0};   // composite mainline flow
-static float *v; //[SecSize]={0.0};   // composite speed for each cell
-static float *o; //[SecSize]={0.0};   // composite occupancy for each cell
-static float *qc; //[SecSize]={7200};      // mainline capacity; assigned in Init()
-static float *queue; //[SecSize]={0.0};      // updated with update_queue();
+static float u[SecSize]={0};    // For all cells
+float alpha[SecSize]={0};
+float beta_c[SecSize]={0};
+static float q[SecSize]={0.0};   // composite mainline flow
+static float v[SecSize]={0.0};   // composite speed for each cell
+static float o[SecSize]={0.0};   // composite occupancy for each cell
+static float qc[SecSize]={7200};      // mainline capacity; assigned in Init()
+static float queue[SecSize]={0.0};      // updated with update_queue();
 //float s[SecSize]={0.0};          // off-ramp flow  // changed on 03/04/14
-static float *s; //[NumOnRamp]={0.0};          // off-ramp flow
-static float *R; //[NumOnRamp]={0.0};   // composite onramp flow;  changed on 01/03/13
-static float *dmd; //[NumOnRamp]={0.0};          // onramp demand flow;     changed on 01/03/13
-static float *Q_o; //[NumOnRamp]={0.0};  // Onramp capacity; total onramp max RM rate
-static float *Q_min; //[NumOnRamp]={0.0};  // Total Onramp minimum RM rate
-static float **ss; //[NumOnRamp][Np]={{0.0}};
-static float **dd; //[NumOnRamp][Np]={{0.0}};     // onramp dmd
-static float *pre_w; //[NumOnRamp]={0};
-static float *max_occ_all_dwn; //[NumOnRamp]={0};
-static float *max_occ_2_dwn; //[NumOnRamp]={0};
+static float s[NumOnRamp]={0.0};          // off-ramp flow
+static float R[NumOnRamp]={0.0};   // composite onramp flow;  changed on 01/03/13
+static float dmd[NumOnRamp]={0.0};          // onramp demand flow;     changed on 01/03/13
+static float Q_o[NumOnRamp]={0.0};  // Onramp capacity; total onramp max RM rate
+static float Q_min[NumOnRamp]={0.0};  // Total Onramp minimum RM rate
+static float ss[NumOnRamp][Np]={{0.0}};
+static float dd[NumOnRamp][Np]={{0.0}};     // onramp dmd
+static float pre_w[NumOnRamp]={0};
+static float max_occ_all_dwn[NumOnRamp]={0};
+static float max_occ_2_dwn[NumOnRamp]={0};
 
-static float *q_main; //[SecSize]={0.0};     // mainline flow of all cells   
-static float *u2; //[SecSize]={0};           // speed to feed into the model
+static float q_main[SecSize]={0.0};     // mainline flow of all cells   
+static float u2[SecSize]={0};           // speed to feed into the model
 
-static float *pre_rho; //[SecSize]={0};
-static float **opt_r; //[SecSize][Np]={{0.0}};
+static float pre_rho[SecSize]={0};
+static float opt_r[SecSize][Np]={{0.0}};
 //static float metering_rate_change_time=0.0;
-static float *up_rho; //[Np]={0};
+static float up_rho[Np]={0};
 
 
 unsigned int replication=0;
 //static int detectorNum=0,sectionNum=0,nodeNum=0,centroidNum=0;  // moved from data_save.h and readdetectordata.h; 05_29_13
 
-static float *dyna_min_r; //[NumOnRamp];
-static float *dyna_max_r; //[NumOnRamp];
-static float *Ramp_rt; //[NumOnRamp];
-static float *RM_occ; //[NumOnRamp];
-static float **ln_CRM_rt; //[NumOnRamp][max_onramp_ln];     // for CRM
-static float **ln_LRRM_rt; //[NumOnRamp][max_onramp_ln];   // fot LRRM
-static int *release_cycle; //[NumOnRamp][max_onramp_ln];
-static float *total_rt; //[NumOnRamp];   // for CRM
-static float *total_LRRM_rt; //[NumOnRamp]; // for LRRM
+static float dyna_min_r[NumOnRamp];
+static float dyna_max_r[NumOnRamp];
+static float Ramp_rt[NumOnRamp];
+static float RM_occ[NumOnRamp];
+static float ln_CRM_rt[NumOnRamp][max_onramp_ln];     // for CRM
+static float ln_LRRM_rt[NumOnRamp][max_onramp_ln];   // fot LRRM
+static int release_cycle[NumOnRamp][max_onramp_ln];
+static float total_rt[NumOnRamp];   // for CRM
+static float total_LRRM_rt[NumOnRamp]; // for LRRM
 	
-	static float *L; //[SecSize]={400.0,1500.0, 1200.0, 300.0,2000.0, 300.0, 555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
-	float *Q; //[SecSize]={2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
-	float *min_Ln_RM_rt; //[NumOnRamp]=  {400, 400, 400, 400, 400, 400, 350,380,480,240,350,400,350,320,330,420,550};   // revised lower bound; 9/28/16
-	float *max_Ln_RM_rt; //[NumOnRamp]=  {750,750,750,750,750,750,750,750,800,800,800,850,900,850,750,850,1080}; // revised lower bound  9/28/16
+	static float L[SecSize]={400.0,1500.0, 1200.0, 300.0,2000.0, 300.0, 555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
+	const float Q[SecSize]={2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
+	//const float min_Ln_RM_rt[NumOnRamp]={480,600,681,240,500,700,480,480,480,575,800}; // field lower bound
+	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,400,550,380,380,380,475,550}; // revised lower bound; used Day_1
+	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,350,500,380,350,380,420,550}; // revised lower bound; 9/27/16
+	const float min_Ln_RM_rt[NumOnRamp]=  {400, 400, 400, 400, 400, 400, 350,380,480,240,350,400,350,320,330,420,550};   // revised lower bound; 9/28/16
+	//const float max_Ln_RM_rt[NumOnRamp]={1000,750,910,900,900,990,900,900,750,920,1080}; // field upper bound;   used Day_1
+	//const float max_Ln_RM_rt[NumOnRamp]=  {1000,750,910,800,800,850,900,850,750,850,1080}; // revised lower bound
+	const float max_Ln_RM_rt[NumOnRamp]=  {750,750,750,750,750,750,750,750,800,800,800,850,900,850,750,850,1080}; // revised lower bound  9/28/16
 										  
 	
 	// for downstream 11 onramps only
-	int *N_OnRamp_Ln; //[NumOnRamp]={2,3,1,1,2,3,2,3,2,2,1,2,2,2,1,1,1};  // from upstream to downstream
-	int *N_OffRamp_Ln; //[NumOnRamp]={1,0,1,0,2,0,1,0,2,0,1,1,1,1,1,1,1};  // from upstream to downstream
+	const int N_OnRamp_Ln[NumOnRamp]={2,3,1,1,2,3,2,3,2,2,1,2,2,2,1,1,1};  // from upstream to downstream
+	//const int N_OffRamp_Ln[NumOnRamp]={2,1,0,3,0,1,1,0,0,1,1,1,1,1,1,2};  // from upstream to downstream
+	const int N_OffRamp_Ln[NumOnRamp]={1,0,1,0,2,0,1,0,2,0,1,1,1,1,1,1,1};  // from upstream to downstream
 	
 
-	float *lambda; // [SecSize]={3.0, 3.0,3.0,3.0,3.0,3.0,3.0000,4.0000,3.3654,4.0000,4.0000, 4.0000,4.0000,4.2945,4.0000,4.1191,5.0000,4.6147}; // composite ln number
-	static float *onrampL; // [NumOnRamp]={300.0, 500.0, 500.0, 500.0, 500.0, 500.0, 379.2,453.6,587.6,831.7,284.8,615.9,334.6,470.7,402.7,522.7,272.3};                                          // used in RT code
+const float lambda[SecSize]={3.0, 3.0,3.0,3.0,3.0,3.0,3.0000,4.0000,3.3654,4.0000,4.0000, 4.0000,4.0000,4.2945,4.0000,4.1191,5.0000,4.6147}; // composite ln number
+static float onrampL[NumOnRamp]={300.0, 500.0, 500.0, 500.0, 500.0, 500.0, 379.2,453.6,587.6,831.7,284.8,615.9,334.6,470.7,402.7,522.7,272.3};                                          // used in RT code
 
 
 const double SR99_RM_occ_tbl[N_interv][NumOnRamp]=
@@ -266,13 +272,13 @@ typedef struct {
 	detectorData data[Np];
 }data_profile;
 
-detData *detection_s_0; //[SecSize];  
-detData *detection_onramp_0; //[NumOnRamp];	//the realtime data for onramp from detector
-detData *detection_offramp_0; //[NumOnRamp];	//the realtime data for offramp from detector
+detData detection_s_0[SecSize];  
+detData detection_onramp_0[NumOnRamp];	//the realtime data for onramp from detector
+detData detection_offramp_0[NumOnRamp];	//the realtime data for offramp from detector
 
-detData *detection_s; //[SecSize]; 
-detData *detection_onramp; //[NumOnRamp];
-detData *detection_offramp; //[NumOnRamp];
+detData *detection_s[SecSize]; 
+detData *detection_onramp[NumOnRamp];
+detData *detection_offramp[NumOnRamp];
 
 int Init();
 int Init_sim_data_io();
