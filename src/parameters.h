@@ -12,8 +12,8 @@
 //#define DBG_COEFF
 
 	
-#define NumOnRamp           16	   // the number of onramp; SR99;;                 Original: 11
-#define SecSize             17                // one more than NumOnRam            Original: 12
+#define NumOnRamp           17	   // the number of onramp; SR99;;                 Original: 11; => 16 in May 2019 => 17 kn 7/20/2019
+#define SecSize             18                // one more than NumOnRam            Original: 12  => 17 in May 2019 => 18 on 7/20/2019
 #define use_CRM				2           // 1: default; 2: Opt CRM; 3: Coord ALINEA;  4: Hybrid
 
 #define VSL_Update_Step		2           // twice of time length for detection; .g if detection is 60s; VSL will be updated every 120s
@@ -28,6 +28,7 @@
 #define Gain_Up				8.0
 #define Gain_Dn				4.0
 #define Occ_Cr				12.0
+#define OnRamp_Occ_Cr		40.0
 
 //#define CellSize 15
 #define ALLvehType          0
@@ -64,7 +65,7 @@ const float T=30/3600.0;  // 30s RM control time interval in [hr]
 //#define a_w 6.5			       // default: 6.5;   2.0 and 6.5 are the same in effect (1/7/14); not sure what is this? value=?
 #define len_str 1280           // for using sprintf_s
 #define Omega 20.11             // shockwave back-propagation speed 12.5 mph=20.1km/h
-static float a_w[NumOnRamp]={0.0};
+static float *a_w; //[NumOnRamp]={0.0};
 
 #define vsl_gain   15.0        // 20.0 fro I-80;    17=>10; 15.0
 #define vsl_p_gain 2.0         // 2.0
@@ -95,133 +96,95 @@ static int StateOn=0;
 static int StateOff=0;
 //static int count=1;
 
-static float u[SecSize]={0};    // For all cells
-float alpha[SecSize]={0};
-float beta_c[SecSize]={0};
-static float q[SecSize]={0.0};   // composite mainline flow
-static float v[SecSize]={0.0};   // composite speed for each cell
-static float o[SecSize]={0.0};   // composite occupancy for each cell
-static float qc[SecSize]={7200};      // mainline capacity; assigned in Init()
-static float queue[SecSize]={0.0};      // updated with update_queue();
+static float *u; //[SecSize]={0};    // For all cells
+float *alpha; //[SecSize]={0};
+float *beta_c; //[SecSize]={0};
+static float *q; //[SecSize]={0.0};   // composite mainline flow
+static float *v; //[SecSize]={0.0};   // composite speed for each cell
+static float *o; //[SecSize]={0.0};   // composite occupancy for each cell
+static float *qc; //[SecSize]={7200};      // mainline capacity; assigned in Init()
+static float *queue; //[SecSize]={0.0};      // updated with update_queue();
 //float s[SecSize]={0.0};          // off-ramp flow  // changed on 03/04/14
-static float s[NumOnRamp]={0.0};          // off-ramp flow
-static float R[NumOnRamp]={0.0};   // composite onramp flow;  changed on 01/03/13
-static float dmd[NumOnRamp]={0.0};          // onramp demand flow;     changed on 01/03/13
-static float Q_o[NumOnRamp]={0.0};  // Onramp capacity; total onramp max RM rate
-static float Q_min[NumOnRamp]={0.0};  // Total Onramp minimum RM rate
-static float ss[NumOnRamp][Np]={{0.0}};
-static float dd[NumOnRamp][Np]={{0.0}};     // onramp dmd
-static float pre_w[NumOnRamp]={0};
-static float max_occ_all_dwn[NumOnRamp]={0};
-static float max_occ_2_dwn[NumOnRamp]={0};
+static float *s; //[NumOnRamp]={0.0};          // off-ramp flow
+static float *R; //[NumOnRamp]={0.0};   // composite onramp flow;  changed on 01/03/13
+static float *dmd; //[NumOnRamp]={0.0};          // onramp demand flow;     changed on 01/03/13
+static float *Q_o; //[NumOnRamp]={0.0};  // Onramp capacity; total onramp max RM rate
+static float *Q_min; //[NumOnRamp]={0.0};  // Total Onramp minimum RM rate
+static float **ss; //[NumOnRamp][Np]={{0.0}};
+static float **dd; //[NumOnRamp][Np]={{0.0}};     // onramp dmd
+static float *pre_w; //[NumOnRamp]={0};
+static float *max_occ_all_dwn; //[NumOnRamp]={0};
+static float *max_occ_2_dwn; //[NumOnRamp]={0};
 
-static float q_main[SecSize]={0.0};     // mainline flow of all cells   
-static float u2[SecSize]={0};           // speed to feed into the model
+static float *q_main; //[SecSize]={0.0};     // mainline flow of all cells   
+static float *u2; //[SecSize]={0};           // speed to feed into the model
 
-static float pre_rho[SecSize]={0};
-static float opt_r[SecSize][Np]={{0.0}};
+static float *pre_rho; //[SecSize]={0};
+static float **opt_r; //[SecSize][Np]={{0.0}};
 //static float metering_rate_change_time=0.0;
-static float up_rho[Np]={0};
+static float *up_rho; //[Np]={0};
 
 
 unsigned int replication=0;
 //static int detectorNum=0,sectionNum=0,nodeNum=0,centroidNum=0;  // moved from data_save.h and readdetectordata.h; 05_29_13
 
-static float dyna_min_r[NumOnRamp];
-static float dyna_max_r[NumOnRamp];
-static float Ramp_rt[NumOnRamp];
-static float RM_occ[NumOnRamp];
-static float ln_CRM_rt[NumOnRamp][max_onramp_ln];     // for CRM
-static float ln_LRRM_rt[NumOnRamp][max_onramp_ln];   // fot LRRM
-static int release_cycle[NumOnRamp][max_onramp_ln];
-static float total_rt[NumOnRamp];   // for CRM
-static float total_LRRM_rt[NumOnRamp]; // for LRRM
+static float *dyna_min_r; //[NumOnRamp];
+static float *dyna_max_r; //[NumOnRamp];
+static float *Ramp_rt; //[NumOnRamp];
+static float *RM_occ; //[NumOnRamp];
+static float **ln_CRM_rt; //[NumOnRamp][max_onramp_ln];     // for CRM
+static float **ln_LRRM_rt; //[NumOnRamp][max_onramp_ln];   // fot LRRM
+static int *release_cycle; //[NumOnRamp][max_onramp_ln];
+static float *total_rt; //[NumOnRamp];   // for CRM
+static float *total_LRRM_rt; //[NumOnRamp]; // for LRRM
 	
-	static float L[SecSize]={1500.0, 1200.0, 300.0,2000.0, 300.0, 555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
-	const float Q[SecSize]={2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
-	//const float min_Ln_RM_rt[NumOnRamp]={480,600,681,240,500,700,480,480,480,575,800}; // field lower bound
-	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,400,550,380,380,380,475,550}; // revised lower bound; used Day_1
-	//const float min_Ln_RM_rt[NumOnRamp]=  {380,500,520,240,350,500,380,350,380,420,550}; // revised lower bound; 9/27/16
-	const float min_Ln_RM_rt[NumOnRamp]=  {200, 400, 400, 400, 400, 350,380,480,240,350,400,350,320,330,420,550};   // revised lower bound; 9/28/16
-	//const float max_Ln_RM_rt[NumOnRamp]={1000,750,910,900,900,990,900,900,750,920,1080}; // field upper bound;   used Day_1
-	//const float max_Ln_RM_rt[NumOnRamp]=  {1000,750,910,800,800,850,900,850,750,850,1080}; // revised lower bound
-	const float max_Ln_RM_rt[NumOnRamp]=  {750,750,750,750,750,750,750,800,800,800,850,900,850,750,850,1080}; // revised lower bound  9/28/16
+	static float *L; //[SecSize]={400.0,1500.0, 1200.0, 300.0,2000.0, 300.0, 555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
+	float *Q; //[SecSize]={2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2000.0, 2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
+	float *min_Ln_RM_rt; //[NumOnRamp]=  {400, 400, 400, 400, 400, 400, 350,380,480,240,350,400,350,320,330,420,550};   // revised lower bound; 9/28/16
+	float *max_Ln_RM_rt; //[NumOnRamp]=  {750,750,750,750,750,750,750,750,800,800,800,850,900,850,750,850,1080}; // revised lower bound  9/28/16
 										  
 	
 	// for downstream 11 onramps only
-	const int N_OnRamp_Ln[NumOnRamp]={3,1,1,2,3,2,3,2,2,1,2,2,2,1,1,1};  // from upstream to downstream
-	//const int N_OffRamp_Ln[NumOnRamp]={2,1,0,3,0,1,1,0,0,1,1,1,1,1,1,2};  // from upstream to downstream
-	const int N_OffRamp_Ln[NumOnRamp]={0,1,0,2,0,1,0,2,0,1,1,1,1,1,1,1};  // from upstream to downstream
+	int *N_OnRamp_Ln; //[NumOnRamp]={2,3,1,1,2,3,2,3,2,2,1,2,2,2,1,1,1};  // from upstream to downstream
+	int *N_OffRamp_Ln; //[NumOnRamp]={1,0,1,0,2,0,1,0,2,0,1,1,1,1,1,1,1};  // from upstream to downstream
 	
-#ifdef SIM_ONLY		
-	const int OnRamp_Ln_Id[NumOnRamp][max_onramp_ln]={{19884,0,17256},{19904,19896,17264},{19916,0,17324},{19928,0,17336},                     {17392,0,0},{19964,0,17510},{19955,0,16705},{19940,0,16731},{16785,0,0},{16571,0,0},{16853,0,0}};
 
-	const int CellDetectionId[SecSize]={19791,19795,19798,19800,19803,19810,19814,19818,19822,19826,19830,19834};  // 10_24_13; most downstream not detected
-
-	//for all 16 onramps
-	const int N_Mainline_Ln_RM_All[(NumOnRamp+5)]={3,3,3,3,3,3,4,3,4,4,4,4,4,4,4,5};
-	const int N_OnRamp_Ln_All[(NumOnRamp+5)]={3,1,1,2,3,2,3,2,2,1,2,2,2,1,1,1};
-	const int OnRamp_Ln_Id_All[(NumOnRamp+5)][max_onramp_ln]={{19852,19842,17550},{338,0,0},{336,0,0},{19978,0,2218},{19875,19871,17232},{19884,0,17256},{19904,19896,17264},
-                         {19916,0,17324},{19928,0,17336},{17392,0,0},{19964,0,17510},{19955,0,16705},{19940,0,16731},{16785,0,0},{16571,0,0},{16853,0,0}};	                                                                                                                                     
-	const int Mainline_Ln_Det_Id_All[(NumOnRamp+5)][max_mainline_ln]={{18392,18394,0,0,18390},{18378,18380,0,0,18376},{18371,18373,0,0,18369},{18357,18359,0,0,18355},
-				{18667,18669,0,0,18665},{18336,18338,0,0,18334},{18327,18329,18331,0,18325},{18311,18309,0,0,18313},
-				{18302,18304,18306,0,18300},{18275,18277,18279,0,18273},{18266,18268,18270,0,18264},{18512,18514,18516,0,18510},
-				{18228,18230,18232,0,18226},{18192,18194,18196,0,18190},{18201,18203,18205,0,18199},{18535,18537,18539,18541,18533}}; // all 16 Sections
-	
-//for measuremnt only
-
-const int OnRampDetectionEndId[NumOnRamp]={19797,20139,19802,19806,19812,19816,20140,19824,19828,19832,19835}; // single detector after meter
-
-const int OnRamp_Ln_AdvanceDetEndId[NumOnRamp][max_onramp_ln]={{19886,0,18424},{19906,19898,18425},{19922,0,18689},{19934,0,18691},
-                                  {18434,0,0},{19966,0,18436},{19957,0,18438},{19944,0,18693},{18442,0,0},{18444,0,0},{18446,0,0}};
-
-int Green[(NumOnRamp+5)][max_onramp_ln]={{0,0,0},{0,0,0},{0,0,0},{0,0,0},
-                                      {0,0,0},{0,0,0},{0,0,0},{0,0,0},
-									  {0,0,0},{0,0,0},{0,0,0},{0,0,0},
-									  {0,0,0},{0,0,0},{0,0,0},{0,0,0}};
-
-const int OffRampDetectionId[NumOnRamp]={18423, 0, 18426, 0, 18433, 18435, 18437, 18439,18441,18443,18445}; // OffRamp Matched with OnRamp
-const int offramp_secId[NumOnRamp]=     {17246, 0, 17286, 0, 17384, 17500, 16697, 16727,16751,16565,16833}; // OffRamp Matched with OnRamp
-
-#endif	// SIM_ONLY
-
-
-const float lambda[SecSize]={3.0,3.0,3.0,3.0,3.0,3.0000,4.0000,3.3654,4.0000,4.0000, 4.0000,4.0000,4.2945,4.0000,4.1191,5.0000,4.6147}; // composite ln number
-static float onrampL[NumOnRamp]={500.0, 500.0, 500.0, 500.0, 500.0, 379.2,453.6,587.6,831.7,284.8,615.9,334.6,470.7,402.7,522.7,272.3};                                          // used in RT code
+	float *lambda; // [SecSize]={3.0, 3.0,3.0,3.0,3.0,3.0,3.0000,4.0000,3.3654,4.0000,4.0000, 4.0000,4.0000,4.2945,4.0000,4.1191,5.0000,4.6147}; // composite ln number
+	static float *onrampL; // [NumOnRamp]={300.0, 500.0, 500.0, 500.0, 500.0, 500.0, 379.2,453.6,587.6,831.7,284.8,615.9,334.6,470.7,402.7,522.7,272.3};                                          // used in RT code
 
 
 const double SR99_RM_occ_tbl[N_interv][NumOnRamp]=
-   {{ 3.0,      5.0,     5.0,      5.0,    5.0,    4.0,    6.0,   5.0,    5.0,   6.0,  7.0,   8.0,   6.0,   9.0,   7.0,     5.0},
-    { 3.9,      5.9,     5.9,      5.7,    5.4,    4.8,    6.9,   6.1,    6.1,   6.3,  7.4,   8.7,   6.9,  10.5,   7.7,     5.9},
-    { 4.7,      6.7,     6.8,      6.4,    5.7,    5.6,    7.7,   7.1,    7.1,   6.5,  7.7,   9.4,   7.7,  12.0,   8.5,     6.9},
-    { 5.6,      7.6,     7.7,      7.1,    6.1,    6.4,    8.6,   8.2,    8.2,   6.8,  8.1,  10.1,   8.6,  13.5,   9.3,     7.8},
-    { 6.4,      8.4,     8.6,      7.9,    6.4,    7.1,    9.4,   9.2,    9.3,   7.0,  8.4,  10.9,   9.4,  15.0,  10.1,     8.8},
-    { 7.3,      9.3,     9.5,      8.6,    6.8,    7.9,   10.3,  10.3,   10.4,   7.3,  8.8,  11.6,  10.3,  16.5,  10.9,     9.7},
-    { 8.1,     10.1,    10.4,      9.3,    7.1,    8.7,   11.1,  11.3,   11.4,   7.5,  9.1,  12.3,  11.1,  18.0,  11.7,    10.7},
-    { 9.0,     11.0,    11.3,     10.0,    7.5,    9.5,   12.0,  12.4,   12.5,   7.8,  9.5,  13.0,  12.0,  19.5,  12.5,    11.6},
-    { 9.9,     11.9,    12.1,     10.7,    7.9,   10.3,   12.9,  13.5,   13.6,   8.0,  9.9,  13.7,  12.9,  21.0,  13.2,    12.5},
-    {10.7,     12.7,    13.0,     11.4,    8.2,   11.1,   13.7,  14.5,   14.6,   8.3, 10.2,  14.4,  13.7,  22.5,  14.0,    13.5},
-    {11.6,     13.6,    13.9,     12.1,    8.6,   11.9,   14.6,  15.6,   15.7,   8.5, 10.6,  15.1,  14.6,  24.0,  14.8,    14.4},
-    {12.4,     14.4,    14.8,     12.9,    8.9,   12.6,   15.4,  16.6,   16.8,   8.8, 10.9,  15.9,  15.4,  25.5,  15.6,    15.4},
-    {13.3,     15.3,    15.7,     13.6,    9.3,   13.4,   16.3,  17.7,   17.9,   9.0, 11.3,  16.6,  16.3,  27.0,  16.4,    16.3},
-    {14.1,     16.1,    16.6,     14.3,    9.6,   14.2,   17.1,  18.7,   18.9,   9.3, 11.6,  17.3,  17.1,  28.5,  17.2,    17.3},
-    {15.0,     17.0,    17.5,     15.0,   10.0,   15.0,   18.0,  19.8,   20.0,   9.5, 12.0,  18.0,  18.0,  30.0,  18.0,    18.2}};
+   {{ 3.0,	3.0,      5.0,     5.0,      5.0,    5.0,    4.0,    6.0,   5.0,    5.0,   6.0,  7.0,   8.0,   6.0,   9.0,   7.0,     5.0},
+    { 3.9,	3.9,      5.9,     5.9,      5.7,    5.4,    4.8,    6.9,   6.1,    6.1,   6.3,  7.4,   8.7,   6.9,  10.5,   7.7,     5.9},
+    { 4.7,	4.7,      6.7,     6.8,      6.4,    5.7,    5.6,    7.7,   7.1,    7.1,   6.5,  7.7,   9.4,   7.7,  12.0,   8.5,     6.9},
+    { 5.6,	5.6,      7.6,     7.7,      7.1,    6.1,    6.4,    8.6,   8.2,    8.2,   6.8,  8.1,  10.1,   8.6,  13.5,   9.3,     7.8},
+    { 6.4,	6.4,      8.4,     8.6,      7.9,    6.4,    7.1,    9.4,   9.2,    9.3,   7.0,  8.4,  10.9,   9.4,  15.0,  10.1,     8.8},
+    { 7.3,	7.3,      9.3,     9.5,      8.6,    6.8,    7.9,   10.3,  10.3,   10.4,   7.3,  8.8,  11.6,  10.3,  16.5,  10.9,     9.7},
+    { 8.1,	8.1,     10.1,    10.4,      9.3,    7.1,    8.7,   11.1,  11.3,   11.4,   7.5,  9.1,  12.3,  11.1,  18.0,  11.7,    10.7},
+    { 9.0,	9.0,     11.0,    11.3,     10.0,    7.5,    9.5,   12.0,  12.4,   12.5,   7.8,  9.5,  13.0,  12.0,  19.5,  12.5,    11.6},
+    { 9.9,	9.9,     11.9,    12.1,     10.7,    7.9,   10.3,   12.9,  13.5,   13.6,   8.0,  9.9,  13.7,  12.9,  21.0,  13.2,    12.5},
+    {10.7,	10.7,     12.7,    13.0,     11.4,    8.2,   11.1,   13.7,  14.5,   14.6,   8.3, 10.2,  14.4,  13.7,  22.5,  14.0,    13.5},
+    {11.6,	11.6,     13.6,    13.9,     12.1,    8.6,   11.9,   14.6,  15.6,   15.7,   8.5, 10.6,  15.1,  14.6,  24.0,  14.8,    14.4},
+    {12.4,	12.4,     14.4,    14.8,     12.9,    8.9,   12.6,   15.4,  16.6,   16.8,   8.8, 10.9,  15.9,  15.4,  25.5,  15.6,    15.4},
+    {13.3,	13.3,     15.3,    15.7,     13.6,    9.3,   13.4,   16.3,  17.7,   17.9,   9.0, 11.3,  16.6,  16.3,  27.0,  16.4,    16.3},
+    {14.1,	14.1,     16.1,    16.6,     14.3,    9.6,   14.2,   17.1,  18.7,   18.9,   9.3, 11.6,  17.3,  17.1,  28.5,  17.2,    17.3},
+    {15.0,	15.0,     17.0,    17.5,     15.0,   10.0,   15.0,   18.0,  19.8,   20.0,   9.5, 12.0,  18.0,  18.0,  30.0,  18.0,    18.2}};
 const double SR99_RM_rate_tbl[N_interv][NumOnRamp]=
-   {{ 700,     800,     900,     900,     700,     1000,    750,   910,   900,   900,   990,  900,  900,    750,   920,    1080},
-    { 668,     778,     870,     853,     672,      963,    740,   894,   853,   827,   970,  870,  870,    730,   895,    1060},
-    { 635,     755,     840,     806,     643,      926,    729,   878,   806,   843,   949,  840,  840,    711,   870,    1040},
-    { 602,     732,     810,     759,     615,      889,    718,   861,   759,   815,   928,  810,  810,    692,   846,    1020},
-    { 569,     709,     780,     712,     586,      852,    708,   845,   712,   786,   908,  780,  780,    672,   821,    1000},
-    { 536,     686,     750,     665,     558,      815,    697,   828,   665,   758,   887,  750,  750,    653,   796,     980},
-    { 503,     663,     720,     618,     529,      778,    686,   812,   618,   729,   866,  720,  720,    634,   772,     960},
-    { 471,     640,     690,     570,     500,      740,    675,   796,   570,   700,   845,  690,  690,    615,   747,     940},
-    { 438,     618,     660,     523,     472,      703,    665,   779,   523,   672,   825,  660,  660,    595,   722,     920},
-    { 405,     595,     630,     476,     443,      666,    654,   763,   476,   643,   804,  630,  630,    576,   698,     900},
-    { 372,     572,     600,     429,     415,      629,    643,   746,   429,   615,   783,  600,  600,    557,   673,     880},
-    { 339,     549,     570,     382,     386,      592,    633,   730,   382,   586,   763,  570,  570,    537,   648,     860},
-    { 306,     526,     540,     335,     358,      555,    622,   713,   335,   558,   742,  540,  540,    518,   624,     840},
-    { 273,     503,     510,     288,     329,      518,    611,   697,   288,   529,   721,  510,  510,    499,   599,     820},
-    { 241,     480,     480,     240,     300,      480,    600,   681,   240,   500,   700,  480,  480,    480,   575,     800}};
+   {{ 700,	700,     800,     900,     900,     700,     1000,    750,   910,   900,   900,   990,  900,  900,    750,   920,    1080},
+    { 668,	668,     778,     870,     853,     672,      963,    740,   894,   853,   827,   970,  870,  870,    730,   895,    1060},
+    { 635,	635,     755,     840,     806,     643,      926,    729,   878,   806,   843,   949,  840,  840,    711,   870,    1040},
+    { 602,	602,     732,     810,     759,     615,      889,    718,   861,   759,   815,   928,  810,  810,    692,   846,    1020},
+    { 569,	569,     709,     780,     712,     586,      852,    708,   845,   712,   786,   908,  780,  780,    672,   821,    1000},
+    { 536,	536,     686,     750,     665,     558,      815,    697,   828,   665,   758,   887,  750,  750,    653,   796,     980},
+    { 503,	503,     663,     720,     618,     529,      778,    686,   812,   618,   729,   866,  720,  720,    634,   772,     960},
+    { 471,	471,     640,     690,     570,     500,      740,    675,   796,   570,   700,   845,  690,  690,    615,   747,     940},
+    { 438,	438,     618,     660,     523,     472,      703,    665,   779,   523,   672,   825,  660,  660,    595,   722,     920},
+    { 405,	405,     595,     630,     476,     443,      666,    654,   763,   476,   643,   804,  630,  630,    576,   698,     900},
+    { 372,	372,     572,     600,     429,     415,      629,    643,   746,   429,   615,   783,  600,  600,    557,   673,     880},
+    { 339,	339,     549,     570,     382,     386,      592,    633,   730,   382,   586,   763,  570,  570,    537,   648,     860},
+    { 306,	306,     526,     540,     335,     358,      555,    622,   713,   335,   558,   742,  540,  540,    518,   624,     840},
+    { 273,	273,     503,     510,     288,     329,      518,    611,   697,   288,   529,   721,  510,  510,    499,   599,     820},
+    { 241,	241,     480,     480,     240,     300,      480,    600,   681,   240,   500,   700,  480,  480,    480,   575,     800}};
 
 
 int origin[20]={0};
@@ -303,13 +266,13 @@ typedef struct {
 	detectorData data[Np];
 }data_profile;
 
-detData detection_s_0[SecSize];  
-detData detection_onramp_0[NumOnRamp];	//the realtime data for onramp from detector
-detData detection_offramp_0[NumOnRamp];	//the realtime data for offramp from detector
+detData *detection_s_0; //[SecSize];  
+detData *detection_onramp_0; //[NumOnRamp];	//the realtime data for onramp from detector
+detData *detection_offramp_0; //[NumOnRamp];	//the realtime data for offramp from detector
 
-detData *detection_s[SecSize]; 
-detData *detection_onramp[NumOnRamp];
-detData *detection_offramp[NumOnRamp];
+detData *detection_s; //[SecSize]; 
+detData *detection_onramp; //[NumOnRamp];
+detData *detection_offramp; //[NumOnRamp];
 
 int Init();
 int Init_sim_data_io();
