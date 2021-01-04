@@ -7,6 +7,14 @@
 #define NAN_ERROR -1.0 
 #define RANGE_ERROR -2.0 
 #define MAX_30_SEC_FLOW		40 // JAS,8/26/2016 I saw 30 in the data (corresponding to 3600 VPH), so this number is larger than that, but XYL says that's local
+
+#ifndef SecSize
+	#define SecSize 17
+#endif
+#ifndef NumOnRamp
+	#define NumOnRamp 16
+#endif
+
 //#define MAX_30_SEC_FLOW	17 //JAS,8/26/2016 from XYL:Maximum 30-second flow rate per lane (sample time is 30 seconds, so this value corresponds to 2000 vehicles per hour)
 
 // units
@@ -89,6 +97,17 @@ long int nCr(int n, int r){
 	return ncr;
 }
 
+float h_mean(float A,float B)
+{
+	float a, b, c, d;
+	float maxd(float,float);
+	a=maxd(A, 5.0);
+	b=maxd(B, 5.0);
+	d=a*a+b*b;
+	c=((a*a/d)*a + (b*b/d)*b);
+	
+	return c;
+}
 // Def minimum lane flow 
 float flow_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence){
 	int i;
@@ -812,55 +831,88 @@ float butt_2(float in_dat){
 }
 
 float butt_2_ML_flow(float in_dat, int index){
-   // 12 is section size
-   float x[2][17]={{0}}, out_dat=0.0;
-   static float x_old_flow[2][17]={{0}};
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
    
-   x[0][index]=0.2779 * x_old_flow[0][index] - 0.4152 * x_old_flow[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_flow[0][index] + 0.8651 * x_old_flow[1][index] + 0.1908*in_dat;  
+   if (mst_sw==1)
+	{
+   		memset(x, 0, sizeof(float)*2*SecSize);
+   		memset(x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_flow[0][index]=x[0][index];
-   x_old_flow[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 
 
 float butt_2_ML_speed(float in_dat, int index){
-   // 12 is section size
-   float x[2][17]={{0}}, out_dat=0.0;
-   static float x_old_speed[2][17]={{0}};
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
    
-   x[0][index]=0.2779 * x_old_speed[0][index] - 0.4152 * x_old_speed[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_speed[0][index] + 0.8651 * x_old_speed[1][index] + 0.1908*in_dat;  
+   if (mst_sw==1)
+	{
+   		memset(x, 0, sizeof(float)*2*SecSize);
+   		memset(x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_speed[0][index]=x[0][index];
-   x_old_speed[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 
 float butt_2_ML_occupancy(float in_dat, int index){
-   // 12 is section size
-   float x[2][17]={{0}}, out_dat=0.0;
-   static float x_old_occupancy[2][17]={{0}};
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
    
-   x[0][index]=0.2779 * x_old_occupancy[0][index] - 0.4152 * x_old_occupancy[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_occupancy[0][index] + 0.8651 * x_old_occupancy[1][index] + 0.1908*in_dat;  
+   if (mst_sw==1)
+	{
+   		memset(x, 0, sizeof(float)*2*SecSize);
+   		memset(x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_occupancy[0][index]=x[0][index];
-   x_old_occupancy[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 
 float butt_2_ML_density(float in_dat, int index){
-   // 12 is section size
-   float x[2][17]={{0}}, out_dat=0.0;
-   static float x_old_density[2][17]={{0}};
    
-   x[0][index]=0.2779 * x_old_density[0][index] - 0.4152 * x_old_density[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_density[0][index] + 0.8651 * x_old_density[1][index] + 0.1908*in_dat;  
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
+   
+   if (mst_sw==1)
+	{
+   		memset(x, 0, sizeof(float)*2*SecSize);
+   		memset(x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_density[0][index]=x[0][index];
-   x_old_density[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 
