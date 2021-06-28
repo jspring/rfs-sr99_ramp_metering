@@ -263,9 +263,9 @@ int main(int argc, char *argv[])
 	for (i = 0; i < NUM_CONTROLLERS; i++)
 	{   //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
-		db_clt_read(pclt, db_controller_list[i+84].id, db_controller_list[i+84].size, &controller_data2[i]);
-		db_clt_read(pclt, db_controller_list[i+112].id, db_controller_list[i+112].size, &controller_data3[i]);
-	}
+		db_clt_read(pclt, db_controller_list[i+87].id, db_controller_list[i+87].size, &controller_data2[i]);
+		db_clt_read(pclt, db_controller_list[i+116].id, db_controller_list[i+116].size, &controller_data3[i]);
+        }
 
 //BEGIN MAIN FOR LOOP HERE
 for(;;)																			// XYLu:  why here within main()   ???
@@ -276,8 +276,8 @@ for(;;)																			// XYLu:  why here within main()   ???
 	for (i = 0; i < NUM_CONTROLLERS; i++)
 	{  //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
-		db_clt_read(pclt, db_controller_list[i+84].id, db_controller_list[i+84].size, &controller_data2[i]);
-		db_clt_read(pclt, db_controller_list[i+112].id, db_controller_list[i+112].size, &controller_data3[i]);
+		db_clt_read(pclt, db_controller_list[i+87].id, db_controller_list[i+87].size, &controller_data2[i]);
+		db_clt_read(pclt, db_controller_list[i+116].id, db_controller_list[i+116].size, &controller_data3[i]);
 	}
 
 /*#################################################################################################################
@@ -293,7 +293,7 @@ for(;;)																			// XYLu:  why here within main()   ???
 	for(i=0;i<NUM_CONTROLLERS;i++)
 	{
 		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, 
-		                                                                    controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
+			controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
 		
 		// min max function bound the data range and exclude nans.
 		controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 1.0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
@@ -1538,6 +1538,8 @@ int opt_metering(void)
 	iposv=ivector(1,M);
 	a=convert_matrix(&cc[0][0],1,MP,1,NP);
 	simplx(a,M,N,M1,M2,M3,&icase,izrov,iposv);
+//printf("opt_metering6: M %d N %d M1 %d M2 %d M3 %d icase %d izrov %d iposv %d\n", M,N,M1,M2,M3,icase,(int)izrov,(int)iposv);
+
 	
 	/*for (i=1;i<=M;i++)
 		fprintf(dbg_f,"%d ",iposv[i]);	
@@ -1554,11 +1556,13 @@ int opt_metering(void)
 				{	
 					opt_r[i-1][0]=a[iposv[i+1]][1];							
 					//fprintf(dbg_f,"i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i][0]);	
+//					printf("i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i][0]);	
 				}	
 			for(i=NumOnRamp+1;i<=2*NumOnRamp;i++)	
 				{
 					opt_r[i-1-NumOnRamp][1]=a[iposv[i+1]][1];								
 					//fprintf(dbg_f,"i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i-1-NumOnRamp][1]);					
+//					printf("i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i-1-NumOnRamp][1]);					
 				}	
 	}
 	else
